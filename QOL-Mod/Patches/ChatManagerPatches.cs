@@ -5,6 +5,7 @@ using System.Text;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using Steamworks;
 
 namespace QOL
 {
@@ -29,6 +30,10 @@ namespace QOL
 
         public static void Commands(string message, ChatManager __instance)
         {
+            Debug.Log("Made it to beginning of commands!");
+            MatchmakingHandler matchmaking = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mMatchmakingHandler").GetValue() as MatchmakingHandler; // For accessing private variable mServerID in ChatManager (This is the host's steamID)
+            CSteamID serverID =  matchmaking.LobbyOwner;
+            Debug.Log("Made it passed serverID assignment! : " + serverID);
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer; // For accessing private variable m_NetworkPlayer in ChatManager
             string text = message.ToLower();
             text = text.TrimStart(new char[] { '/' });
@@ -47,7 +52,7 @@ namespace QOL
                 theText.richText = !theText.richText;
                 return;
             }
-            if (text.Contains("hp") && localNetworkPlayer.HasLocalControl)
+            if (text.Contains("hp") && localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
             {
                 if (text.Length > 2)
                 {
@@ -56,31 +61,40 @@ namespace QOL
                     localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
                     return;
                 }
+                Debug.Log("Looking for my health!");
                 string localHealth = localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
                 Debug.Log("Current Health: " + localHealth);
                 localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 return;
             }
+            if (text == "private")
+            {
+                SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, false);
+                localNetworkPlayer.OnTalked("Lobby is now private!");
+            }
+            if (text == "public")
+            {
+                SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, true);
+                localNetworkPlayer.OnTalked("Lobby is now public!");
+            }
+            if (text == "test")
+            {
+                Debug.Log("Matchmaking, lobbyID: " + MatchmakingHandlerPatch.lobbyID);
+            }
         }
         public static ushort GetIDFromColor(string targetSpawnColor)
         {
-            if (targetSpawnColor == "yellow")
+            switch (targetSpawnColor)
             {
-                return 0;
+                case "blue":
+                    return 1;
+                case "Red":
+                    return 2;
+                case "Green":
+                    return 3;
+                default:
+                    return 0;
             }
-            if (targetSpawnColor == "blue")
-            {
-                return 1;
-            }
-            if (targetSpawnColor == "red")
-            {
-                return 2;
-            }
-            if (targetSpawnColor == "green")
-            {
-                return 3;
-            }
-            return ushort.MaxValue;
         }
         public static global::NetworkPlayer GetNetworkPlayer(ushort targetID)
         {

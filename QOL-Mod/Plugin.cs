@@ -16,11 +16,14 @@ namespace QOL
             try
             {
                 Harmony harmony = new Harmony("monky.QOL"); // Creates harmony instance with identifier
+                Logger.LogInfo("Applying ChatManager patches");
                 ChatManagerPatches.Patches(harmony);
+                Logger.LogInfo("Applying MatchmakingHandler patches");
+                MatchmakingHandlerPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
-                Logger.LogInfo("Exception on applying patches: " + ex.Message);
+                Logger.LogError("Exception on applying patches: " + ex.Message);
             }
         }
     }
