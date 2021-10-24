@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using HarmonyLib;
 using TMPro;
+using UnityEngine;
 
 namespace QOL
 {
@@ -46,6 +47,51 @@ namespace QOL
                 theText.richText = !theText.richText;
                 return;
             }
+            if (text.Contains("hp") && localNetworkPlayer.HasLocalControl)
+            {
+                if (text.Length > 2)
+                {
+                    string colorWanted = text.Substring(3);
+                    string targetHealth = ChatManagerPatches.GetNetworkPlayer(ChatManagerPatches.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
+                    localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
+                    return;
+                }
+                string localHealth = localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
+                Debug.Log("Current Health: " + localHealth);
+                localNetworkPlayer.OnTalked("My HP: " + localHealth);
+                return;
+            }
+        }
+        public static ushort GetIDFromColor(string targetSpawnColor)
+        {
+            if (targetSpawnColor == "yellow")
+            {
+                return 0;
+            }
+            if (targetSpawnColor == "blue")
+            {
+                return 1;
+            }
+            if (targetSpawnColor == "red")
+            {
+                return 2;
+            }
+            if (targetSpawnColor == "green")
+            {
+                return 3;
+            }
+            return ushort.MaxValue;
+        }
+        public static global::NetworkPlayer GetNetworkPlayer(ushort targetID)
+        {
+            foreach (global::NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<global::NetworkPlayer>())
+            {
+                if (networkPlayer.NetworkSpawnID == targetID)
+                {
+                    return networkPlayer;
+                }
+            }
+            return null;
         }
     }
 }
