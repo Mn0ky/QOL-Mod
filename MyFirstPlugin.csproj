@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
     <AssemblyName>QOL-Mod</AssemblyName>
-    <Description>A mod that offers quality-of-life improvements and additions to Stick Fight: The Game</Description>
+    <Description>A mod that offers quality-of-life improvements and additions to Stick Fight: The Game.</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
