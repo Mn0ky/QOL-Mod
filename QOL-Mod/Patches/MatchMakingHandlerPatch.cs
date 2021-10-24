@@ -9,7 +9,7 @@ namespace QOL
         public static void Patch(Harmony harmonyInstance) // MatchmakingHandler method to patch with the harmony instance
         {
             var ClientInitLobbyAndOwnerMethod = AccessTools.Method(typeof(MatchmakingHandler), "ClientInitLobbyAndOwner");
-            var ClientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatch).GetMethod(nameof(MatchmakingHandlerPatch.ClientInitLobbyAndOwnerMethodPostfix))); // Patches OnServerJoinedMethod with postfix method
+            var ClientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatch).GetMethod(nameof(MatchmakingHandlerPatch.ClientInitLobbyAndOwnerMethodPostfix))); // Patches ClientInitLobbyAndOwnerMethod with postfix method
             harmonyInstance.Patch(ClientInitLobbyAndOwnerMethod, postfix: ClientInitLobbyAndOwnerMethodPostfix);
         }
         public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby) // Sets lobbyID as the ID of the current lobby for easy access

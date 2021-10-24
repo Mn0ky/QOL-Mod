@@ -77,9 +77,12 @@ namespace QOL
                 SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, true);
                 localNetworkPlayer.OnTalked("Lobby is now public!");
             }
-            if (text == "test")
+            if (text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
             {
-                Debug.Log("Matchmaking, lobbyID: " + MatchmakingHandlerPatch.lobbyID);
+                Debug.Log("LobbyID: " + MatchmakingHandlerPatch.lobbyID);
+                Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(MatchmakingHandlerPatch.lobbyID, StickFightConstants.VERSION_KEY));
+                ChatManagerPatches.GetJoinGameLink(MatchmakingHandlerPatch.lobbyID, ChatManagerPatches.GetSteamID(localNetworkPlayer.NetworkSpawnID));
+                localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
         }
         public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
@@ -107,5 +110,26 @@ namespace QOL
             }
             return null;
         }
+        public static void GetJoinGameLink(CSteamID lobbyID, CSteamID playerSteamID) // Actually sticks "join game" the link together
+        {
+            string urlAndProtocolPrefix = "steam://joinlobby/";
+            string appID = "674940/";
+            string joinLink = string.Concat(new string[]
+            {
+            urlAndProtocolPrefix,
+            appID,
+            lobbyID.ToString(),
+            "/",
+            playerSteamID.ToString()
+            });
+            Debug.Log("joinLink: " + joinLink);
+            GUIUtility.systemCopyBuffer = joinLink;
+        }
+        public static CSteamID GetSteamID(ushort targetID) // Returns the steamID of the specified spawnID
+        {
+            ConnectedClientData[] connectedClients = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mConnectedClients").GetValue() as ConnectedClientData[];
+            return connectedClients[(int)targetID].ClientID;
+        }
+
     }
 }
