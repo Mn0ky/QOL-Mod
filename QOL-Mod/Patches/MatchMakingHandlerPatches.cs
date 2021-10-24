@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using HarmonyLib;
-using TMPro;
+﻿using HarmonyLib;
 using UnityEngine;
 using Steamworks;
 
@@ -17,14 +12,11 @@ namespace QOL
             var ClientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatch).GetMethod(nameof(MatchmakingHandlerPatch.ClientInitLobbyAndOwnerMethodPostfix))); // Patches OnServerJoinedMethod with postfix method
             harmonyInstance.Patch(ClientInitLobbyAndOwnerMethod, postfix: ClientInitLobbyAndOwnerMethodPostfix);
         }
-        public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby)
+        public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby) // Sets lobbyID as the ID of the current lobby for easy access
         {
-            // MatchmakingHandler matchmaking = Traverse.Create(__instance).Field("mMatchmakingHandler").GetValue() as MatchmakingHandler;
-            // string lobby = Traverse.Create(matchmaking).Field("m_Lobby").GetValue() as string;
-            // MultiplayerManagerPatches.lobbyID = new CSteamID(ulong.Parse(lobby));
-            Debug.Log("matchmaking lobbyid: " + lobby);
+            Debug.Log("Matchmaking lobbyID: " + lobby);
             MatchmakingHandlerPatch.lobbyID = lobby;
         }
-        public static CSteamID lobbyID;
+        public static CSteamID lobbyID; // The ID of the current lobby
     }
 }

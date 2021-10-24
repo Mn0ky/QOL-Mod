@@ -31,7 +31,7 @@ namespace QOL
         public static void Commands(string message, ChatManager __instance)
         {
             Debug.Log("Made it to beginning of commands!");
-            MatchmakingHandler matchmaking = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mMatchmakingHandler").GetValue() as MatchmakingHandler; // For accessing private variable mServerID in ChatManager (This is the host's steamID)
+            MatchmakingHandler matchmaking = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mMatchmakingHandler").GetValue() as MatchmakingHandler; // For accessing private variable mServerID in ChatManager (this is the host's steamID)
             CSteamID serverID =  matchmaking.LobbyOwner;
             Debug.Log("Made it passed serverID assignment! : " + serverID);
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer; // For accessing private variable m_NetworkPlayer in ChatManager
@@ -67,12 +67,12 @@ namespace QOL
                 localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 return;
             }
-            if (text == "private")
+            if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
                 SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, false);
                 localNetworkPlayer.OnTalked("Lobby is now private!");
             }
-            if (text == "public")
+            if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
                 SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, true);
                 localNetworkPlayer.OnTalked("Lobby is now public!");
@@ -82,7 +82,7 @@ namespace QOL
                 Debug.Log("Matchmaking, lobbyID: " + MatchmakingHandlerPatch.lobbyID);
             }
         }
-        public static ushort GetIDFromColor(string targetSpawnColor)
+        public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
         {
             switch (targetSpawnColor)
             {
@@ -96,7 +96,7 @@ namespace QOL
                     return 0;
             }
         }
-        public static global::NetworkPlayer GetNetworkPlayer(ushort targetID)
+        public static global::NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
         {
             foreach (global::NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<global::NetworkPlayer>())
             {
