@@ -11,7 +11,7 @@ namespace QOL
     {
         private void Start()
         {
-            Debug.Log("Started GUI or called class?");
+            Debug.Log("Started GUI in GUIManager!");
         }
         private void Awake()
         {
