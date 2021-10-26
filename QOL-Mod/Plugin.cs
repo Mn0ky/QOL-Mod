@@ -1,5 +1,6 @@
 ﻿using System;
 using BepInEx;
+using UnityEngine;
 using HarmonyLib;   
 
 namespace QOL
@@ -24,6 +25,15 @@ namespace QOL
             catch (Exception ex)
             {
                 Logger.LogError("Exception on applying patches: " + ex.Message);
+            }
+            try
+            {
+                new GameObject("GUIHandler").AddComponent<GUIManager>();
+                Debug.Log("Added GUIManager!");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Exception on starting GUIManager: " + ex.Message);
             }
         }
     }

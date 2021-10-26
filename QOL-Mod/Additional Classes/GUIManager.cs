@@ -49,6 +49,22 @@ namespace QOL
 				text = text + "\n" + str;
 			}
 			GUILayout.Label(text, new GUILayoutOption[0]);
+            if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
+            {
+                Helper.localNetworkPlayer.OnTalked("Yellow HP: " + GUIManager.GetHPOfPlayer(0));
+            }
+            if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
+            {
+                Helper.localNetworkPlayer.OnTalked("Blue HP: " + GUIManager.GetHPOfPlayer(1));
+            }
+            if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
+            {
+                Helper.localNetworkPlayer.OnTalked("Red HP: " + GUIManager.GetHPOfPlayer(2));
+            }
+            if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
+            {
+                Helper.localNetworkPlayer.OnTalked("Green HP: " + GUIManager.GetHPOfPlayer(3));
+            }
 			if (GUI.Button(new Rect(120f, 335f, 100f, 30f), "Get Lobby Link"))
 			{
 				Helper.GetJoinGameLink();
