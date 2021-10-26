@@ -15,8 +15,7 @@ namespace QOL
         public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby) // Sets lobbyID as the ID of the current lobby for easy access
         {
             Debug.Log("Matchmaking lobbyID: " + lobby);
-            MatchmakingHandlerPatch.lobbyID = lobby;
+            Helper.lobbyID = lobby;
         }
-        public static CSteamID lobbyID; // The ID of the current lobby
     }
 }

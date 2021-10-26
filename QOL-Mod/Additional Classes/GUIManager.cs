@@ -12,7 +12,6 @@ namespace QOL
         private void Start()
         {
             Debug.Log("Started GUI or called class?");
-            this.mTestNetworkPlayer = base.gameObject.GetComponent<NetworkPlayer>();
         }
         private void Awake()
         {
@@ -35,7 +34,7 @@ namespace QOL
 		private void KickWindow(int window)
 		{
 			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>", new GUILayoutOption[0]);
-			GUILayout.Label("<color=red>Lobby ID:</color> " + MatchmakingHandlerPatch.lobbyID, new GUILayoutOption[0]);
+			GUILayout.Label("<color=red>Lobby ID:</color> " + Helper.lobbyID, new GUILayoutOption[0]);
 			GUILayout.Label("Host: " + GUIManager.GetPlayerName(this.mMatchmaking.LobbyOwner), new GUILayoutOption[0]);
 			string text = "Players in Room: \n";
 			foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
@@ -52,7 +51,8 @@ namespace QOL
 			GUILayout.Label(text, new GUILayoutOption[0]);
 			if (GUI.Button(new Rect(120f, 335f, 100f, 30f), "Get Lobby Link"))
 			{
-				ChatManagerPatches.GetJoinGameLink(MatchmakingHandlerPatch.lobbyID, ChatManagerPatches.localPlayerSteamID);
+				Helper.GetJoinGameLink();
+                Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
 		}
         public string GetColor(ushort x)
@@ -75,7 +75,6 @@ namespace QOL
         }
         private MultiplayerManager mManager = UnityEngine.Object.FindObjectOfType<MultiplayerManager>();
         private MatchmakingHandler mMatchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
-        private NetworkPlayer mTestNetworkPlayer;
         private bool mShowMenu;
         private Rect MenuRect = new Rect(0f, 100f, 350f, 375f);
         private int WindowId = 100;

@@ -33,7 +33,7 @@ namespace QOL
         public static void StartMethodPostfix(ChatManager __instance)
         {
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            ChatManagerPatches.localPlayerSteamID = ChatManagerPatches.GetSteamID(localNetworkPlayer.NetworkSpawnID);
+            Helper.localPlayerSteamID = Helper.GetSteamID(Helper.localNetworkPlayer.NetworkSpawnID);
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
@@ -48,23 +48,23 @@ namespace QOL
         public static void Commands(string message, ChatManager __instance)
         {
             Debug.Log("Made it to beginning of commands!");
-            NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer; // For accessing private variable m_NetworkPlayer in ChatManager
+            Helper.localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer; // For accessing private variable m_NetworkPlayer in ChatManager
             string text = message.ToLower();
             text = text.TrimStart(new char[] { '/' });
 
-            if (text.Contains("hp") && localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
+            if (text.Contains("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
             {
                 if (text.Length > 2)
                 {
                     string colorWanted = text.Substring(3);
-                    string targetHealth = ChatManagerPatches.GetNetworkPlayer(ChatManagerPatches.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
-                    localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
+                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
+                    Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
                     return;
                 }
                 Debug.Log("Looking for my health!");
-                string localHealth = localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
+                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
                 Debug.Log("Current Health: " + localHealth);
-                localNetworkPlayer.OnTalked("My HP: " + localHealth);
+                Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace QOL
             {
                 message = message.Replace("/shrug", "");
                 message += " \u00af\\_(ツ)_/\u00af";
-                localNetworkPlayer.OnTalked(message);
+                Helper.localNetworkPlayer.OnTalked(message);
                 return;
             }
 
@@ -84,67 +84,21 @@ namespace QOL
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
-                SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, false);
-                localNetworkPlayer.OnTalked("Lobby is now private!");
+                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
+                Helper.localNetworkPlayer.OnTalked("Lobby is now private!");
             }
             else if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
-                SteamMatchmaking.SetLobbyJoinable(MatchmakingHandlerPatch.lobbyID, true);
-                localNetworkPlayer.OnTalked("Lobby is now public!");
+                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
+                Helper.localNetworkPlayer.OnTalked("Lobby is now public!");
             }
             else if (text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
             {
-                Debug.Log("LobbyID: " + MatchmakingHandlerPatch.lobbyID);
-                Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(MatchmakingHandlerPatch.lobbyID, StickFightConstants.VERSION_KEY));
-                ChatManagerPatches.GetJoinGameLink(MatchmakingHandlerPatch.lobbyID, ChatManagerPatches.GetSteamID(localNetworkPlayer.NetworkSpawnID));
-                localNetworkPlayer.OnTalked("Join link copied to clipboard!");
+                Debug.Log("LobbyID: " + Helper.lobbyID);
+                Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
+                ChatManagerPatches.GetJoinGameLink(Helper.lobbyID, Helper.localPlayerSteamID);
+                Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
         }
-        public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
-        {
-            switch (targetSpawnColor)
-            {
-                case "blue":
-                    return 1;
-                case "Red":
-                    return 2;
-                case "Green":
-                    return 3;
-                default:
-                    return 0;
-            }
-        }
-        public static global::NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
-        {
-            foreach (global::NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<global::NetworkPlayer>())
-            {
-                if (networkPlayer.NetworkSpawnID == targetID)
-                {
-                    return networkPlayer;
-                }
-            }
-            return null;
-        }
-        public static void GetJoinGameLink(CSteamID lobbyID, CSteamID playerSteamID) // Actually sticks "join game" the link together
-        {
-            string urlAndProtocolPrefix = "steam://joinlobby/";
-            string appID = "674940/";
-            string joinLink = string.Concat(new string[]
-            {
-            urlAndProtocolPrefix,
-            appID,
-            lobbyID.ToString(),
-            "/",
-            playerSteamID.ToString()
-            });
-            Debug.Log("joinLink: " + joinLink);
-            GUIUtility.systemCopyBuffer = joinLink;
-        }
-        public static CSteamID GetSteamID(ushort targetID) // Returns the steamID of the specified spawnID
-        {
-            ConnectedClientData[] connectedClients = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mConnectedClients").GetValue() as ConnectedClientData[];
-            return connectedClients[(int)targetID].ClientID;
-        }
-        public static CSteamID localPlayerSteamID;
     }
 }
