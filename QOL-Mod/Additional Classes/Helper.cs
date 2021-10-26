@@ -28,6 +28,20 @@ namespace QOL
                     return 0;
             }
         }
+        public string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
+        {
+            switch (x)
+            {
+                case 1:
+                    return "Blue";
+                case 2:
+                    return "Red";
+                case 3:
+                    return "Green";
+                default:
+                    return "Yellow";
+            }
+        }
         public static NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
         {
             foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())

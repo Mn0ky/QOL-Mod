@@ -42,9 +42,9 @@ namespace QOL
 				string str = string.Concat(new object[]
 				{
 				"[",
-				this.GetColor(networkPlayer.NetworkSpawnID),
+				Helper.GetColorFromID(networkPlayer.NetworkSpawnID),
 				"] ",
-				GUIManager.GetPlayerName(ChatManagerPatches.GetSteamID(networkPlayer.NetworkSpawnID))
+				Helper.GetPlayerName(Helper.GetSteamID(networkPlayer.NetworkSpawnID))
 				});
 				text = text + "\n" + str;
 			}
@@ -54,20 +54,6 @@ namespace QOL
 				Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
-		}
-        public string GetColor(ushort x)
-        {
-            switch (x)
-            {
-                case 1:
-                    return "Blue";
-                case 2:
-                    return "Red";
-                case 3:
-                    return "Green";
-                default:
-                    return "Yellow";
-            }
         }
         private MultiplayerManager mManager = UnityEngine.Object.FindObjectOfType<MultiplayerManager>();
         private MatchmakingHandler mMatchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
