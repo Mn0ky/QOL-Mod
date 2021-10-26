@@ -39,6 +39,10 @@ namespace QOL
             }
             return null;
         }
+        public static string GetPlayerName(CSteamID passedClientID) // Gets the steam profile name of the specified steamID
+        {
+            return SteamFriends.GetFriendPersonaName(passedClientID);
+        }
         public static void GetJoinGameLink() // Actually sticks "join game" the link together
         {
             string urlAndProtocolPrefix = "steam://joinlobby/";

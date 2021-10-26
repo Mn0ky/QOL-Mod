@@ -35,7 +35,7 @@ namespace QOL
 		{
 			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>", new GUILayoutOption[0]);
 			GUILayout.Label("<color=red>Lobby ID:</color> " + Helper.lobbyID, new GUILayoutOption[0]);
-			GUILayout.Label("Host: " + GUIManager.GetPlayerName(this.mMatchmaking.LobbyOwner), new GUILayoutOption[0]);
+			GUILayout.Label("Host: " + Helper.GetPlayerName(this.mMatchmaking.LobbyOwner), new GUILayoutOption[0]);
 			string text = "Players in Room: \n";
 			foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
 			{
@@ -68,10 +68,6 @@ namespace QOL
                 default:
                     return "Yellow";
             }
-        }
-        public static string GetPlayerName(CSteamID passedClientID)
-        {
-            return SteamFriends.GetFriendPersonaName(passedClientID);
         }
         private MultiplayerManager mManager = UnityEngine.Object.FindObjectOfType<MultiplayerManager>();
         private MatchmakingHandler mMatchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
