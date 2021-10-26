@@ -96,7 +96,7 @@ namespace QOL
             {
                 Debug.Log("LobbyID: " + Helper.lobbyID);
                 Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
-                ChatManagerPatches.GetJoinGameLink(Helper.lobbyID, Helper.localPlayerSteamID);
+                Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
         }
