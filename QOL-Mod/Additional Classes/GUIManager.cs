@@ -20,7 +20,17 @@ namespace QOL
         {
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1) && !ChatManager.isTyping)
             {
+                Debug.Log("Trying to open GUI menu!");
                 this.mShowMenu = !this.mShowMenu;
+                this.networkPlayerArray = UnityEngine.Object.FindObjectsOfType<NetworkPlayer>();
+                Debug.Log("playerarray: ");
+                foreach (NetworkPlayer owo in this.networkPlayerArray)
+                {
+                    Debug.Log(owo);
+                }
+
+                this.theLobbyID = Helper.lobbyID;
+                this.theLobbyHost = Helper.GetPlayerName(Helper.lobbyID);
             }
         }
         public void OnGUI()
@@ -34,10 +44,10 @@ namespace QOL
 		private void KickWindow(int window)
 		{
 			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>", new GUILayoutOption[0]);
-			GUILayout.Label("<color=red>Lobby ID:</color> " + Helper.lobbyID, new GUILayoutOption[0]);
-			GUILayout.Label("Host: " + Helper.GetPlayerName(this.mMatchmaking.LobbyOwner), new GUILayoutOption[0]);
+			GUILayout.Label("<color=red>Lobby ID:</color> " + this.theLobbyID, new GUILayoutOption[0]);
+			GUILayout.Label("Host: " + this.theLobbyHost, new GUILayoutOption[0]);
 			string text = "Players in Room: \n";
-			foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
+			foreach (NetworkPlayer networkPlayer in networkPlayerArray)
 			{
 				string str = string.Concat(new object[]
 				{
@@ -51,19 +61,19 @@ namespace QOL
 			GUILayout.Label(text, new GUILayoutOption[0]);
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
             {
-                Helper.localNetworkPlayer.OnTalked("Yellow HP: " + GUIManager.GetHPOfPlayer(0));
+                Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));
             }
             if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
             {
-                Helper.localNetworkPlayer.OnTalked("Blue HP: " + GUIManager.GetHPOfPlayer(1));
+                Helper.localNetworkPlayer.OnTalked("Blue HP: " + Helper.GetHPOfPlayer("blue"));
             }
             if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
             {
-                Helper.localNetworkPlayer.OnTalked("Red HP: " + GUIManager.GetHPOfPlayer(2));
+                Helper.localNetworkPlayer.OnTalked("Red HP: " + Helper.GetHPOfPlayer("red"));
             }
             if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
             {
-                Helper.localNetworkPlayer.OnTalked("Green HP: " + GUIManager.GetHPOfPlayer(3));
+                Helper.localNetworkPlayer.OnTalked("Green HP: " + Helper.GetHPOfPlayer("green"));
             }
 			if (GUI.Button(new Rect(120f, 335f, 100f, 30f), "Get Lobby Link"))
 			{
@@ -76,5 +86,9 @@ namespace QOL
         private bool mShowMenu;
         private Rect MenuRect = new Rect(0f, 100f, 350f, 375f);
         private int WindowId = 100;
+        private NetworkPlayer[] networkPlayerArray;
+        // private string[] playerNamesArray;
+        private string theLobbyHost;
+        private CSteamID theLobbyID;
     }
 }

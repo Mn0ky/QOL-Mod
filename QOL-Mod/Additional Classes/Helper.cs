@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Steamworks;
+using HarmonyLib;
 
 namespace QOL
 {
@@ -28,7 +29,7 @@ namespace QOL
                     return 0;
             }
         }
-        public string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
+        public static string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
         {
             switch (x)
             {
@@ -57,7 +58,12 @@ namespace QOL
         {
             return SteamFriends.GetFriendPersonaName(passedClientID);
         }
-        public static void GetJoinGameLink() // Actually sticks "join game" the link together
+        public static string GetHPOfPlayer(string colorWanted)
+        {
+            Debug.Log("colorwanted, hpofplayer: " + colorWanted);
+            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString());
+        }
+        public static void GetJoinGameLink() // Actually sticks the "join game" link together
         {
             string urlAndProtocolPrefix = "steam://joinlobby/";
             string appID = "674940/";
@@ -67,7 +73,7 @@ namespace QOL
             appID,
             Helper.lobbyID.ToString(),
             "/",
-            Helper.localplayerSteamID.ToString()
+            Helper.localPlayerSteamID.ToString()
             });
             Debug.Log("joinLink: " + joinLink);
             GUIUtility.systemCopyBuffer = joinLink;
@@ -75,5 +81,6 @@ namespace QOL
         public static CSteamID lobbyID; // The ID of the current lobby
         public static CSteamID localPlayerSteamID; // The steamID of the local player
         public static NetworkPlayer localNetworkPlayer;
+        public static bool isTranslating;
     }
 }

@@ -19,21 +19,16 @@ namespace QOL
                 Harmony harmony = new Harmony("monky.QOL"); // Creates harmony instance with identifier
                 Logger.LogInfo("Applying ChatManager patches");
                 ChatManagerPatches.Patches(harmony);
-                Logger.LogInfo("Applying MatchmakingHandler patches");
+                Logger.LogInfo("Applying MatchmakingHandler patch");
                 MatchmakingHandlerPatch.Patch(harmony);
+                Logger.LogInfo("Applying MultiplayerManager patches");
+                MultiplayerManagerPatches.Patches(harmony);
+                Logger.LogInfo("Applying NetworkPlayer patch");
+                NetworkPlayerPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
                 Logger.LogError("Exception on applying patches: " + ex.Message);
-            }
-            try
-            {
-                new GameObject("GUIHandler").AddComponent<GUIManager>();
-                Debug.Log("Added GUIManager!");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("Exception on starting GUIManager: " + ex.Message);
             }
         }
     }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using HarmonyLib;
 using TMPro;
@@ -27,13 +29,15 @@ namespace QOL
     }
         public static void AwakeMethodPostfix(ChatManager __instance)
         {
-            __instance.gameObject.transform.root.gameObject.AddComponent<GUIManager>();
-            Debug.Log("Added GUIManager!");
+            // __instance.gameObject.transform.root.gameObject.AddComponent<GUIManager>();
+            // Debug.Log("Awake method skipped!");
         }
         public static void StartMethodPostfix(ChatManager __instance)
         {
-            NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
+            Helper.localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
             Helper.localPlayerSteamID = Helper.GetSteamID(Helper.localNetworkPlayer.NetworkSpawnID);
+            Debug.Log("local player steam ID: " + Helper.localPlayerSteamID);
+            Debug.Log("local networkplayer: " + Helper.localNetworkPlayer);
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
@@ -48,7 +52,6 @@ namespace QOL
         public static void Commands(string message, ChatManager __instance)
         {
             Debug.Log("Made it to beginning of commands!");
-            Helper.localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer; // For accessing private variable m_NetworkPlayer in ChatManager
             string text = message.ToLower();
             text = text.TrimStart(new char[] { '/' });
 
@@ -98,6 +101,14 @@ namespace QOL
                 Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
                 Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
+            }
+            else if (text == "translate") // Whether or not to enable automatic translations
+            {
+                Helper.isTranslating = !Helper.isTranslating;
+            }
+            else if (text == "translate_test2")
+            {
+                Debug.Log("placeholder");
             }
         }
     }
