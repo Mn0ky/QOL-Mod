@@ -21,7 +21,8 @@ namespace QOL
         }
 
         // Exactly the same as above but allow the user to change from Auto, for when google gets all wacky
-        public static IEnumerator Process(string sourceLang, string targetLang, string sourceText, System.Action<string> result)
+        public static IEnumerator Process(string sourceLang, string targetLang, string sourceText,
+            System.Action<string> result)
         {
             string url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
                          + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + WWW.EscapeURL(sourceText);
@@ -41,6 +42,7 @@ namespace QOL
             }
         }
     }
+}
 
 
 
