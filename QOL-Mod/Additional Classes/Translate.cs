@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using SimpleJSON;
 using UnityEngine;
 
@@ -12,17 +13,17 @@ namespace QOL
     // You will need SimpleJSON if you don't use alternatives.
     // It can be gotten hither: https://github.com/Bunny83/SimpleJSON
 
-    public class Translate
+    public class Translate : MonoBehaviour
     {
-        // We have used Google's own api built into google Translator.
+
+        // We have use googles own api built into google Translator.
         public static IEnumerator Process(string targetLang, string sourceText, System.Action<string> result)
         {
             yield return Process("auto", targetLang, sourceText, result);
         }
 
-        // Exactly the same as above but allow the user to change from Auto, for when google gets all wacky
-        public static IEnumerator Process(string sourceLang, string targetLang, string sourceText,
-            System.Action<string> result)
+        // Exactly the same as above but allow the user to change from Auto, for when google get's all Jerk Butt-y
+        public static IEnumerator Process(string sourceLang, string targetLang, string sourceText, System.Action<string> result)
         {
             string url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
                          + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + WWW.EscapeURL(sourceText);
@@ -36,7 +37,6 @@ namespace QOL
                 {
                     var N = JSONNode.Parse(www.text);
                     string translatedText = N[0][0][0];
-
                     result(translatedText);
                 }
             }

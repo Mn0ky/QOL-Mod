@@ -8,7 +8,7 @@ namespace QOL
 {
     class NetworkPlayerPatch
     {
-        public static void Patch(Harmony harmonyInstance) // Multiplayer methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony instance
         {
 
             var SyncClientChatMethod = AccessTools.Method(typeof(NetworkPlayer), "SyncClientChat");
@@ -26,15 +26,19 @@ namespace QOL
             return false;
         }
 
-        public static void translateMessage(byte[] data, NetworkPlayer __instance)
+        public static void translateMessage(byte[] data, NetworkPlayer __instance) // Checks if auto-translation is enabled, if so then translate it
         {
             string textToTranslate = Encoding.UTF8.GetString(data);
             Debug.Log("Got message: " + textToTranslate);
-            string mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue() as string; // TODO: fix this!!
+            var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue(); // TODO: fix this!!
+            ChatManager mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), "mLocalChatManager");
+            Debug.Log("mLocalChatManager : " + mLocalChatManager);
             Debug.Log("mHasLocalControl : " + mHasLocalControl);
-            if (bool.Parse(mHasLocalControl))
+            //Translate translator = new Translate();
+            if ((bool)mHasLocalControl)
             {
-                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
+                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { Debug.Log(s); }));
+                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
                 return;
             }
             ChatManager mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue() as ChatManager;

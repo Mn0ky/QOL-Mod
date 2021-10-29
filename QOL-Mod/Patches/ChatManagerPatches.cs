@@ -53,19 +53,22 @@ namespace QOL
         {
             Debug.Log("Made it to beginning of commands!");
             string text = message.ToLower();
-            text = text.TrimStart(new char[] { '/' });
+            text = text.TrimStart(new char[] {'/'});
 
             if (text.Contains("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
             {
                 if (text.Length > 2)
                 {
                     string colorWanted = text.Substring(3);
-                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
+                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted))
+                        .GetComponentInChildren<HealthHandler>().health.ToString();
                     Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
                     return;
                 }
+
                 Debug.Log("Looking for my health!");
-                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
+                string localHealth =
+                    Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
                 Debug.Log("Current Health: " + localHealth);
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 return;
@@ -95,16 +98,21 @@ namespace QOL
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
                 Helper.localNetworkPlayer.OnTalked("Lobby is now public!");
             }
-            else if (text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
+            else if (
+                text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
             {
                 Debug.Log("LobbyID: " + Helper.lobbyID);
-                Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
+                Debug.Log("Verification test, should return 25: " +
+                          SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
                 Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
             else if (text == "translate") // Whether or not to enable automatic translations
             {
                 Helper.isTranslating = !Helper.isTranslating;
+                //__instance.StartCoroutine(Translate.Process("en", "Bonjour.", delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
+                //__instance.StartCoroutine(Translate.Process("en", "Bonjour.",
+                   // returnValue => { Debug.Log(returnValue); }));;
             }
             else if (text == "translate_test2")
             {
