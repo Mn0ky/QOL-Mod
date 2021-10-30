@@ -72,7 +72,7 @@ namespace QOL
                 string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
                 Debug.Log("Current Health: " + localHealth);
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
-                return;
+                
             }
 
             else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
@@ -80,14 +80,14 @@ namespace QOL
                 message = message.Replace("/shrug", "");
                 message += " \u00af\\_(ツ)_/\u00af";
                 Helper.localNetworkPlayer.OnTalked(message);
-                return;
+                
             }
 
             else if (text == "rich") // Enables rich text for chat messages
             {
                 TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
                 theText.richText = !theText.richText;
-                return;
+                
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
@@ -113,10 +113,6 @@ namespace QOL
                 Helper.isTranslating = !Helper.isTranslating;
                 //__instance.StartCoroutine(Translate.Process("en", "Bonjour.", delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
                 
-            }
-            else if (text == "translate_test2")
-            {
-                Debug.Log("placeholder");
             }
         }
     }

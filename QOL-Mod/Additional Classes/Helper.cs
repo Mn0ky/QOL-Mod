@@ -89,7 +89,7 @@ namespace QOL
                 Debug.Log("Assigned the localNetworkPlayer!");
                 return;
             }
-            Debug.Log("That wasn't the local-player!");
+            Debug.Log("That wasn't the local player!");
         }
         public static CSteamID lobbyID; // The ID of the current lobby
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user
