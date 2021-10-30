@@ -17,8 +17,8 @@ namespace QOL
     */
 
     /* Limitations 
-    // translate.googleapis.com is free, but it only allows about 100 requests per one hour.
-    // After that, you will receive 429 error response.
+    translate.googleapis.com is free, but it only allows about 100 requests per one hour.
+    After that, you will receive 429 error response.
     */
 
     public class Translate : MonoBehaviour
