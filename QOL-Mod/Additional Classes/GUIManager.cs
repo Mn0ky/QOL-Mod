@@ -18,19 +18,28 @@ namespace QOL
         }
         private void Update()
         {
-            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1) && !ChatManager.isTyping)
+            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1))
             {
                 Debug.Log("Trying to open GUI menu!");
                 this.mShowMenu = !this.mShowMenu;
                 this.networkPlayerArray = UnityEngine.Object.FindObjectsOfType<NetworkPlayer>();
-                Debug.Log("playerarray: ");
-                foreach (NetworkPlayer owo in this.networkPlayerArray)
+                this.playerNamesStr = string.Empty;
+                foreach (NetworkPlayer player in this.networkPlayerArray)
                 {
-                    Debug.Log(owo);
+                    string str = string.Concat(new object[]
+                    {
+                        "[",
+                        Helper.GetColorFromID(player.NetworkSpawnID),
+                        "] ",
+                        Helper.GetPlayerName(Helper.GetSteamID(player.NetworkSpawnID))
+                    });
+                    this.playerNamesStr = this.playerNamesStr + "\n" + str;
                 }
 
                 this.theLobbyID = Helper.lobbyID;
-                this.theLobbyHost = Helper.GetPlayerName(Helper.lobbyID);
+                this.theLobbyHost = Helper.hostName;
+                Debug.Log("this.theLobbyID : " + this.theLobbyID);
+                Debug.Log("this.theLobbyHost : " + this.theLobbyHost);
             }
         }
         public void OnGUI()
@@ -46,19 +55,7 @@ namespace QOL
 			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>", new GUILayoutOption[0]);
 			GUILayout.Label("<color=red>Lobby ID:</color> " + this.theLobbyID, new GUILayoutOption[0]);
 			GUILayout.Label("Host: " + this.theLobbyHost, new GUILayoutOption[0]);
-			string text = "Players in Room: \n";
-			foreach (NetworkPlayer networkPlayer in networkPlayerArray)
-			{
-				string str = string.Concat(new object[]
-				{
-				"[",
-				Helper.GetColorFromID(networkPlayer.NetworkSpawnID),
-				"] ",
-				Helper.GetPlayerName(Helper.GetSteamID(networkPlayer.NetworkSpawnID))
-				});
-				text = text + "\n" + str;
-			}
-			GUILayout.Label(text, new GUILayoutOption[0]);
+            GUILayout.Label(this.playerNamesStr, new GUILayoutOption[0]);
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
             {
                 Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));
@@ -87,7 +84,7 @@ namespace QOL
         private Rect MenuRect = new Rect(0f, 100f, 350f, 375f);
         private int WindowId = 100;
         private NetworkPlayer[] networkPlayerArray;
-        // private string[] playerNamesArray;
+        private string playerNamesStr = "Players in Room: \n";
         private string theLobbyHost;
         private CSteamID theLobbyID;
     }

@@ -69,7 +69,7 @@ namespace QOL
                 Debug.Log("Looking for my health!");
                 Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
                 Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
-                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
+                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString() + "%";
                 Debug.Log("Current Health: " + localHealth);
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 

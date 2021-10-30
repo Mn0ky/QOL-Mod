@@ -63,7 +63,7 @@ namespace QOL
         public static string GetHPOfPlayer(string colorWanted)
         {
             Debug.Log("colorwanted, hpofplayer: " + colorWanted);
-            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString());
+            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString() + "%");
         }
         public static void GetJoinGameLink() // Actually sticks the "join game" link together
         {
@@ -95,5 +95,6 @@ namespace QOL
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user
         public static NetworkPlayer localNetworkPlayer;
         public static bool isTranslating;
+        public static string hostName = Helper.GetPlayerName(UnityEngine.Object.FindObjectOfType<MatchmakingHandler>().LobbyOwner);
     }
 }
