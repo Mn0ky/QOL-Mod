@@ -5,7 +5,7 @@ using HarmonyLib;
 
 namespace QOL
 {
-    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.6")]
+    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.7")]
     [BepInProcess("StickFight.exe")]
     public class Plugin : BaseUnityPlugin
     {
