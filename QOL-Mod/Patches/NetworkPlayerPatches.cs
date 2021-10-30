@@ -22,22 +22,22 @@ namespace QOL
             {
                 return true;
             }
-            translateMessage(data, __instance);
+            TranslateMessage(data, __instance);
             return false;
         }
 
-        public static void translateMessage(byte[] data, NetworkPlayer __instance) // Checks if auto-translation is enabled, if so then translate it
+        public static void TranslateMessage(byte[] data, NetworkPlayer __instance) // Checks if auto-translation is enabled, if so then translate it
         {
             string textToTranslate = Encoding.UTF8.GetString(data);
             Debug.Log("Got message: " + textToTranslate);
+
             var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue(); // TODO: fix this!!
             ChatManager mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), "mLocalChatManager");
             Debug.Log("mLocalChatManager : " + mLocalChatManager);
             Debug.Log("mHasLocalControl : " + mHasLocalControl);
-            //Translate translator = new Translate();
+
             if ((bool)mHasLocalControl)
             {
-                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { Debug.Log(s); }));
                 __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
                 return;
             }

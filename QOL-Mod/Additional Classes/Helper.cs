@@ -21,9 +21,9 @@ namespace QOL
             {
                 case "blue":
                     return 1;
-                case "Red":
+                case "red":
                     return 2;
-                case "Green":
+                case "green":
                     return 3;
                 default:
                     return 0;

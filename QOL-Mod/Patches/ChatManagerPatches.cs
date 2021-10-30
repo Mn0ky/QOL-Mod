@@ -60,8 +60,7 @@ namespace QOL
                 if (text.Length > 2)
                 {
                     string colorWanted = text.Substring(3);
-                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted))
-                        .GetComponentInChildren<HealthHandler>().health.ToString();
+                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
                     Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
                     return;
                 }
@@ -111,8 +110,7 @@ namespace QOL
             {
                 Helper.isTranslating = !Helper.isTranslating;
                 //__instance.StartCoroutine(Translate.Process("en", "Bonjour.", delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
-                //__instance.StartCoroutine(Translate.Process("en", "Bonjour.",
-                   // returnValue => { Debug.Log(returnValue); }));;
+                
             }
             else if (text == "translate_test2")
             {
