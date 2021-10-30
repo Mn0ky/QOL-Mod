@@ -19,6 +19,8 @@ namespace QOL
         {
             switch (targetSpawnColor)
             {
+                case "yellow":
+                    return 0;
                 case "blue":
                     return 1;
                 case "red":
@@ -26,7 +28,7 @@ namespace QOL
                 case "green":
                     return 3;
                 default:
-                    return 0;
+                    return ushort.MaxValue;
             }
         }
         public static string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
@@ -78,8 +80,19 @@ namespace QOL
             Debug.Log("joinLink: " + joinLink);
             GUIUtility.systemCopyBuffer = joinLink;
         }
+
+        public static void AssignLocalNetworkPlayer(NetworkPlayer localNetworkPlayer)
+        {
+            if (GetSteamID(localNetworkPlayer.NetworkSpawnID) == Helper.localPlayerSteamID)
+            {
+                Helper.localNetworkPlayer = localNetworkPlayer;
+                Debug.Log("Assigned the localNetworkPlayer!");
+                return;
+            }
+            Debug.Log("That wasn't the local-player!");
+        }
         public static CSteamID lobbyID; // The ID of the current lobby
-        public static CSteamID localPlayerSteamID; // The steamID of the local player
+        public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user
         public static NetworkPlayer localNetworkPlayer;
         public static bool isTranslating;
     }

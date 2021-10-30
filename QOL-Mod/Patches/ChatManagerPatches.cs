@@ -34,10 +34,9 @@ namespace QOL
         }
         public static void StartMethodPostfix(ChatManager __instance)
         {
-            Helper.localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            Helper.localPlayerSteamID = Helper.GetSteamID(Helper.localNetworkPlayer.NetworkSpawnID);
-            Debug.Log("local player steam ID: " + Helper.localPlayerSteamID);
-            Debug.Log("local networkplayer: " + Helper.localNetworkPlayer);
+            NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
+            Helper.AssignLocalNetworkPlayer(localNetworkPlayer);
+
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
@@ -60,14 +59,17 @@ namespace QOL
                 if (text.Length > 2)
                 {
                     string colorWanted = text.Substring(3);
-                    string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
-                    Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + targetHealth);
+                    //string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
+                    Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
+                    Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
+                    Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + Helper.GetHPOfPlayer(colorWanted));
                     return;
                 }
 
                 Debug.Log("Looking for my health!");
-                string localHealth =
-                    Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
+                Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
+                Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
+                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString();
                 Debug.Log("Current Health: " + localHealth);
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 return;
