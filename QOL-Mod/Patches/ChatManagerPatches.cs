@@ -74,7 +74,10 @@ namespace QOL
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
                 
             }
-
+            else if (text == "gg") // Enables or disables automatic "gg" upon death
+            {
+                Helper.autoGG = !Helper.autoGG;
+            }
             else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
             {
                 message = message.Replace("/shrug", "");
@@ -82,7 +85,6 @@ namespace QOL
                 Helper.localNetworkPlayer.OnTalked(message);
                 
             }
-
             else if (text == "rich") // Enables rich text for chat messages
             {
                 TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;

@@ -95,6 +95,7 @@ namespace QOL
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user
         public static NetworkPlayer localNetworkPlayer;
         public static bool isTranslating;
+        public static bool autoGG;
         public static string hostName = Helper.GetPlayerName(UnityEngine.Object.FindObjectOfType<MatchmakingHandler>().LobbyOwner);
     }
 }
