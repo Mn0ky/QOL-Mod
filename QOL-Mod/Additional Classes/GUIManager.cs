@@ -37,9 +37,10 @@ namespace QOL
                 }
 
                 this.theLobbyID = Helper.lobbyID;
-                this.theLobbyHost = Helper.hostName;
+                this.theLobbyHost = Helper.GetPlayerName(mMatchmaking.LobbyOwner);
                 Debug.Log("this.theLobbyID : " + this.theLobbyID);
                 Debug.Log("this.theLobbyHost : " + this.theLobbyHost);
+                Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
             }
         }
         public void OnGUI()

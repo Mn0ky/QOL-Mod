@@ -96,6 +96,5 @@ namespace QOL
         public static NetworkPlayer localNetworkPlayer;
         public static bool isTranslating;
         public static bool autoGG;
-        public static string hostName = Helper.GetPlayerName(UnityEngine.Object.FindObjectOfType<MatchmakingHandler>().LobbyOwner);
     }
 }
