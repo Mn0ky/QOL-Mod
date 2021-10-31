@@ -26,7 +26,11 @@ namespace QOL
             var SendChatMessageMethod = AccessTools.Method(typeof(ChatManager), "SendChatMessage");
             var SendChatMessageMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.SendChatMessageMethodPrefix))); // Patches SendChatMessage with prefix method
             harmonyInstance.Patch(SendChatMessageMethod, prefix: SendChatMessageMethodPrefix);
-    }
+
+            var ReplaceUnacceptableWordsMethod = AccessTools.Method(typeof(ChatManager), "ReplaceUnacceptableWords");
+            var ReplaceUnacceptableWordsMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.ReplaceUnacceptableWordsMethodPrefix))); // Patches SendChatMessage with prefix method
+            harmonyInstance.Patch(ReplaceUnacceptableWordsMethod, prefix: ReplaceUnacceptableWordsMethodPrefix);
+        }
         public static void AwakeMethodPostfix(ChatManager __instance)
         {
             // __instance.gameObject.transform.root.gameObject.AddComponent<GUIManager>();
@@ -47,7 +51,17 @@ namespace QOL
             }
             return true;
         }
-
+        public static bool ReplaceUnacceptableWordsMethodPrefix(ref string message, ref string __result) // Prefix method for patching the original (ReplaceUnacceptableWordsMethod)
+        {
+            if (Helper.chatCensorshipBypass)
+            {
+                Debug.Log("skipping censorship");
+                __result = message;
+                return false;
+            }
+            Debug.Log("censoring message");
+            return true;
+        }
         public static void Commands(string message, ChatManager __instance)
         {
             Debug.Log("Made it to beginning of commands!");
@@ -77,6 +91,11 @@ namespace QOL
             else if (text == "gg") // Enables or disables automatic "gg" upon death
             {
                 Helper.autoGG = !Helper.autoGG;
+            }
+            else if (text == "uncensor") // Enables or disables skip for chat censorship
+            {
+                Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
+                Debug.Log("Helper.chatCensorshipBypass : " + Helper.chatCensorshipBypass);
             }
             else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
             {
@@ -114,7 +133,6 @@ namespace QOL
             {
                 Helper.isTranslating = !Helper.isTranslating;
                 //__instance.StartCoroutine(Translate.Process("en", "Bonjour.", delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
-                
             }
         }
     }

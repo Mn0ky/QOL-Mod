@@ -96,5 +96,6 @@ namespace QOL
         public static NetworkPlayer localNetworkPlayer;
         public static bool isTranslating;
         public static bool autoGG;
+        public static bool chatCensorshipBypass;
     }
 }
