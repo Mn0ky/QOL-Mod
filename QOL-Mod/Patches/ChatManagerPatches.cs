@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using Steamworks;
+
 
 namespace QOL
 {
@@ -22,6 +22,10 @@ namespace QOL
             var StartMethod = AccessTools.Method(typeof(ChatManager), "Start");
             var StartMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StartMethodPostfix))); // Patches Awake with prefix method
             harmonyInstance.Patch(StartMethod, postfix: StartMethodPostfix);
+
+            var UpdateMethod = AccessTools.Method(typeof(ChatManager), "Update");
+            var UpdateMethodTranspiler = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.UpdateMethodTranspiler))); // Patches Awake with prefix method
+            harmonyInstance.Patch(UpdateMethod, transpiler: UpdateMethodTranspiler);
 
             var SendChatMessageMethod = AccessTools.Method(typeof(ChatManager), "SendChatMessage");
             var SendChatMessageMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.SendChatMessageMethodPrefix))); // Patches SendChatMessage with prefix method
@@ -41,6 +45,30 @@ namespace QOL
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
             Helper.AssignLocalNetworkPlayer(localNetworkPlayer);
 
+        }
+        public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+
+            var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic);
+            var DebugLogMethod = typeof(Debug).GetMethod(nameof(Debug.Log), new[] { typeof(object) });
+            var list = instructions.ToList();
+            var len = list.Count;
+            for (var i = 0; i < len; i++)
+            {
+                if (list[i].Calls(StopTypingMethod))
+                {
+                    // CodeInstruction instruction0 = new CodeInstruction(OpCodes.Brfalse_S, (sbyte)0x04);
+                    // list.Insert(17, instruction0);
+
+                    CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldstr, "OwO, ChatManagerPatches");
+                    list.Insert(6, instruction1);
+
+                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Call, DebugLogMethod);
+                    list.Insert(7, instruction2);
+                    break;
+                }
+            }
+            return list.AsEnumerable();
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {

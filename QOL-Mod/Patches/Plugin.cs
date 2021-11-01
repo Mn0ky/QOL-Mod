@@ -2,6 +2,7 @@
 using BepInEx;
 using UnityEngine;
 using HarmonyLib;   
+using System.Reflection;
 
 namespace QOL
 {
@@ -18,6 +19,8 @@ namespace QOL
             {
                 Harmony harmony = new Harmony("monky.QOL"); // Creates harmony instance with identifier
                 Logger.LogInfo("Applying ChatManager patches");
+                Logger.LogInfo(typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic));
+                Logger.LogInfo(typeof(Debug).GetMethod(nameof(Debug.Log), new[] { typeof(object) }));
                 ChatManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying MatchmakingHandler patch");
                 MatchmakingHandlerPatch.Patch(harmony);
