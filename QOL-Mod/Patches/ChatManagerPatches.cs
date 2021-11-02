@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using Steamworks;
@@ -24,8 +25,12 @@ namespace QOL
             harmonyInstance.Patch(StartMethod, postfix: StartMethodPostfix);
 
             var UpdateMethod = AccessTools.Method(typeof(ChatManager), "Update");
-            var UpdateMethodTranspiler = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.UpdateMethodTranspiler))); // Patches Awake with prefix method
+            var UpdateMethodTranspiler = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.UpdateMethodTranspiler))); // Patches Update with transpiler method
             harmonyInstance.Patch(UpdateMethod, transpiler: UpdateMethodTranspiler);
+
+            var StopTypingMethod = AccessTools.Method(typeof(ChatManager), "StopTyping");
+            var StopTypingMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StopTypingMethodPostfix))); // Patches StopTyping with postfix method
+            harmonyInstance.Patch(StopTypingMethod, postfix: StopTypingMethodPostfix);
 
             var SendChatMessageMethod = AccessTools.Method(typeof(ChatManager), "SendChatMessage");
             var SendChatMessageMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.SendChatMessageMethodPrefix))); // Patches SendChatMessage with prefix method
@@ -46,7 +51,7 @@ namespace QOL
             Helper.AssignLocalNetworkPlayer(localNetworkPlayer);
 
         }
-        public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen)
         {
 
             var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -57,21 +62,42 @@ namespace QOL
             {
                 if (list[i].Calls(StopTypingMethod))
                 {
-                    // CodeInstruction instruction0 = new CodeInstruction(OpCodes.Brfalse_S, (sbyte)0x04);
-                    // list.Insert(17, instruction0);
+                    Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
 
-                    CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldstr, "OwO, ChatManagerPatches");
-                    list.Insert(6, instruction1);
+                    CodeInstruction instruction0 = list[17];
+                    instruction0.opcode = OpCodes.Brfalse_S;
+                    instruction0.operand = jumpToCheckForArrowKeysLabel;
+                    instruction0.labels.Clear();
 
-                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Call, DebugLogMethod);
-                    list.Insert(7, instruction2);
+                    CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
+                    instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
+                    list.Insert(20, instruction1);
+
+                    Debug.Log("list[9].operand" + list[9].operand);
+                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, list[9].operand);
+                    list.Insert(21, instruction2);
+
+                    CodeInstruction instruction3 = new CodeInstruction(OpCodes.Call, SymbolExtensions.GetMethodInfo(() => CheckForArrowKeys(null)));
+                    list.Insert(22, instruction3);
                     break;
                 }
             }
+
+            for (var i = 0; i < len; i++)
+            {
+                Debug.Log(i + "\t" + list[i]); 
+            }
+
             return list.AsEnumerable();
+        }
+        public static void StopTypingMethodPostfix()
+        {
+            Debug.Log("ChatManagerPatches.upArrowCounter : " + ChatManagerPatches.upArrowCounter);
+            ChatManagerPatches.upArrowCounter = 0;
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
+            ChatManagerPatches.SaveForUpArrow(message);
             if (message.StartsWith("/"))
             {
                 ChatManagerPatches.Commands(message, __instance);
@@ -163,5 +189,42 @@ namespace QOL
                 //__instance.StartCoroutine(Translate.Process("en", "Bonjour.", delegate (string s) { Helper.localNetworkPlayer.OnTalked(s); }));
             }
         }
+        public static void CheckForArrowKeys(TMP_InputField chatField)
+        {
+            Debug.Log("chatField.text : " + chatField.text);
+            Debug.Log("backupTextList : " + ChatManagerPatches.backupTextList);
+            if (Input.GetKeyDown(KeyCode.UpArrow) && ChatManagerPatches.upArrowCounter < ChatManagerPatches.backupTextList.Count)
+            {
+                Debug.Log("UpArrow, current: " + ChatManagerPatches.upArrowCounter);
+                chatField.text = ChatManagerPatches.backupTextList[ChatManagerPatches.upArrowCounter];
+                ChatManagerPatches.upArrowCounter++;
+                Debug.Log("UpArrow, now: " + ChatManagerPatches.upArrowCounter);
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow) && ChatManagerPatches.upArrowCounter > 0)
+            {
+                Debug.Log("DownArrow, current: " + ChatManagerPatches.upArrowCounter);
+                ChatManagerPatches.upArrowCounter--;
+                chatField.text = ChatManagerPatches.backupTextList[ChatManagerPatches.upArrowCounter];
+                Debug.Log("DownArrow, now: " + ChatManagerPatches.upArrowCounter);
+            }
+        }
+        public static void SaveForUpArrow(string backupThisText)
+        {
+            if (!ChatManagerPatches.backupTextList.Any<string>() &&  backupThisText.Length <= 350)
+            {
+                ChatManagerPatches.backupTextList.Insert(0, backupThisText);
+            }
+            if (ChatManagerPatches.backupTextList.Count == 20)
+            {
+                ChatManagerPatches.backupTextList.RemoveAt(19);
+            }
+            if (ChatManagerPatches.backupTextList[0] != backupThisText && backupThisText.Length <= 350)
+            {
+                ChatManagerPatches.backupTextList.Insert(0, backupThisText);
+            }
+        }
+
+        private static List<string> backupTextList;
+        private static int upArrowCounter;
     }
 }

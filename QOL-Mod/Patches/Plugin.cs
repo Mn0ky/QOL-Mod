@@ -33,7 +33,7 @@ namespace QOL
             }
             catch (Exception ex)
             {
-                Logger.LogError("Exception on applying patches: " + ex.Message);
+                Logger.LogError("Exception on applying patches: " + ex.InnerException);
             }
         }
     }
