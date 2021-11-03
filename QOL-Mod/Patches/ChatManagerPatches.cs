@@ -16,39 +16,38 @@ namespace QOL
         public static void Patches(Harmony harmonyInstance) // ChatManager methods to patch with the harmony instance
         {
             var StartMethod = AccessTools.Method(typeof(ChatManager), "Start");
-            var StartMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StartMethodPostfix))); // Patches Awake with prefix method
+            var StartMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StartMethodPostfix))); // Patches Start() with prefix method
             harmonyInstance.Patch(StartMethod, postfix: StartMethodPostfix);
 
             var UpdateMethod = AccessTools.Method(typeof(ChatManager), "Update");
-            var UpdateMethodTranspiler = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.UpdateMethodTranspiler))); // Patches Update with transpiler method
+            var UpdateMethodTranspiler = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.UpdateMethodTranspiler))); // Patches Update() with transpiler method
             harmonyInstance.Patch(UpdateMethod, transpiler: UpdateMethodTranspiler);
 
             var StopTypingMethod = AccessTools.Method(typeof(ChatManager), "StopTyping");
-            var StopTypingMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StopTypingMethodPostfix))); // Patches StopTyping with postfix method
+            var StopTypingMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StopTypingMethodPostfix))); // Patches StopTyping() with postfix method
             harmonyInstance.Patch(StopTypingMethod, postfix: StopTypingMethodPostfix);
 
             var SendChatMessageMethod = AccessTools.Method(typeof(ChatManager), "SendChatMessage");
-            var SendChatMessageMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.SendChatMessageMethodPrefix))); // Patches SendChatMessage with prefix method
+            var SendChatMessageMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.SendChatMessageMethodPrefix))); // Patches SendChatMessage() with prefix method
             harmonyInstance.Patch(SendChatMessageMethod, prefix: SendChatMessageMethodPrefix);
 
             var ReplaceUnacceptableWordsMethod = AccessTools.Method(typeof(ChatManager), "ReplaceUnacceptableWords");
-            var ReplaceUnacceptableWordsMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.ReplaceUnacceptableWordsMethodPrefix))); // Patches SendChatMessage with prefix method
+            var ReplaceUnacceptableWordsMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.ReplaceUnacceptableWordsMethodPrefix))); // Patches ReplaceUnacceptableWords() with prefix method
             harmonyInstance.Patch(ReplaceUnacceptableWordsMethod, prefix: ReplaceUnacceptableWordsMethodPrefix);
         }
 
         public static void StartMethodPostfix(ChatManager __instance)
         {
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            Helper.AssignLocalNetworkPlayer(localNetworkPlayer);
+            Helper.AssignLocalNetworkPlayer(localNetworkPlayer); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours
 
         }
 
-        public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen)
+        public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
         {
 
             var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic);
             var CheckForArrowKeysMethod = typeof(ChatManagerPatches).GetMethod(nameof(CheckForArrowKeys), BindingFlags.Static | BindingFlags.Public);
-            var DebugLogMethod = typeof(Debug).GetMethod(nameof(Debug.Log), new[] {typeof(object)});
             var list = instructions.ToList();
             var len = list.Count;
             for (var i = 0; i < len; i++)
@@ -87,7 +86,7 @@ namespace QOL
         public static void StopTypingMethodPostfix()
         {
             Debug.Log("ChatManagerPatches.upArrowCounter : " + ChatManagerPatches.upArrowCounter);
-            ChatManagerPatches.upArrowCounter = 0;
+            ChatManagerPatches.upArrowCounter = 0; // When player is finished typing, reset the counter for # of uparrow presses
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
@@ -124,7 +123,6 @@ namespace QOL
                 if (text.Length > 2)
                 {
                     string colorWanted = text.Substring(3);
-                    //string targetHealth = Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString();
                     Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
                     Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
                     Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + Helper.GetHPOfPlayer(colorWanted));
@@ -185,7 +183,7 @@ namespace QOL
             }
         }
             
-        public static void CheckForArrowKeys(TMP_InputField chatField)
+        public static void CheckForArrowKeys(TMP_InputField chatField) // Checks if uparrow or downarrow keys are pressed, if so then set the chatField.text to whichever message the user stops on
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) && ChatManagerPatches.upArrowCounter < ChatManagerPatches.backupTextList.Count)
             {
@@ -204,7 +202,7 @@ namespace QOL
             }
         }
 
-        public static void SaveForUpArrow(string backupThisText)
+        public static void SaveForUpArrow(string backupThisText) // Checks if the message should be inserted then inserts it into the 0th index of backup list 
         {
             Debug.Log("backupThisText : " + backupThisText);
             Debug.Log("backupTextList[0] : " + backupTextList[0]);
@@ -226,11 +224,10 @@ namespace QOL
             }
         }
 
-        public static int upArrowCounter;
+        public static int upArrowCounter; // Holds how many times the uparrow key is pressed
 
-        public static List<string> backupTextList = new()
+        public static List<string> backupTextList = new() // Ends up containing previous messages sent by us (up to 20)
         {
-
             string.Empty
         };
     }
