@@ -81,7 +81,7 @@ namespace QOL
             GUIUtility.systemCopyBuffer = joinLink;
         }
 
-        public static void AssignLocalNetworkPlayer(NetworkPlayer localNetworkPlayer)
+        public static void AssignLocalNetworkPlayer(NetworkPlayer localNetworkPlayer) // Assigns the networkPlayer as the local one if it matches our steamID
         {
             if (GetSteamID(localNetworkPlayer.NetworkSpawnID) == Helper.localPlayerSteamID)
             {
@@ -92,10 +92,15 @@ namespace QOL
             Debug.Log("That wasn't the local player!");
         }
         public static CSteamID lobbyID; // The ID of the current lobby
-        public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user
-        public static NetworkPlayer localNetworkPlayer;
-        public static bool isTranslating;
-        public static bool autoGG;
-        public static bool chatCensorshipBypass;
+        
+        public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
+        
+        public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
+        
+        public static bool isTranslating; // True if auto-translations are enabled, false by default
+        
+        public static bool autoGG; // True if auto gg on death is enabled, false by default
+        
+        public static bool chatCensorshipBypass; // True if chat censoring is bypassed, false by default
     }
 }
