@@ -46,9 +46,9 @@ namespace QOL
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
         {
 
-            var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic);
-            var CheckForArrowKeysMethod = typeof(ChatManagerPatches).GetMethod(nameof(CheckForArrowKeys), BindingFlags.Static | BindingFlags.Public);
-            var list = instructions.ToList();
+            var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic); // Gets MethodInfo for StopTyping()
+            var CheckForArrowKeysMethod = typeof(ChatManagerPatches).GetMethod(nameof(CheckForArrowKeys), BindingFlags.Static | BindingFlags.Public); // Get MethodInfo for CheckForArrowKeys() 
+            var list = instructions.ToList(); // Generates a list of CIL instructions for Update() 
             var len = list.Count;
             for (var i = 0; i < len; i++)
             {
@@ -66,10 +66,10 @@ namespace QOL
                     list.Insert(20, instruction1);
 
                     Debug.Log("list[9].operand" + list[9].operand);
-                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, list[9].operand);
+                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, list[9].operand); // Gets value of chatField field
                     list.Insert(21, instruction2);
 
-                    CodeInstruction instruction3 = new CodeInstruction(OpCodes.Call, CheckForArrowKeysMethod);
+                    CodeInstruction instruction3 = new CodeInstruction(OpCodes.Call, CheckForArrowKeysMethod); // Calls CheckForArrowKeys() with value of chatField
                     list.Insert(22, instruction3);
                     break;
                 }
@@ -80,7 +80,7 @@ namespace QOL
                 Debug.Log(i + "\t" + list[i]);
             }
 
-            return list.AsEnumerable();
+            return list.AsEnumerable(); // Returns the now modified list of CIL instructions
         }
 
         public static void StopTypingMethodPostfix()
@@ -103,6 +103,7 @@ namespace QOL
 
             return true;
         }
+        
         public static bool ReplaceUnacceptableWordsMethodPrefix(ref string message, ref string __result) // Prefix method for patching the original (ReplaceUnacceptableWordsMethod)
         {
             if (Helper.chatCensorshipBypass)
@@ -224,7 +225,7 @@ namespace QOL
 
         public static List<string> backupTextList = new() // Ends up containing previous messages sent by us (up to 20)
         {
-            string.Empty
+            string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
     }
 }
