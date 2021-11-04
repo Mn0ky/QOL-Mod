@@ -16,9 +16,9 @@ namespace QOL
             var OnDeathMethodMethodPostfix = new HarmonyMethod(typeof(ControllerPatch).GetMethod(nameof(ControllerPatch.OnDeathMethodMethodPostfix))); // Patches OnDeathMethod with postfix method
             harmonyInstance.Patch(OnDeathMethod, postfix: OnDeathMethodMethodPostfix);
         }
-        public static void OnDeathMethodMethodPostfix(Controller __instance)
+        public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
         {
-            if (Helper.autoGG)
+            if (Helper.autoGG) // If autoGG on death is enabled (true), and the player has control (is us) then send "gg" to chat
             {
                 if (__instance.HasControl)
                 {
