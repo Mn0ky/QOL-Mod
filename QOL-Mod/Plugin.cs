@@ -7,7 +7,7 @@ using System.Reflection;
 namespace QOL
 {
     [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.7")]
-    [BepInProcess("StickFight.exe")]
+    [BepInProcess("StickFight.exe")]    
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
