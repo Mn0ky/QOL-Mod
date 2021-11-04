@@ -90,7 +90,11 @@ namespace QOL
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
-            ChatManagerPatches.SaveForUpArrow(message);
+            if (message.Length <= 350)
+            {
+                ChatManagerPatches.SaveForUpArrow(message);
+            }
+
             if (message.StartsWith("/"))
             {
                 ChatManagerPatches.Commands(message, __instance);
@@ -204,22 +208,14 @@ namespace QOL
 
         public static void SaveForUpArrow(string backupThisText) // Checks if the message should be inserted then inserts it into the 0th index of backup list 
         {
-            Debug.Log("backupThisText : " + backupThisText);
-            Debug.Log("backupTextList[0] : " + backupTextList[0]);
-            if (!ChatManagerPatches.backupTextList.Any<string>() && backupThisText.Length <= 350)
-            {
-                Debug.Log("Attempting to insert");
-                ChatManagerPatches.backupTextList.Add(backupThisText);
-                ChatManagerPatches.backupTextList.RemoveAt(0);
-            }
 
-            if (ChatManagerPatches.backupTextList.Count == 20)
+            if (ChatManagerPatches.backupTextList[0] != backupThisText && ChatManagerPatches.backupTextList.Count <= 20)
+            {
+                ChatManagerPatches.backupTextList.Insert(0, backupThisText);
+            }
+            else
             {
                 ChatManagerPatches.backupTextList.RemoveAt(19);
-            }
-
-            if (ChatManagerPatches.backupTextList[0] != backupThisText && backupThisText.Length <= 350)
-            {
                 ChatManagerPatches.backupTextList.Insert(0, backupThisText);
             }
         }

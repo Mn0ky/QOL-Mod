@@ -22,7 +22,7 @@ namespace QOL
             {
                 Debug.Log("Trying to open GUI menu!");
                 this.mShowMenu = !this.mShowMenu;
-                this.networkPlayerArray = UnityEngine.Object.FindObjectsOfType<NetworkPlayer>();
+                this.networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
                 this.playerNamesStr = string.Empty;
                 foreach (NetworkPlayer player in this.networkPlayerArray)
                 {
@@ -78,9 +78,10 @@ namespace QOL
 				Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
+            GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
-        private MultiplayerManager mManager = UnityEngine.Object.FindObjectOfType<MultiplayerManager>();
-        private MatchmakingHandler mMatchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
+        private MultiplayerManager mManager = FindObjectOfType<MultiplayerManager>();
+        private MatchmakingHandler mMatchmaking = FindObjectOfType<MatchmakingHandler>();
         private bool mShowMenu;
         private Rect MenuRect = new Rect(0f, 100f, 350f, 375f);
         private int WindowId = 100;
