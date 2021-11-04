@@ -46,41 +46,42 @@ namespace QOL
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
         {
 
-            var StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic); // Gets MethodInfo for StopTyping()
-            var CheckForArrowKeysMethod = typeof(ChatManagerPatches).GetMethod(nameof(CheckForArrowKeys), BindingFlags.Static | BindingFlags.Public); // Get MethodInfo for CheckForArrowKeys() 
-            var list = instructions.ToList(); // Generates a list of CIL instructions for Update() 
-            var len = list.Count;
+            MethodInfo StopTypingMethod = typeof(ChatManager).GetMethod("StopTyping", BindingFlags.Instance | BindingFlags.NonPublic); // Gets MethodInfo for StopTyping()
+            MethodInfo CheckForArrowKeysMethod = typeof(ChatManagerPatches).GetMethod(nameof(CheckForArrowKeys), BindingFlags.Static | BindingFlags.Public); // Get MethodInfo for CheckForArrowKeys() 
+            List<CodeInstruction> instructionList = instructions.ToList(); // Generates a list of CIL instructions for Update() 
+            var len = instructionList.Count;
             for (var i = 0; i < len; i++)
             {
-                if (list[i].Calls(StopTypingMethod))
+                if (instructionList[i].Calls(StopTypingMethod))
                 {
                     Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
 
-                    CodeInstruction instruction0 = list[17];
+                    CodeInstruction instruction0 = instructionList[17];
                     instruction0.opcode = OpCodes.Brfalse_S;
                     instruction0.operand = jumpToCheckForArrowKeysLabel;
                     instruction0.labels.Clear();
 
                     CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
                     instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
-                    list.Insert(20, instruction1);
+                    instructionList.Insert(20, instruction1);
 
-                    Debug.Log("list[9].operand" + list[9].operand);
-                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, list[9].operand); // Gets value of chatField field
-                    list.Insert(21, instruction2);
+                    Debug.Log("list[9].operand" + instructionList[9].operand);
+                    CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, instructionList[9].operand); // Gets value of chatField field
+                    instructionList.Insert(21, instruction2);
 
                     CodeInstruction instruction3 = new CodeInstruction(OpCodes.Call, CheckForArrowKeysMethod); // Calls CheckForArrowKeys() with value of chatField
-                    list.Insert(22, instruction3);
+                    instructionList.Insert(22, instruction3);
                     break;
                 }
             }
 
-            for (var i = 0; i < len; i++)
-            {
-                Debug.Log(i + "\t" + list[i]);
-            }
+            // TODO: Make above more flexible!
+            // for (var i = 0; i < len; i++)
+            // {
+            //     Debug.Log(i + "\t" + instructionList[i]);
+            // }
 
-            return list.AsEnumerable(); // Returns the now modified list of CIL instructions
+            return instructionList.AsEnumerable(); // Returns the now modified list of CIL instructions
         }
 
         public static void StopTypingMethodPostfix()
