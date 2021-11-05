@@ -6,14 +6,14 @@ using System.Reflection;
 
 namespace QOL
 {
-    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.7")]
+    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.8")]
     [BepInProcess("StickFight.exe")]    
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
         {
             // Plugin startup logic
-            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded!");
+            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v1.0.8]");
             Logger.LogInfo("Hello from monk :D");
             try
             {

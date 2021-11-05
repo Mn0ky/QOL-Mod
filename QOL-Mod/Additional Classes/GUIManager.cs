@@ -49,7 +49,7 @@ namespace QOL
             {
                 return;
             }
-            this.MenuRect = GUILayout.Window(this.WindowId, this.MenuRect, new GUI.WindowFunction(this.KickWindow), "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v1.0.7]", new GUILayoutOption[0]);
+            this.MenuRect = GUILayout.Window(this.WindowId, this.MenuRect, new GUI.WindowFunction(this.KickWindow), "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v1.0.8]", new GUILayoutOption[0]);
         }
 		private void KickWindow(int window)
 		{
