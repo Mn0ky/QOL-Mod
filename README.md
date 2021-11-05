@@ -12,7 +12,7 @@ Scroll to the bottom of this README for a video of a general overview of this mo
 ## Installation
 
 To use the mod, here are the steps required:<br/> 
-  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases), grab the lastest release of version **``5.4``**.
+  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases), grab the lastest release of version **``5.4``** (**must be 32-bit**).
   2)  Follow the [Installation Tutorial](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_mono.html).
   3)  Put the mod into the now generated ``BepInEx/plugins`` folder for BepInEx to load.
   4)  Start the game, join a lobby, and enjoy!
