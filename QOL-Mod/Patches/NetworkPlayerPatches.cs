@@ -31,18 +31,31 @@ namespace QOL
             string textToTranslate = Encoding.UTF8.GetString(data);
             Debug.Log("Got message: " + textToTranslate);
 
-            var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue(); // TODO: fix this!!
+            bool usingKey = !string.IsNullOrEmpty(Plugin.configAuthKeyForTranslation.Value);
+
+            var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue();
             ChatManager mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), "mLocalChatManager");
             Debug.Log("mLocalChatManager : " + mLocalChatManager);
             Debug.Log("mHasLocalControl : " + mHasLocalControl);
 
             if ((bool)mHasLocalControl)
             {
-                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
+                if (usingKey)
+                {
+                    __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
+                    return;
+                }
+                __instance.StartCoroutine(AuthTranslate.TranslateText("auto", "en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
+                    return;
+            }
+
+            ChatManager mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue() as ChatManager;
+            if (usingKey)
+            {
+                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
                 return;
             }
-            ChatManager mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue() as ChatManager;
-            __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
+            __instance.StartCoroutine(AuthTranslate.TranslateText("auto", "en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
         }
     }
 }

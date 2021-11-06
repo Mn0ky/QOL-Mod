@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
+using TMPro;
 
 namespace QOL
 {
@@ -81,12 +82,14 @@ namespace QOL
             GUIUtility.systemCopyBuffer = joinLink;
         }
 
-        public static void AssignLocalNetworkPlayer(NetworkPlayer localNetworkPlayer) // Assigns the networkPlayer as the local one if it matches our steamID
+        public static void AssignLocalNetworkPlayerAndRichText(NetworkPlayer localNetworkPlayer, ChatManager __instance) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
         {
             if (GetSteamID(localNetworkPlayer.NetworkSpawnID) == Helper.localPlayerSteamID)
             {
                 Helper.localNetworkPlayer = localNetworkPlayer;
                 Debug.Log("Assigned the localNetworkPlayer!");
+                TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
+                theText.richText = Plugin.configRichText.Value;
                 return;
             }
             Debug.Log("That wasn't the local player!");
@@ -94,13 +97,13 @@ namespace QOL
         public static CSteamID lobbyID; // The ID of the current lobby
         
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
-        
+
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
+
+        public static bool isTranslating = Plugin.configTranslation.Value; // True if auto-translations are enabled, false by default
         
-        public static bool isTranslating; // True if auto-translations are enabled, false by default
+        public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
         
-        public static bool autoGG; // True if auto gg on death is enabled, false by default
-        
-        public static bool chatCensorshipBypass; // True if chat censoring is bypassed, false by default
+        public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
     }
 }

@@ -39,8 +39,7 @@ namespace QOL
         public static void StartMethodPostfix(ChatManager __instance)
         {
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            Helper.AssignLocalNetworkPlayer(localNetworkPlayer); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours
-
+            Helper.AssignLocalNetworkPlayerAndRichText(localNetworkPlayer, __instance); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours (also if text should be rich or not)
         }
 
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
@@ -65,7 +64,7 @@ namespace QOL
                     instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
                     instructionList.Insert(20, instruction1);
 
-                    Debug.Log("list[9].operand" + instructionList[9].operand);
+                    // Debug.Log("list[9].operand" + instructionList[9].operand);
                     CodeInstruction instruction2 = new CodeInstruction(OpCodes.Ldfld, instructionList[9].operand); // Gets value of chatField field
                     instructionList.Insert(21, instruction2);
 
@@ -91,7 +90,7 @@ namespace QOL
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
-            if (message.Length <= 350)
+            if (ChatManagerPatches.backupTextList[0] != message && message.Length <= 350)
             {
                 ChatManagerPatches.SaveForUpArrow(message);
             }
@@ -211,7 +210,7 @@ namespace QOL
         public static void SaveForUpArrow(string backupThisText) // Checks if the message should be inserted then inserts it into the 0th index of backup list 
         {
 
-            if (ChatManagerPatches.backupTextList[0] != backupThisText && ChatManagerPatches.backupTextList.Count <= 20)
+            if (ChatManagerPatches.backupTextList.Count <= 20)
             {
                 ChatManagerPatches.backupTextList.Insert(0, backupThisText);
             }
