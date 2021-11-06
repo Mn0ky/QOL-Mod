@@ -1,20 +1,18 @@
 ﻿using System;
-using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using UnityEngine;
 
 namespace QOL
 {
-    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.8")]
+    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.9")]
     [BepInProcess("StickFight.exe")]    
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
         {
             // Plugin startup logic
-            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v1.0.8]");
+            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v1.0.9]");
             Logger.LogInfo("Hello from monk :D");
             try
             {
