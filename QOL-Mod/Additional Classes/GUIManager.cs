@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using Steamworks;
+﻿using Steamworks;
+using UnityEngine;
 
 namespace QOL
 {
@@ -17,10 +17,10 @@ namespace QOL
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1))
             {
                 Debug.Log("Trying to open GUI menu!");
-                this.mShowMenu = !this.mShowMenu;
-                this.networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
-                this.playerNamesStr = string.Empty;
-                foreach (NetworkPlayer player in this.networkPlayerArray)
+                mShowMenu = !mShowMenu;
+                networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
+                playerNamesStr = string.Empty;
+                foreach (NetworkPlayer player in networkPlayerArray)
                 {
                     string str = string.Concat(new object[]
                     {
@@ -29,30 +29,30 @@ namespace QOL
                         "] ",
                         Helper.GetPlayerName(Helper.GetSteamID(player.NetworkSpawnID))
                     });
-                    this.playerNamesStr = this.playerNamesStr + "\n" + str;
+                    playerNamesStr = playerNamesStr + "\n" + str;
                 }
 
-                this.theLobbyID = Helper.lobbyID;
-                this.theLobbyHost = Helper.GetPlayerName(mMatchmaking.LobbyOwner);
-                Debug.Log("this.theLobbyID : " + this.theLobbyID);
-                Debug.Log("this.theLobbyHost : " + this.theLobbyHost);
+                theLobbyID = Helper.lobbyID;
+                theLobbyHost = Helper.GetPlayerName(mMatchmaking.LobbyOwner);
+                Debug.Log("this.theLobbyID : " + theLobbyID);
+                Debug.Log("this.theLobbyHost : " + theLobbyHost);
                 Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
             }
         }
         public void OnGUI()
         {
-            if (!this.mShowMenu)
+            if (!mShowMenu)
             {
                 return;
             }
-            this.MenuRect = GUILayout.Window(this.WindowId, this.MenuRect, new GUI.WindowFunction(this.KickWindow), "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v1.0.9]", new GUILayoutOption[0]);
+            MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v1.0.9]");
         }
 		private void KickWindow(int window)
 		{
-			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>", new GUILayoutOption[0]);
-			GUILayout.Label("<color=red>Lobby ID:</color> " + this.theLobbyID, new GUILayoutOption[0]);
-			GUILayout.Label("Host: " + this.theLobbyHost, new GUILayoutOption[0]);
-            GUILayout.Label(this.playerNamesStr, new GUILayoutOption[0]);
+			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>");
+			GUILayout.Label("<color=red>Lobby ID:</color> " + theLobbyID);
+			GUILayout.Label("Host: " + theLobbyHost);
+            GUILayout.Label(playerNamesStr);
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
             {
                 Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));

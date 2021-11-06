@@ -120,7 +120,7 @@ namespace QOL
         {
             Debug.Log("Made it to beginning of commands!");
             string text = message.ToLower();
-            text = text.TrimStart(new char[] {'/'});
+            text = text.TrimStart('/');
 
             if (text.Contains("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
             {
@@ -136,7 +136,7 @@ namespace QOL
                 Debug.Log("Looking for my health!");
                 Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
                 Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
-                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health.ToString() + "%";
+                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health + "%";
                 Debug.Log("Current Health: " + localHealth);
                 Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
 
