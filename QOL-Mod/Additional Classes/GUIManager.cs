@@ -72,17 +72,27 @@ namespace QOL
             {
                 Helper.localNetworkPlayer.OnTalked("Green HP: " + Helper.GetHPOfPlayer("green"));
             }
-			if (GUI.Button(new Rect(120f, 335f, 100f, 30f), "Get Lobby Link"))
+			if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
 				Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
+            if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
+            {
+                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
+                Helper.localNetworkPlayer.OnTalked("Lobby made private!");
+            }
+            if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
+            {
+                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
+                Helper.localNetworkPlayer.OnTalked("Lobby made public!");
+            }
             Helper.autoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), Helper.autoGG, "AutoGG");
-            Helper.tmpText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), Helper.tmpText.richText, "RichTextInChat");
+            Helper.isTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), Helper.isTranslating, "AutoTranslations");
+            Helper.tmpText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), Helper.tmpText.richText, "RichText");
             Helper.chatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), Helper.chatCensorshipBypass, "ChatCensorshipBypass");
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
-        private MultiplayerManager mManager = FindObjectOfType<MultiplayerManager>();
 
         private MatchmakingHandler mMatchmaking = FindObjectOfType<MatchmakingHandler>();
 

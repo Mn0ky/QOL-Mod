@@ -48,7 +48,7 @@ namespace QOL
                     "Disable chat censorship on startup?");
 
                 configRichText = Config.Bind("Startup Options",
-                    "RichTextInChat",
+                    "RichText",
                     false,
                     "Enable rich text for chat on startup?");
 

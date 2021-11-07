@@ -166,12 +166,12 @@ namespace QOL
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
-                Helper.localNetworkPlayer.OnTalked("Lobby is now private!");
+                Helper.localNetworkPlayer.OnTalked("Lobby made private!");
             }
             else if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
-                Helper.localNetworkPlayer.OnTalked("Lobby is now public!");
+                Helper.localNetworkPlayer.OnTalked("Lobby made public!");
             }
             else if (
                 text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
