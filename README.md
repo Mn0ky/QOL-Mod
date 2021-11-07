@@ -28,7 +28,8 @@ The following are some general things to take note of:
 
 ## GUI Menu
 
-The menu is the primary way to use and enable/disable features. It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
+The menu is the primary way to use and enable/disable features.<br/>
+It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
 An image below shows a visual overview:<br/>
 ![Image of QOL Menu](https://i.ibb.co/LhWr9hV/QOL-MENU-cropped.png)<br/>
 Alternative chat commands are listed directly below.
