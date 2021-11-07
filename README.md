@@ -15,8 +15,9 @@ To use the mod, here are the steps required:<br/>
   1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases), grab the lastest release of version **``5.4``** (**must be 32-bit**).
   2)  Extract the newly downloaded zip into the ``StickFightTheGame`` folder.
   3)  Launch the game and then exit (BepInEx will have generated new files and folders).
-  4)  Put the mod into the now generated ``BepInEx/plugins`` folder for BepInEx to load.
-  5)  Start the game, join a lobby, and enjoy!
+  4)  Download the latest version of the QOL mod from the releases section.
+  5)  Put the mod into the now generated ``BepInEx/plugins`` folder for BepInEx to load.
+  6)  Start the game, join a lobby, and enjoy!
 
 ## Caveats
 
@@ -28,7 +29,8 @@ The following are some general things to take note of:
 
 ## GUI Menu
 
-The menu is the primary way to use and enable/disable features. It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
+The menu is the primary way to use and enable/disable features.<br/>
+It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
 An image below shows a visual overview:<br/>
 ![Image of QOL Menu](https://i.ibb.co/LhWr9hV/QOL-MENU-cropped.png)<br/>
 Alternative chat commands are listed directly below.
@@ -64,7 +66,7 @@ Changing ``RichTextInChat = false`` to ``RichTextInChat = true`` will enable it 
 Another important option to mention for the config is the ability to specify an API key for Google Translate.<br/>
 In doing so, this will allow you to bypass the rate-limit that comes normally.<br/> 
 **You are responsible for creating the key, and any potential charges accrued.**<br/>
-Instructions & documentation can be found [here](https://cloud.google.com/translate).<br/>
+Instructions & documentation for all of that can be found [here](https://cloud.google.com/translate).<br/>
 
 Updating the mod ***does not*** require you to delete the config.
 
