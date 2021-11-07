@@ -84,8 +84,8 @@ namespace QOL
             {
                 Helper.localNetworkPlayer = localNetworkPlayer;
                 Debug.Log("Assigned the localNetworkPlayer!");
-                TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
-                theText.richText = Plugin.configRichText.Value;
+                Helper.tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
+                Helper.tmpText.richText = Plugin.configRichText.Value;
                 return;
             }
             Debug.Log("That wasn't the local player!");
@@ -101,5 +101,7 @@ namespace QOL
         public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
         
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
+
+        public static TextMeshPro tmpText;
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Steamworks;
 using UnityEngine;
+using HarmonyLib;
+using TMPro;
 
 namespace QOL
 {
@@ -17,6 +19,7 @@ namespace QOL
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1))
             {
                 Debug.Log("Trying to open GUI menu!");
+                Debug.Log("chatText.richText : " + Helper.tmpText.richText);
                 mShowMenu = !mShowMenu;
                 networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
                 playerNamesStr = string.Empty;
@@ -74,16 +77,27 @@ namespace QOL
 				Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
+            Helper.autoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), Helper.autoGG, "AutoGG");
+            Helper.tmpText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), Helper.tmpText.richText, "RichTextInChat");
+            Helper.chatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), Helper.chatCensorshipBypass, "ChatCensorshipBypass");
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
         private MultiplayerManager mManager = FindObjectOfType<MultiplayerManager>();
+
         private MatchmakingHandler mMatchmaking = FindObjectOfType<MatchmakingHandler>();
+
         private bool mShowMenu;
-        private Rect MenuRect = new Rect(0f, 100f, 350f, 375f);
+
+        private Rect MenuRect = new(0f, 100f, 350f, 375f);
+
         private int WindowId = 100;
+
         private NetworkPlayer[] networkPlayerArray;
+
         private string playerNamesStr = "Players in Room: \n";
+
         private string theLobbyHost;
+
         private CSteamID theLobbyID;
     }
 }

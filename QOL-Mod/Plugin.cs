@@ -55,7 +55,7 @@ namespace QOL
                 configTranslation = Config.Bind("Startup Options",
                     "AutoTranslations",
                     false,
-                    "Enable auto-translations for messages to English?");
+                    "Enable auto-translation for chat messages to English on startup?");
 
                 configAuthKeyForTranslation = Config.Bind("Startup Options",
                     "AutoAuthTranslationsAPIKey",
