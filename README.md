@@ -26,6 +26,12 @@ The following are some general things to take note of:
   - The auto-translation feature uses the Google Translate API and has a rate-limit of **``100``** requests per hour.
   - The ``ツ`` character outputted by the ``/shrug`` command shows up as invalid (�) ingame.
 
+## GUI Menu
+
+The menu is the primary way to use and enable/disable features. It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
+An image below shows a visual overview:<br/>
+![Image of QOL Menu](https://i.ibb.co/rfB5nHh/QOL-MENU-cropped.png)<br/>
+Alternative chat commands are listed directly below.
 ## Chat Commands
 
 Command | Description
@@ -40,6 +46,27 @@ Command | Description
 /hp	```[<target_color>]```	| Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.
 /invite		| Generates a "join game" link and copies it to clipboard.
 /translate		| Enables auto-translation for messages from others to English.
+
+## Using The Config
+
+A configuration file named ``monky.plugins.QOL.cfg`` can be found under ``BepInEx\config``.<br/>
+Please note that you ___must run the mod at least once___ for it to be generated.<br/>
+You can currently use it to set certain features to be enabled on startup.<br/>
+Example: 
+```
+## Enable rich text for chat on startup?
+# Setting type: Boolean
+# Default value: false
+RichTextInChat = true
+```
+Changing ``RichTextInChat = false`` to ``RichTextInChat = true`` will enable it on startup without the need for doing ``/rich`` to enable it.<br/>
+
+Another important option to mention for the config is the ability to specify an API key for Google Translate.<br/>
+In doing so, this will allow you to bypass the rate-limit that comes normally.<br/> 
+**You are responsible for creating the key, and any potential charges accrued.**<br/>
+Instructions & documentation can be found [here](https://cloud.google.com/translate).<br/>
+
+Updating the mod ***does not*** require you to delete the config.
 
 ## QOL Mod Overview
 
