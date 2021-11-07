@@ -65,7 +65,7 @@ Changing ``RichTextInChat = false`` to ``RichTextInChat = true`` will enable it 
 Another important option to mention for the config is the ability to specify an API key for Google Translate.<br/>
 In doing so, this will allow you to bypass the rate-limit that comes normally.<br/> 
 **You are responsible for creating the key, and any potential charges accrued.**<br/>
-Instructions & documentation can be found [here](https://cloud.google.com/translate).<br/>
+Instructions & documentation for all of that can be found [here](https://cloud.google.com/translate).<br/>
 
 Updating the mod ***does not*** require you to delete the config.
 
