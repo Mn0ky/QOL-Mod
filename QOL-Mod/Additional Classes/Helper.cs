@@ -103,5 +103,7 @@ namespace QOL
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
 
         public static TextMeshPro tmpText;
+
+        public static MatchmakingHandler Matchmaking = Object.FindObjectOfType<MatchmakingHandler>();
     }
 }

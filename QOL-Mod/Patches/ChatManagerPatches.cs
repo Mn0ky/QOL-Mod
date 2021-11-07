@@ -165,16 +165,29 @@ namespace QOL
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
-                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
-                Helper.localNetworkPlayer.OnTalked("Lobby made private!");
+                if (Helper.Matchmaking.IsHost)
+                {
+                    SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
+                    Helper.localNetworkPlayer.OnTalked("Lobby made private!");
+                }
+                else
+                {
+                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
+                }
             }
             else if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
-                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
-                Helper.localNetworkPlayer.OnTalked("Lobby made public!");
+                if (Helper.Matchmaking.IsHost)
+                {
+                    SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
+                    Helper.localNetworkPlayer.OnTalked("Lobby made public!");
+                }
+                else
+                {
+                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
+                }
             }
-            else if (
-                text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
+            else if (text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
             {
                 Debug.Log("LobbyID: " + Helper.lobbyID);
                 Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));

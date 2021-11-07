@@ -36,13 +36,13 @@ namespace QOL
                 }
 
                 theLobbyID = Helper.lobbyID;
-                theLobbyHost = Helper.GetPlayerName(mMatchmaking.LobbyOwner);
+                theLobbyHost = Helper.GetPlayerName(Helper.Matchmaking.LobbyOwner);
                 Debug.Log("this.theLobbyID : " + theLobbyID);
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
                 Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
             }
         }
-        public void OnGUI()
+        public void OnGUI() 
         {
             if (!mShowMenu)
             {
@@ -80,12 +80,26 @@ namespace QOL
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
-                Helper.localNetworkPlayer.OnTalked("Lobby made private!");
+                if (Helper.Matchmaking.IsHost)
+                {
+                    Helper.localNetworkPlayer.OnTalked("Lobby made private!");
+                }
+                else
+                {
+                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
+                }
             }
             if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
-                Helper.localNetworkPlayer.OnTalked("Lobby made public!");
+                if (Helper.Matchmaking.IsHost)
+                {
+                    Helper.localNetworkPlayer.OnTalked("Lobby made public!");
+                }
+                else
+                {
+                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
+                }
             }
             Helper.autoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), Helper.autoGG, "AutoGG");
             Helper.isTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), Helper.isTranslating, "AutoTranslations");
@@ -93,8 +107,6 @@ namespace QOL
             Helper.chatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), Helper.chatCensorshipBypass, "ChatCensorshipBypass");
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
-
-        private MatchmakingHandler mMatchmaking = FindObjectOfType<MatchmakingHandler>();
 
         private bool mShowMenu;
 
