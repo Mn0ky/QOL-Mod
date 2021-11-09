@@ -99,7 +99,9 @@ namespace QOL
         public static bool isTranslating = Plugin.configTranslation.Value; // True if auto-translations are enabled, false by default
         
         public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
-        
+
+        public static bool uwuifyText; // True if uwufiy text is enabled, false by default
+
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
 
         public static TextMeshPro tmpText;

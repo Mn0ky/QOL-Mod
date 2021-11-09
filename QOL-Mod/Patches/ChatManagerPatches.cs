@@ -2,6 +2,7 @@
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -100,6 +101,16 @@ namespace QOL
                 return false;
             }
 
+            if (Helper.uwuifyText && !string.IsNullOrEmpty(message))
+            {
+                NetworkPlayer networkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
+                if (networkPlayer.HasLocalControl)
+                {
+                    networkPlayer.OnTalked(ChatManagerPatches.UwUify(message));
+                    return false;
+                }
+            }
+
             return true;
         }
         
@@ -161,6 +172,11 @@ namespace QOL
             {
                 TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
                 theText.richText = !theText.richText;
+
+            }
+            else if (text == "uwu") // Enables uwuifier
+            {
+                Helper.uwuifyText = !Helper.uwuifyText;
 
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
@@ -233,11 +249,46 @@ namespace QOL
             }
         }
 
+        public static string UwUify(string targetText)
+        {
+            StringBuilder newMessage = new StringBuilder(targetText);
+            for (int i = 0; i < targetText.Length; i++)
+            {
+                char curChar = targetText[i];
+                if (i > 0)
+                {
+                    ChatManagerPatches.previousChar = targetText[i - 1];
+                }
+
+                if (curChar == 'L' || curChar == 'R')
+                {
+                    newMessage[i] = 'W';
+                }
+
+                else if (curChar == 'l' || curChar == 'r')
+                {
+                    newMessage[i] = 'w';
+                }
+
+                else if (curChar == 'O' || curChar == 'o')
+                {
+                    if (ChatManagerPatches.previousChar == 'N' || ChatManagerPatches.previousChar is 'n' or 'M' or 'm')
+                    {
+                        newMessage[i] = 'y';
+                        newMessage.Insert(i, "o");
+                    }
+                }
+            }
+
+            return newMessage.ToString();
+        }
+
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
 
         public static List<string> backupTextList = new() // Ends up containing previous messages sent by us (up to 20)
         {
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
+        private static char previousChar;
     }
 }
