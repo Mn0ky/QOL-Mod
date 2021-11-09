@@ -46,6 +46,7 @@ Command | Description
 /public		| Opens the current lobby to the public (**must be host**).
 /uncensor		| Disables chat censorship.
 /hp	```[<target_color>]```	| Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.
+/uwu		| *uwuifies* any message you send.
 /invite		| Generates a "join game" link and copies it to clipboard.
 /translate		| Enables auto-translation for messages from others to English.
 
