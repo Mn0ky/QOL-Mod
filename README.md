@@ -69,7 +69,8 @@ In doing so, this will allow you to bypass the rate-limit that comes normally.<b
 **You are responsible for creating the key, and any potential charges accrued.**<br/>
 Instructions & documentation for all of that can be found [here](https://cloud.google.com/translate).<br/>
 
-Updating the mod ***does not*** require you to delete the config.
+Simply delete the config file to have a new one generated with default settings.<br/>
+Updating the mod ***does not*** require you to delete the config file.
 
 ## QOL Mod Overview
 
