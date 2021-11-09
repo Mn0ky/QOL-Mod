@@ -56,7 +56,7 @@ A configuration file named ``monky.plugins.QOL.cfg`` can be found under ``BepInE
 Please note that you ___must run the mod at least once___ for it to be generated.<br/>
 You can currently use it to set certain features to be enabled on startup.<br/>
 Example: 
-```
+```cfg
 ## Enable rich text for chat on startup?
 # Setting type: Boolean
 # Default value: false
