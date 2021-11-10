@@ -254,22 +254,10 @@ namespace QOL
         public static string UwUify(string targetText) // TODO: improve logic here !!
         {
             StringBuilder newMessage = new StringBuilder(targetText);
-            for (int i = 0; i < targetText.Length; i++)
+            for (int i = 0; i < targetText.Length - 1; i++)
             {
-                Debug.Log("Message length: " + newMessage.Length);
-                if (i > newMessage.Length - 1)
-                {
-                    Debug.Log("Breaking!");
-                    break;
-                }
-
                 char curChar = char.ToLower(newMessage[i]);
                 Debug.Log(i + ": curchar : " +  curChar);
-
-                if (i > 0)
-                {
-                    ChatManagerPatches.previousChar = newMessage[i - 1];
-                }
 
                 else if (curChar == 'l' || curChar == 'r')
                 {       
@@ -291,15 +279,15 @@ namespace QOL
                         if (char.ToLower(newMessage[i + 1]) == 'h')
                         {
                             Debug.Log("replacing 'th' with 'd'");
-                            newMessage[i] = 'd';
-                            Debug.Log(newMessage[i + 1]);
-                            Debug.Log(newMessage[i]);
+                            newMessage[i] = 'd'; // Perhaps use replace() method here?
+                            // Debug.Log(newMessage[i + 1]);
+                            // Debug.Log(newMessage[i]);
                             newMessage.Remove(i + 1, 1);
                         }
                     }
                 }
 
-                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u')
+                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u') // Maybe use || instead of is/or
                 {
                     Debug.Log("Found vowel");
                     if (i + 2 < newMessage.Length)
