@@ -1,6 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
@@ -249,36 +251,70 @@ namespace QOL
             }
         }
 
-        public static string UwUify(string targetText)
+        public static string UwUify(string targetText) // TODO: improve logic here !!
         {
             StringBuilder newMessage = new StringBuilder(targetText);
             for (int i = 0; i < targetText.Length; i++)
             {
-                char curChar = targetText[i];
-                if (i > 0)
+                Debug.Log("Message length: " + newMessage.Length);
+                if (i > newMessage.Length - 1)
                 {
-                    ChatManagerPatches.previousChar = targetText[i - 1];
+                    Debug.Log("Breaking!");
+                    break;
                 }
 
-                if (curChar == 'L' || curChar == 'R')
+                char curChar = char.ToLower(newMessage[i]);
+                Debug.Log(i + ": curchar : " +  curChar);
+
+                if (i > 0)
                 {
-                    newMessage[i] = 'W';
+                    ChatManagerPatches.previousChar = newMessage[i - 1];
                 }
 
                 else if (curChar == 'l' || curChar == 'r')
-                {
+                {       
+                    Debug.Log("found r or l");
                     newMessage[i] = 'w';
                 }
 
-                else if (curChar == 'O' || curChar == 'o')
+                else if (curChar == 't')
                 {
-                    if (ChatManagerPatches.previousChar == 'N' || ChatManagerPatches.previousChar is 'n' or 'M' or 'm')
+                    var num1 = i + 1;
+                    Debug.Log("Found t, i is: " + i + "| i + 1 is: " + num1);
+                    // Debug.Log(char.ToLower(newMessage[i + 1]));
+                    var num2 = i + 2;
+                    Debug.Log(num2);
+                    if (i + 2 < newMessage.Length)
                     {
-                        newMessage[i] = 'y';
-                        newMessage.Insert(i, "o");
+                        Debug.Log("Found t, past message length test");
+                        Debug.Log(char.ToLower(newMessage[i + 1]));
+                        if (char.ToLower(newMessage[i + 1]) == 'h')
+                        {
+                            Debug.Log("replacing 'th' with 'd'");
+                            newMessage[i] = 'd';
+                            Debug.Log(newMessage[i + 1]);
+                            Debug.Log(newMessage[i]);
+                            newMessage.Remove(i + 1, 1);
+                        }
+                    }
+                }
+
+                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u')
+                {
+                    Debug.Log("Found vowel");
+                    if (i + 2 < newMessage.Length)
+                    {
+                        if (char.ToLower(newMessage[i + 1]) == 't')
+                        {
+                            Debug.Log(newMessage[i + 1]);
+                            newMessage.Insert(i + 1, 'w');
+                        }
                     }
                 }
             }
+            // Debug.Log("replacing 'th' with 'd'");
+            //newMessage.Replace("th", "d");
+            Debug.Log("newMessage : " + newMessage);
 
             return newMessage.ToString();
         }
