@@ -56,7 +56,7 @@ A configuration file named ``monky.plugins.QOL.cfg`` can be found under ``BepInE
 Please note that you ___must run the mod at least once___ for it to be generated.<br/>
 You can currently use it to set certain features to be enabled on startup.<br/>
 Example: 
-```
+```cfg
 ## Enable rich text for chat on startup?
 # Setting type: Boolean
 # Default value: false
@@ -69,7 +69,8 @@ In doing so, this will allow you to bypass the rate-limit that comes normally.<b
 **You are responsible for creating the key, and any potential charges accrued.**<br/>
 Instructions & documentation for all of that can be found [here](https://cloud.google.com/translate).<br/>
 
-Updating the mod ***does not*** require you to delete the config.
+Simply delete the config file to have a new one generated with default settings.<br/>
+Updating the mod ***does not*** require you to delete the config file.
 
 ## QOL Mod Overview
 
