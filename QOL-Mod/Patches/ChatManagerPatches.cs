@@ -263,12 +263,12 @@ namespace QOL
             StringBuilder newMessage = new StringBuilder(targetText);
             for (int i = 0; i < targetText.Length - 1; i++)
             {
-                Debug.Log("Message length: " + newMessage.Length);
 
                 char curChar = char.ToLower(newMessage[i]);
                 Debug.Log(i + ": curchar : " +  curChar);
 
                 if (curChar == 'l' || curChar == 'r')
+
                 {       
                     Debug.Log("found r or l");
                     newMessage[i] = 'w';
@@ -291,12 +291,14 @@ namespace QOL
                             newMessage[i] = 'd';
                             Debug.Log(newMessage[i + 1]);
                             Debug.Log(newMessage[i]);
-                            newMessage.Remove(i + 1, 1); // Perhaps use replace() method here?
+                            newMessage.Remove(i + 1, 1);
+                            newMessage[i] = 'd'; // Perhaps use replace() method here?
+                            newMessage.Remove(i + 1, 1);
                         }
                     }
                 }
 
-                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u')
+                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u') // Maybe use || instead of is/or
                 {
                     Debug.Log("Found vowel");
                     if (i + 2 < newMessage.Length)
@@ -309,8 +311,6 @@ namespace QOL
                     }
                 }
             }
-            // Debug.Log("replacing 'th' with 'd'");
-            //newMessage.Replace("th", "d");
             Debug.Log("newMessage : " + newMessage);
 
             return newMessage.ToString();
