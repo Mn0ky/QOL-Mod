@@ -2,6 +2,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using UnityEngine;
 
 namespace QOL
 {
@@ -57,6 +58,11 @@ namespace QOL
                     false,
                     "Enable auto-translation for chat messages to English on startup?");
 
+                configCustomColor = Config.Bind("Startup Options",
+                    "CustomColor",
+                    new Color(1, 1, 1),
+                    "Specify a custom player color? (Use a HEX value)");
+
                 configAuthKeyForTranslation = Config.Bind("Startup Options",
                     "AutoAuthTranslationsAPIKey",
                     string.Empty,
@@ -71,6 +77,7 @@ namespace QOL
         public static ConfigEntry<bool> configAutoGG;
         public static ConfigEntry<bool> configRichText;
         public static ConfigEntry<bool> configTranslation;
+        public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
     }
 }

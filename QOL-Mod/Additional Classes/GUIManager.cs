@@ -74,7 +74,7 @@ namespace QOL
             }
 			if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
-				Helper.GetJoinGameLink();
+                GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))

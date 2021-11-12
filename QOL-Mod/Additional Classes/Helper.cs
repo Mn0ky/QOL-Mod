@@ -62,7 +62,7 @@ namespace QOL
             Debug.Log("colorwanted, hpofplayer: " + colorWanted);
             return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString() + "%");
         }
-        public static void GetJoinGameLink() // Actually sticks the "join game" link together
+        public static string GetJoinGameLink() // Actually sticks the "join game" link together
         {
             string urlAndProtocolPrefix = "steam://joinlobby/";
             string appID = "674940/";
@@ -75,7 +75,7 @@ namespace QOL
             Helper.localPlayerSteamID.ToString()
             });
             Debug.Log("joinLink: " + joinLink);
-            GUIUtility.systemCopyBuffer = joinLink;
+            return joinLink;
         }
 
         public static void AssignLocalNetworkPlayerAndRichText(NetworkPlayer localNetworkPlayer, ChatManager __instance) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
@@ -103,6 +103,8 @@ namespace QOL
         public static bool uwuifyText; // True if uwufiy text is enabled, false by default
 
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
+
+        public static Color customPlayerColor = Plugin.configCustomColor.Value;
 
         public static TextMeshPro tmpText;
 

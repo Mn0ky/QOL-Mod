@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
@@ -55,12 +54,12 @@ namespace QOL
             {
                 if (instructionList[i].Calls(StopTypingMethod))
                 {
-                    Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
+                    System.Reflection.Emit.Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
 
                     CodeInstruction instruction0 = instructionList[17];
                     instruction0.opcode = OpCodes.Brfalse_S;
                     instruction0.operand = jumpToCheckForArrowKeysLabel;
-                    instruction0.labels.Clear();
+                    instruction0.labels.Clear();    
 
                     CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
                     instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
@@ -209,12 +208,20 @@ namespace QOL
             {
                 Debug.Log("LobbyID: " + Helper.lobbyID);
                 Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
-                Helper.GetJoinGameLink();
+                GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
             else if (text == "translate") // Whether or not to enable automatic translations
             {
                 Helper.isTranslating = !Helper.isTranslating;
+            }
+            else if (text == "pink")
+            {
+                Debug.Log(Helper.customPlayerColor.ToString());
+            }
+            else if (text == "lobhealth")
+            {
+                Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
             }
         }
             
@@ -254,24 +261,14 @@ namespace QOL
         public static string UwUify(string targetText) // TODO: improve logic here !!
         {
             StringBuilder newMessage = new StringBuilder(targetText);
-            for (int i = 0; i < targetText.Length; i++)
+            for (int i = 0; i < targetText.Length - 1; i++)
             {
                 Debug.Log("Message length: " + newMessage.Length);
-                if (i > newMessage.Length - 1)
-                {
-                    Debug.Log("Breaking!");
-                    break;
-                }
 
                 char curChar = char.ToLower(newMessage[i]);
                 Debug.Log(i + ": curchar : " +  curChar);
 
-                if (i > 0)
-                {
-                    ChatManagerPatches.previousChar = newMessage[i - 1];
-                }
-
-                else if (curChar == 'l' || curChar == 'r')
+                if (curChar == 'l' || curChar == 'r')
                 {       
                     Debug.Log("found r or l");
                     newMessage[i] = 'w';
@@ -294,7 +291,7 @@ namespace QOL
                             newMessage[i] = 'd';
                             Debug.Log(newMessage[i + 1]);
                             Debug.Log(newMessage[i]);
-                            newMessage.Remove(i + 1, 1);
+                            newMessage.Remove(i + 1, 1); // Perhaps use replace() method here?
                         }
                     }
                 }
@@ -319,12 +316,16 @@ namespace QOL
             return newMessage.ToString();
         }
 
+        public static void SetPlayerColor(Material[] colors, byte b)
+        {
+            colors[(int)b].SetColor("_Color", Helper.customPlayerColor);
+        }
+
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
 
         public static List<string> backupTextList = new() // Ends up containing previous messages sent by us (up to 20)
         {
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
-        private static char previousChar;
     }
 }
