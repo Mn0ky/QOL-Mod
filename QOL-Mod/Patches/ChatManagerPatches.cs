@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
@@ -59,7 +59,7 @@ namespace QOL
                     CodeInstruction instruction0 = instructionList[17];
                     instruction0.opcode = OpCodes.Brfalse_S;
                     instruction0.operand = jumpToCheckForArrowKeysLabel;
-                    instruction0.labels.Clear();    
+                    instruction0.labels.Clear();
 
                     CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
                     instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
@@ -114,7 +114,7 @@ namespace QOL
 
             return true;
         }
-        
+
         public static bool ReplaceUnacceptableWordsMethodPrefix(ref string message, ref string __result) // Prefix method for patching the original (ReplaceUnacceptableWordsMethod)
         {
             if (Helper.chatCensorshipBypass)
@@ -224,7 +224,7 @@ namespace QOL
                 Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
             }
         }
-            
+
         public static void CheckForArrowKeys(TMP_InputField chatField) // Checks if uparrow or downarrow keys are pressed, if so then set the chatField.text to whichever message the user stops on
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) && ChatManagerPatches.upArrowCounter < ChatManagerPatches.backupTextList.Count)
@@ -265,11 +265,10 @@ namespace QOL
             {
 
                 char curChar = char.ToLower(newMessage[i]);
-                Debug.Log(i + ": curchar : " +  curChar);
+                Debug.Log(i + ": curchar : " + curChar);
 
                 if (curChar == 'l' || curChar == 'r')
-
-                {       
+                {
                     Debug.Log("found r or l");
                     newMessage[i] = 'w';
                 }
@@ -288,9 +287,9 @@ namespace QOL
                         if (char.ToLower(newMessage[i + 1]) == 'h')
                         {
                             Debug.Log("replacing 'th' with 'd'");
-                            newMessage[i] = 'd';
-                            Debug.Log(newMessage[i + 1]);
-                            Debug.Log(newMessage[i]);
+                            newMessage[i] = 'd'; // Perhaps use replace() method here?
+                            // Debug.Log(newMessage[i + 1]);
+                            // Debug.Log(newMessage[i]);
                             newMessage.Remove(i + 1, 1);
                             newMessage[i] = 'd'; // Perhaps use replace() method here?
                             newMessage.Remove(i + 1, 1);
@@ -314,11 +313,6 @@ namespace QOL
             Debug.Log("newMessage : " + newMessage);
 
             return newMessage.ToString();
-        }
-
-        public static void SetPlayerColor(Material[] colors, byte b)
-        {
-            colors[(int)b].SetColor("_Color", Helper.customPlayerColor);
         }
 
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
