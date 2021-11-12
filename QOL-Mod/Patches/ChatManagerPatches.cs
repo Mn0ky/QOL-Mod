@@ -59,7 +59,7 @@ namespace QOL
                     CodeInstruction instruction0 = instructionList[17];
                     instruction0.opcode = OpCodes.Brfalse_S;
                     instruction0.operand = jumpToCheckForArrowKeysLabel;
-                    instruction0.labels.Clear();    
+                    instruction0.labels.Clear();
 
                     CodeInstruction instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
                     instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
@@ -215,8 +215,16 @@ namespace QOL
             {
                 Helper.isTranslating = !Helper.isTranslating;
             }
+            else if (text == "pink")
+            {
+                Debug.Log(Helper.customPlayerColor.ToString());
+            }
+            else if (text == "lobhealth")
+            {
+                Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
+            }
         }
-            
+
         public static void CheckForArrowKeys(TMP_InputField chatField) // Checks if uparrow or downarrow keys are pressed, if so then set the chatField.text to whichever message the user stops on
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) && ChatManagerPatches.upArrowCounter < ChatManagerPatches.backupTextList.Count)
@@ -253,25 +261,14 @@ namespace QOL
         public static string UwUify(string targetText) // TODO: improve logic here !!
         {
             StringBuilder newMessage = new StringBuilder(targetText);
-            for (int i = 0; i < targetText.Length; i++)
+            for (int i = 0; i < targetText.Length - 1; i++)
             {
-                Debug.Log("Message length: " + newMessage.Length);
-                if (i > newMessage.Length - 1)
-                {
-                    Debug.Log("Breaking!");
-                    break;
-                }
 
                 char curChar = char.ToLower(newMessage[i]);
-                Debug.Log(i + ": curchar : " +  curChar);
+                Debug.Log(i + ": curchar : " + curChar);
 
-                if (i > 0)
+                if (curChar == 'l' || curChar == 'r')
                 {
-                    ChatManagerPatches.previousChar = newMessage[i - 1];
-                }
-
-                else if (curChar == 'l' || curChar == 'r')
-                {       
                     Debug.Log("found r or l");
                     newMessage[i] = 'w';
                 }
@@ -316,11 +313,6 @@ namespace QOL
             Debug.Log("newMessage : " + newMessage);
 
             return newMessage.ToString();
-        }
-
-        public static void SetPlayerColor(Material[] colors, byte b)
-        {
-            colors[(int)b].SetColor("_Color", Helper.customPlayerColor);
         }
 
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
