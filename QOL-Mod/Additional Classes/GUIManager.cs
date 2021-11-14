@@ -1,7 +1,5 @@
 ﻿using Steamworks;
 using UnityEngine;
-using HarmonyLib;
-using TMPro;
 
 namespace QOL
 {
@@ -10,6 +8,7 @@ namespace QOL
         private void Start()
         {
             Debug.Log("Started GUI in GUIManager!");
+            matchmaking = FindObjectOfType<MatchmakingHandler>();
         }
         private void Awake()
         {
@@ -20,6 +19,7 @@ namespace QOL
             {
                 Debug.Log("Trying to open GUI menu!");
                 Debug.Log("chatText.richText : " + Helper.tmpText.richText);
+
                 mShowMenu = !mShowMenu;
                 networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
                 playerNamesStr = string.Empty;
@@ -34,12 +34,13 @@ namespace QOL
                     });
                     playerNamesStr = playerNamesStr + "\n" + str;
                 }
-
+                Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
                 theLobbyID = Helper.lobbyID;
-                theLobbyHost = Helper.GetPlayerName(Helper.Matchmaking.LobbyOwner);
+                Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
+                Debug.Log("findobject lobbyowner: " + matchmaking.LobbyOwner);
+                theLobbyHost = Helper.GetPlayerName(matchmaking.LobbyOwner);
                 Debug.Log("this.theLobbyID : " + theLobbyID);
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
-                Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
             }
         }
         public void OnGUI() 
@@ -48,7 +49,7 @@ namespace QOL
             {
                 return;
             }
-            MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v1.0.9]");
+            MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
         }
 		private void KickWindow(int window)
 		{
@@ -80,7 +81,7 @@ namespace QOL
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
-                if (Helper.Matchmaking.IsHost)
+                if (matchmaking.IsHost)
                 {
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
                 }
@@ -92,7 +93,7 @@ namespace QOL
             if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
             {
                 SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
-                if (Helper.Matchmaking.IsHost)
+                if (matchmaking.IsHost)
                 {
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
                 }
@@ -119,6 +120,8 @@ namespace QOL
         private string playerNamesStr = "Players in Room: \n";
 
         private string theLobbyHost;
+
+        private static MatchmakingHandler matchmaking;
 
         private CSteamID theLobbyID;
     }

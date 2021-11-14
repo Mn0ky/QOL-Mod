@@ -107,7 +107,5 @@ namespace QOL
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
 
         public static TextMeshPro tmpText;
-
-        public static MatchmakingHandler Matchmaking = Object.FindObjectOfType<MatchmakingHandler>();
     }
 }

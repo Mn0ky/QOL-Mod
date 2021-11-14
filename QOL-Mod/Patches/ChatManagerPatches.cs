@@ -182,7 +182,7 @@ namespace QOL
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
-                if (Helper.Matchmaking.IsHost)
+                if (matchmaking.IsHost)
                 {
                     SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
@@ -194,7 +194,7 @@ namespace QOL
             }
             else if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
-                if (Helper.Matchmaking.IsHost)
+                if (matchmaking.IsHost)
                 {
                     SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
@@ -215,13 +215,13 @@ namespace QOL
             {
                 Helper.isTranslating = !Helper.isTranslating;
             }
-            else if (text == "pink")
-            {
-                Debug.Log(Helper.customPlayerColor.ToString());
-            }
             else if (text == "lobhealth")
             {
                 Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
+            }
+            else if (text == "ver")
+            {
+                Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
             }
         }
 
@@ -261,11 +261,19 @@ namespace QOL
         public static string UwUify(string targetText) // TODO: improve logic here !!
         {
             StringBuilder newMessage = new StringBuilder(targetText);
-            for (int i = 0; i < targetText.Length - 1; i++)
+            for (int i = 0; i < targetText.Length; i++)
             {
-
+                Debug.Log("length: " + targetText.Length);
+                Debug.Log("newmessage length: " + newMessage.Length);
+                Debug.Log("i : " + i);
                 char curChar = char.ToLower(newMessage[i]);
                 Debug.Log(i + ": curchar : " + curChar);
+
+                if (i >= newMessage.Length - 1)
+                {
+                    Debug.Log("breaking!");
+                    break;
+                }
 
                 if (curChar == 'l' || curChar == 'r')
                 {
@@ -273,26 +281,16 @@ namespace QOL
                     newMessage[i] = 'w';
                 }
 
-                else if (curChar == 't')
+                else if (curChar == 't')    
                 {
-                    var num1 = i + 1;
-                    Debug.Log("Found t, i is: " + i + "| i + 1 is: " + num1);
-                    // Debug.Log(char.ToLower(newMessage[i + 1]));
-                    var num2 = i + 2;
-                    Debug.Log(num2);
                     if (i + 2 < newMessage.Length)
                     {
                         Debug.Log("Found t, past message length test");
-                        Debug.Log(char.ToLower(newMessage[i + 1]));
                         if (char.ToLower(newMessage[i + 1]) == 'h')
                         {
                             Debug.Log("replacing 'th' with 'd'");
-                            newMessage[i] = 'd'; // Perhaps use replace() method here?
-                            // Debug.Log(newMessage[i + 1]);
-                            // Debug.Log(newMessage[i]);
-                            newMessage.Remove(i + 1, 1);
-                            newMessage[i] = 'd'; // Perhaps use replace() method here?
-                            newMessage.Remove(i + 1, 1);
+                            newMessage[i] = 'd';
+                            newMessage.Remove(i + 1, 1); // Perhaps use replace() method here?
                         }
                     }
                 }
@@ -304,7 +302,6 @@ namespace QOL
                     {
                         if (char.ToLower(newMessage[i + 1]) == 't')
                         {
-                            Debug.Log(newMessage[i + 1]);
                             newMessage.Insert(i + 1, 'w');
                         }
                     }
@@ -321,5 +318,7 @@ namespace QOL
         {
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
+
+        private static MatchmakingHandler matchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
     }
 }

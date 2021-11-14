@@ -6,14 +6,14 @@ using UnityEngine;
 
 namespace QOL
 {
-    [BepInPlugin("monky.plugins.QOL", "QOL Mod", "1.0.9")]
+    [BepInPlugin("monky.plugins.QOL", "QOL Mod", VersionNumber)]
     [BepInProcess("StickFight.exe")]    
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
         {
             // Plugin startup logic
-            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v1.0.9]");
+            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v" + VersionNumber + "]");
             Logger.LogInfo("Hello from monk :D");
             try
             {
@@ -79,5 +79,7 @@ namespace QOL
         public static ConfigEntry<bool> configTranslation;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
+
+        public const string VersionNumber = "1.0.10"; // Version number
     }
 }
