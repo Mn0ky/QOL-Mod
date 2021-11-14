@@ -23,9 +23,11 @@ To use the mod, here are the steps required:<br/>
 
 The following are some general things to take note of:
   - Both the ``/private`` & ``/public`` commands require you to be the host in order to function.
-  - The ``/rich`` command only enables rich text for you, and anyone else using the mod.
+  - The ``/rich`` command only enables rich text for you, a.k.a client-side only.
   - The auto-translation feature uses the Google Translate API and has a rate-limit of **``100``** requests per hour.
   - The ``ツ`` character outputted by the ``/shrug`` command shows up as invalid (�) ingame.
+  - A custom player color only shows for you, a.k.a client-side only.
+  - Currently, a custom player color only shows up when *joining* a server and not when creating one.
 
 ## GUI Menu
 
@@ -63,6 +65,10 @@ Example:
 RichTextInChat = true
 ```
 Changing ``RichTextInChat = false`` to ``RichTextInChat = true`` will enable it on startup without the need for doing ``/rich`` to enable it.<br/>
+
+To change your player color to a custom value, please look in the config and replace the default value of ``FFFFFFFF`` to a [HEX color](https://g.co/kgs/qJMEDR).<br/>
+An example is the color neon pink, which the HEX value is: ``FF10F0``<br/>
+Please *do not* include a ``#`` character at the front of your HEX value.
 
 Another important option to mention for the config is the ability to specify an API key for Google Translate.<br/>
 In doing so, this will allow you to bypass the rate-limit that comes normally.<br/> 
