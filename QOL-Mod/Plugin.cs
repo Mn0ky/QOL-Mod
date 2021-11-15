@@ -28,6 +28,8 @@ namespace QOL
                 NetworkPlayerPatch.Patch(harmony);
                 Logger.LogInfo("Applying Controller patch...");
                 ControllerPatch.Patch(harmony);
+                Logger.LogInfo("Applying GameManager patch...");
+                GameManagerPatch.Patch(harmony);
             }
             catch (Exception ex)
             {

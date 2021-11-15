@@ -107,5 +107,7 @@ namespace QOL
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
 
         public static TextMeshPro tmpText;
+
+        public static int winStreak = 0;
     }
 }

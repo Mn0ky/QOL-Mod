@@ -258,7 +258,7 @@ namespace QOL
             }
         }
 
-        public static string UwUify(string targetText) // TODO: improve logic here !!
+        public static string UwUify(string targetText) // TODO: Improve logic here one day
         {
             StringBuilder newMessage = new StringBuilder(targetText);
             for (int i = 0; i < targetText.Length; i++)
