@@ -1,4 +1,10 @@
 # QOL-Mod
+<p align="center">
+  <a href="https://github.com/Mn0ky/QOL-Mod/releases/latest">
+    <img src="https://img.shields.io/github/downloads/Mn0ky/QOL-Mod/total?label=Github%20downloads&logo=github">
+  </a>
+</p>
+
 A mod that offers quality-of-life improvements and additions to [Stick Fight: The Game](https://store.steampowered.com/app/674940/Stick_Fight_The_Game/).<br/>
 This is accomplished through a GUI menu but alternative chat commands are listed below.<br/>
 To open the menu, use the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
