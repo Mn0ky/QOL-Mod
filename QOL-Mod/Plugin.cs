@@ -50,6 +50,11 @@ namespace QOL
                     false,
                     "Disable chat censorship on startup?");
 
+                configWinStreakLog = Config.Bind("Startup Options",
+                    "AlwaysTrackWinstreak",
+                    false,
+                    "Always keep track of your winstreak instead of only when enabled?");
+
                 configRichText = Config.Bind("Startup Options",
                     "RichText",
                     false,
@@ -65,6 +70,16 @@ namespace QOL
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
 
+                configNoResize = Config.Bind("Startup Options",
+                    "NoResize",
+                    false,
+                    "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
+
+                // configCustomName = Config.Bind("Startup Options",
+                //     "CustomUsername",
+                //     string.Empty,
+                //     "Specify a custom username? (client-side only)");
+
                 configAuthKeyForTranslation = Config.Bind("Startup Options",
                     "AutoAuthTranslationsAPIKey",
                     string.Empty,
@@ -79,9 +94,11 @@ namespace QOL
         public static ConfigEntry<bool> configAutoGG;
         public static ConfigEntry<bool> configRichText;
         public static ConfigEntry<bool> configTranslation;
+        public static ConfigEntry<bool> configWinStreakLog;
+        public static ConfigEntry<bool> configNoResize;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
 
-        public const string VersionNumber = "1.0.10"; // Version number
+        public const string VersionNumber = "1.0.11"; // Version number
     }
 }

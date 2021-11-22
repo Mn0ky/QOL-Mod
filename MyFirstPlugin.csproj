@@ -34,5 +34,8 @@
     <Reference Include="TextMeshPro-1.0.55.56.0b9">
       <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\TextMeshPro-1.0.55.56.0b9.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

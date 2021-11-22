@@ -62,9 +62,9 @@ namespace QOL
             oldColor = myColors[playerByte].color;
             Debug.Log("Old color is: " + oldColor);
 
-            myColors[(int)playerByte].SetColor("_Color", Helper.customPlayerColor);
+            myColors[playerByte].SetColor("_Color", Helper.customPlayerColor);
             Debug.Log("color I wanted: " + Helper.customPlayerColor);
-            Debug.Log("color I set it to: "+ myColors[playerByte].color.ToString());
+            Debug.Log("color I set it to: "+ myColors[playerByte].color);
         }
 
         public static void InitGUI()

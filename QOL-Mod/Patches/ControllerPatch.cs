@@ -18,12 +18,10 @@ namespace QOL
         }
         public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
         {
-            if (Helper.autoGG) // If autoGG on death is enabled (true), and the player has control (is us) then send "gg" to chat
+            if (!Helper.autoGG) return;
+            if (__instance.HasControl)
             {
-                if (__instance.HasControl)
-                {
-                    Helper.localNetworkPlayer.OnTalked("gg");
-                }
+                Helper.localNetworkPlayer.OnTalked("gg");
             }
         }
     }

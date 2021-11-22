@@ -54,7 +54,7 @@ namespace QOL
             {
                 if (instructionList[i].Calls(StopTypingMethod))
                 {
-                    System.Reflection.Emit.Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
+                    Label jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
 
                     CodeInstruction instruction0 = instructionList[17];
                     instruction0.opcode = OpCodes.Brfalse_S;
@@ -162,6 +162,10 @@ namespace QOL
                 Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
                 Debug.Log("Helper.chatCensorshipBypass : " + Helper.chatCensorshipBypass);
             }
+            else if (text == "winstreak")
+            {
+                Helper.winStreakEnabled = !Helper.winStreakEnabled;
+            }
             else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
             {
                 message = message.Replace("/shrug", "");
@@ -175,10 +179,20 @@ namespace QOL
                 theText.richText = !theText.richText;
 
             }
+            else if (text == "rich") // Enables rich text for chat messages
+            {
+                TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
+                theText.richText = !theText.richText;
+
+            }
             else if (text == "uwu") // Enables uwuifier
             {
                 Helper.uwuifyText = !Helper.uwuifyText;
 
+            }
+            else if (text == "lobregen")
+            {
+                Helper.localNetworkPlayer.OnTalked("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen)); 
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
@@ -219,6 +233,35 @@ namespace QOL
             {
                 Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
             }
+            else if (text.Contains("ping"))
+            {
+                ConnectedClientData[] clients = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mClients").GetValue() as ConnectedClientData[];
+                Debug.Log("clients length: " + clients.Length);
+                ushort colorWanted;
+
+                if (text.Length > 4)
+                {
+                    colorWanted = Helper.GetIDFromColor(text.Substring(5));
+                    Helper.localNetworkPlayer.OnTalked(Helper.GetColorFromID(colorWanted) + " Ping" + clients[colorWanted].Ping);
+                    return;
+                }
+                Helper.localNetworkPlayer.OnTalked("Can't ping yourself!");
+            }
+            else if (text.Contains("name"))
+            {
+                string nameWanted = Helper.GetPlayerName(Helper.GetSteamID(Helper.GetIDFromColor(text.Substring(5))));
+                Helper.localNetworkPlayer.OnTalked(nameWanted);
+            }
+            else if (text == "color")
+            {
+                GameObject myCharacter = Helper.localNetworkPlayer.gameObject;
+                Helper.localNetworkPlayer.OnTalked("Not implemented");
+            }
+            else if (text == "customname_test")
+            {
+                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
+                playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
+            }
             else if (text == "ver")
             {
                 Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
@@ -258,58 +301,31 @@ namespace QOL
             }
         }
 
-        public static string UwUify(string targetText) // TODO: Improve logic here one day
+        public static string UwUify(string targetText)
         {
-            StringBuilder newMessage = new StringBuilder(targetText);
-            for (int i = 0; i < targetText.Length; i++)
+            int i = 0;
+            StringBuilder newMessage = new StringBuilder(targetText.ToLower()).Append(0);
+            while (i < newMessage.Length)
             {
-                Debug.Log("length: " + targetText.Length);
-                Debug.Log("newmessage length: " + newMessage.Length);
-                Debug.Log("i : " + i);
-                char curChar = char.ToLower(newMessage[i]);
-                Debug.Log(i + ": curchar : " + curChar);
-
-                if (i >= newMessage.Length - 1)
+                char curChar = newMessage[i];
+                switch (curChar)
                 {
-                    Debug.Log("breaking!");
-                    break;
-                }
-
-                if (curChar == 'l' || curChar == 'r')
-                {
-                    Debug.Log("found r or l");
-                    newMessage[i] = 'w';
-                }
-
-                else if (curChar == 't')    
-                {
-                    if (i + 2 < newMessage.Length)
-                    {
-                        Debug.Log("Found t, past message length test");
-                        if (char.ToLower(newMessage[i + 1]) == 'h')
-                        {
-                            Debug.Log("replacing 'th' with 'd'");
-                            newMessage[i] = 'd';
-                            newMessage.Remove(i + 1, 1); // Perhaps use replace() method here?
-                        }
-                    }
-                }
-
-                if (curChar is 'a' or 'e' or 'i' or 'o' or 'u') // Maybe use || instead of is/or
-                {
-                    Debug.Log("Found vowel");
-                    if (i + 2 < newMessage.Length)
-                    {
-                        if (char.ToLower(newMessage[i + 1]) == 't')
+                    case 'l' or 'r':
+                        newMessage[i] = 'w';
+                        break;
+                    case 't' when newMessage[i + 1] == 'h':
+                        newMessage[i] = 'd';
+                        break;
+                    default:
+                        if ("aeiou".Contains(curChar) && newMessage[i + 1] == 't')
                         {
                             newMessage.Insert(i + 1, 'w');
                         }
-                    }
+                        break;
                 }
+                i++;
             }
-            Debug.Log("newMessage : " + newMessage);
-
-            return newMessage.ToString();
+            return newMessage.Remove(newMessage.Length - 1, 1).ToString();
         }
 
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed

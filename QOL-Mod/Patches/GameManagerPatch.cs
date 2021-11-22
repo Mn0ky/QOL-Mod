@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
 
 namespace QOL
@@ -16,20 +17,32 @@ namespace QOL
             harmonyInstance.Patch(networkAllPlayersDiedButOneMethod, postfix: networkAllPlayersDiedButOnePostfix);
         }
 
-        public static void networkAllPlayersDiedButOnePostfix(ref byte winner)
+        public static void networkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
             Debug.Log("winner int: " + winner);
             Debug.Log("spawnID: " + Helper.localNetworkPlayer.NetworkSpawnID);
-            if (winner == Helper.localNetworkPlayer.NetworkSpawnID)
+            if (winner == Helper.localNetworkPlayer.NetworkSpawnID && (Helper.winStreakEnabled || Helper.AlwaysTrackWinstreak))
             {
                 Debug.Log("Winner is me :D");
                 Helper.winStreak++;
-                Helper.localNetworkPlayer.OnTalked("Winstreak of: " + Helper.winStreak);
+                if (Helper.winStreakEnabled)
+                {
+                    Helper.localNetworkPlayer.OnTalked("Winstreak of: " + Helper.winStreak);
+                }
+
+                __instance.winText.color = Helper.winStreak switch
+                {
+                    < 3 => Color.red,
+                    <= 5 => Color.yellow,
+                    _ => Color.green
+                };
+
+                __instance.winText.text = "Winstreak of " + Helper.winStreak;
+                __instance.winText.gameObject.SetActive(true);
+                Debug.Log("wintext font size: " + __instance.winText.fontSize);
+                return;
             }
-            else
-            {
-                Helper.winStreak = 0;
-            }
+            Helper.winStreak = 0;
         }
     }
 }

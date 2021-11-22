@@ -14,33 +14,24 @@ namespace QOL
         }
         public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
         {
-            switch (targetSpawnColor)
+            return targetSpawnColor switch
             {
-                case "yellow":
-                    return 0;
-                case "blue":
-                    return 1;
-                case "red":
-                    return 2;
-                case "green":
-                    return 3;
-                default:
-                    return ushort.MaxValue;
-            }
+                "yellow" => 0,
+                "blue" => 1,
+                "red" => 2,
+                "green" => 3,
+                _ => ushort.MaxValue,
+            };
         }
         public static string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
         {
-            switch (x)
+            return x switch
             {
-                case 1:
-                    return "Blue";
-                case 2:
-                    return "Red";
-                case 3:
-                    return "Green";
-                default:
-                    return "Yellow";
-            }
+                1 => "Blue",
+                2 => "Red",
+                3 => "Green",
+                _ => "Yellow",
+            };
         }
         public static NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
         {
@@ -60,7 +51,7 @@ namespace QOL
         public static string GetHPOfPlayer(string colorWanted)
         {
             Debug.Log("colorwanted, hpofplayer: " + colorWanted);
-            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health.ToString() + "%");
+            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health + "%");
         }
         public static string GetJoinGameLink() // Actually sticks the "join game" link together
         {
@@ -86,6 +77,19 @@ namespace QOL
                 Debug.Log("Assigned the localNetworkPlayer!");
                 Helper.tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
                 Helper.tmpText.richText = Plugin.configRichText.Value;
+                TextMeshProUGUI[] playerNames = Traverse.Create(Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
+
+                if (Helper.GetPlayerName(Helper.localPlayerSteamID).Length > 12 && !Helper.NoResize) // If reading custom names then make sure to add conditional here
+                {
+                    playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().fontSize = 19.5f;
+                }
+
+                // if (isCustomName)
+                // {
+                //     Debug.Log("custom name:" + Plugin.configCustomName.Value);
+                //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
+                //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
+                // }
                 return;
             }
             Debug.Log("That wasn't the local player!");
@@ -102,9 +106,17 @@ namespace QOL
 
         public static bool uwuifyText; // True if uwufiy text is enabled, false by default
 
+        public static bool winStreakEnabled;
+
+        public static bool AlwaysTrackWinstreak = Plugin.configWinStreakLog.Value;
+
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
 
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
+
+        // public static bool isCustomName = string.IsNullOrEmpty(Plugin.configCustomName.Value);
+
+        public static bool NoResize = Plugin.configNoResize.Value;
 
         public static TextMeshPro tmpText;
 
