@@ -198,7 +198,8 @@ namespace QOL
             {
                 if (matchmaking.IsHost)
                 {
-                    SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
+                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
+                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly});
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
                 }
                 else
@@ -210,7 +211,8 @@ namespace QOL
             {
                 if (matchmaking.IsHost)
                 {
-                    SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
+                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
+                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic });
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
                 }
                 else
@@ -310,7 +312,7 @@ namespace QOL
                 char curChar = newMessage[i];
                 switch (curChar)
                 {
-                    case 'l' or 'r':
+                    case 'r' or 'l':
                         newMessage[i] = 'w';
                         break;
                     case 't' when newMessage[i + 1] == 'h':

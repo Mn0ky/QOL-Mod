@@ -47,7 +47,7 @@ namespace QOL
             instructionsList.Insert(35, instruction1);
             Debug.Log("instruction1 labels: " + instruction1.labels[0].ToString());
 
-            instructionsList[36].labels.RemoveAt(0);
+            instructionsList[36].labels.Clear();
 
             CodeInstruction instruction2 = new CodeInstruction(OpCodes.Call, checkForCustomNameMethod);
             instructionsList.Insert(39, instruction2);

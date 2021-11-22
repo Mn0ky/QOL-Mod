@@ -1,4 +1,5 @@
 ﻿using Steamworks;
+using System.Reflection;
 using UnityEngine;
 
 namespace QOL
@@ -80,9 +81,10 @@ namespace QOL
 			}
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
-                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, false);
                 if (matchmaking.IsHost)
                 {
+                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
+                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly });
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
                 }
                 else
@@ -92,9 +94,10 @@ namespace QOL
             }
             if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
             {
-                SteamMatchmaking.SetLobbyJoinable(Helper.lobbyID, true);
                 if (matchmaking.IsHost)
                 {
+                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
+                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic});
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
                 }
                 else
