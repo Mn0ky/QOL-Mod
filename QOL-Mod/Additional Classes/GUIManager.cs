@@ -54,7 +54,7 @@ namespace QOL
         }
 		private void KickWindow(int window)
 		{
-			GUILayout.Label("\t<color=#228f69>Show / Hide Menu (Q)</color>");
+			GUILayout.Label("\t<color=#228f69>Draggable</color>");
 			GUILayout.Label("<color=red>Lobby ID:</color> " + theLobbyID);
 			GUILayout.Label("Host: " + theLobbyHost);
             GUILayout.Label(playerNamesStr);

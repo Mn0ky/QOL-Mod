@@ -21,7 +21,7 @@ namespace QOL
                 Logger.LogInfo("Applying ChatManager patches...");
                 ChatManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying MatchmakingHandler patch...");
-                MatchmakingHandlerPatch.Patch(harmony);
+                MatchmakingHandlerPatches.Patch(harmony);
                 Logger.LogInfo("Applying MultiplayerManager patches...");
                 MultiplayerManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying NetworkPlayer patch...");
