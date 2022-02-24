@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
 using TMPro;
+using Object = UnityEngine.Object;
 
 namespace QOL
 {
@@ -94,6 +96,12 @@ namespace QOL
             }
             Debug.Log("That wasn't the local player!");
         }
+
+        public static bool IsVowel(char c) // Fancy bit manipulation of a character's ASCII values to check if it's a vowel or not
+        {
+            return (0x208222 >> (c & 0x1f) & 1) != 0;
+        }
+
         public static CSteamID lobbyID; // The ID of the current lobby
         
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
@@ -114,7 +122,7 @@ namespace QOL
 
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
 
-        // public static bool isCustomName = string.IsNullOrEmpty(Plugin.configCustomName.Value);
+        public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
 
         public static bool NoResize = Plugin.configNoResize.Value;
 

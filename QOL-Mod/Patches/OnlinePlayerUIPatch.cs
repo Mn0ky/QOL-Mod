@@ -54,6 +54,11 @@ namespace QOL
 
             instructionsList.RemoveRange(40, 4);
 
+            instructionsList.RemoveAt(58);
+            instructionsList[57].opcode = OpCodes.Brtrue;
+            instructionsList[57].operand = instructionsList[82].labels[0];
+            instructionsList[58].labels.Clear();
+
             // CodeInstruction instruction1_5 = new CodeInstruction(OpCodes.Ldarg_0);
             // instructionsList.Insert(36, instruction1_5);
             //
@@ -71,8 +76,9 @@ namespace QOL
         public static void CheckForCustomName(int i, TextMeshProUGUI[] playerNames, ConnectedClientData clientData)
         {
             Debug.Log("Made it to check for custom name!");
-            if (i == Helper.localNetworkPlayer.NetworkSpawnID) // Add conditional if working on this to check Helper.isCustomName
+            if (i == Helper.localNetworkPlayer.NetworkSpawnID && Helper.isCustomName) // Add conditional if working on this to check Helper.isCustomName
             {
+                Debug.Log("custom name wanted: " + Plugin.configCustomName.Value);
                 playerNames[i].text = "this is a test";
             }
             playerNames[i].text = clientData.PlayerName;

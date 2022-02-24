@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
@@ -157,6 +158,16 @@ namespace QOL
             {
                 Helper.autoGG = !Helper.autoGG;
             }
+            //else if (text == "spam")
+            //{
+            //    Debug.Log("clipboard: " + GUIUtility.systemCopyBuffer);
+            //    __instance.StartCoroutine(WaitCoroutine(GUIUtility.systemCopyBuffer));
+            //}
+            // else if (text == "stopspam")
+            // {
+            //     Debug.Log("stopping spam");
+            //     stopSpam = true;
+            // }
             else if (text == "uncensor") // Enables or disables skip for chat censorship
             {
                 Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
@@ -188,7 +199,6 @@ namespace QOL
             else if (text == "uwu") // Enables uwuifier
             {
                 Helper.uwuifyText = !Helper.uwuifyText;
-
             }
             else if (text == "lobregen")
             {
@@ -226,6 +236,20 @@ namespace QOL
                 Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
+            }
+            else if (text.StartsWith("stats"))
+            {
+                string[] commandArr = text.Split(' ');
+                if (commandArr.Length == 3)
+                {
+
+                    CharacterStats playerStats = Helper.GetNetworkPlayer(Helper.GetIDFromColor(commandArr[1])).GetComponentInParent<CharacterStats>();
+
+                    Helper.localNetworkPlayer.OnTalked(commandArr[1] + ", " + commandArr[2] + ": " + GetTargetStatValue(playerStats, commandArr[2])); 
+                    return;
+                }
+                CharacterStats myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
+                Helper.localNetworkPlayer.OnTalked("My " + commandArr[1] + ": " + GetTargetStatValue(myStats, commandArr[1]));
             }
             else if (text == "translate") // Whether or not to enable automatic translations
             {
@@ -289,6 +313,15 @@ namespace QOL
             }
         }
 
+        public static IEnumerator WaitCoroutine(string clipboard)
+        {
+            for (;;)
+            {
+                if (stopSpam) break;
+                Helper.localNetworkPlayer.OnTalked(clipboard);
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
         public static void SaveForUpArrow(string backupThisText) // Checks if the message should be inserted then inserts it into the 0th index of backup list 
         {
 
@@ -306,9 +339,14 @@ namespace QOL
         public static string UwUify(string targetText)
         {
             int i = 0;
-            StringBuilder newMessage = new StringBuilder(targetText.ToLower()).Append(0);
+            StringBuilder newMessage = new StringBuilder(targetText.ToLower()).Append(0);   
             while (i < newMessage.Length)
             {
+                if (!char.IsLetter(newMessage[i]))
+                {
+                    i++;
+                    continue;
+                }
                 char curChar = newMessage[i];
                 switch (curChar)
                 {
@@ -317,9 +355,10 @@ namespace QOL
                         break;
                     case 't' when newMessage[i + 1] == 'h':
                         newMessage[i] = 'd';
+                        newMessage.Remove(i + 1, 1);
                         break;
                     default:
-                        if ("aeiou".Contains(curChar) && newMessage[i + 1] == 't')
+                        if (Helper.IsVowel(curChar) && newMessage[i + 1] == 't')
                         {
                             newMessage.Insert(i + 1, 'w');
                         }
@@ -330,12 +369,27 @@ namespace QOL
             return newMessage.Remove(newMessage.Length - 1, 1).ToString();
         }
 
+        public static string GetTargetStatValue(CharacterStats stats, string targetStat)
+        {
+            foreach (var stat in typeof(CharacterStats).GetFields())
+            {
+                if (stat.Name.ToLower() == targetStat)
+                {
+                    return stat.GetValue(stats).ToString();
+                }
+            }
+
+            return "No value";
+        }
+
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
 
-        public static List<string> backupTextList = new() // Ends up containing previous messages sent by us (up to 20)
+        public static List<string> backupTextList = new(21) // Ends up containing previous messages sent by us (up to 20)
         {
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
+
+        public static bool stopSpam;
 
         private static MatchmakingHandler matchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
     }

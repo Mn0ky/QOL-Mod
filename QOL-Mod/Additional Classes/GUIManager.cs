@@ -46,16 +46,40 @@ namespace QOL
         }
         public void OnGUI() 
         {
-            if (!mShowMenu)
+            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
+            if (mShowStatMenu)
             {
-                return;
+
+                foreach (var stat in FindObjectsOfType<CharacterStats>())
+                {
+                    switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
+                    {
+                        case 0:
+                            yellowStatsText = stat.GetString();
+                            break;
+                        case 1:
+                            blueStatsText = stat.GetString();
+                            break;
+                        case 2:
+                            redStatsText = stat.GetString();
+                            break;
+                        default:
+                            greenStatsText = stat.GetString();
+                            break;
+                    }
+                }
+
+                StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Window");
             }
-            MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
         }
 		private void KickWindow(int window)
-		{
-			GUILayout.Label("\t<color=#228f69>Draggable</color>");
-			GUILayout.Label("<color=red>Lobby ID:</color> " + theLobbyID);
+        {
+            var normAlignment = GUI.skin.label.alignment;
+            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
+            GUI.skin.label.alignment = normAlignment;
+
+            GUILayout.Label("<color=red>Lobby ID:</color> " + theLobbyID);
 			GUILayout.Label("Host: " + theLobbyHost);
             GUILayout.Label(playerNamesStr);
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
@@ -79,6 +103,10 @@ namespace QOL
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
+            if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
+            {
+                mShowStatMenu = !mShowStatMenu;
+            }
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
                 if (matchmaking.IsHost)
@@ -112,13 +140,58 @@ namespace QOL
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
 
+        private void StatWindow(int window)
+        {
+            var normAlignment = GUI.skin.label.alignment;
+            GUI.skin.label.alignment = TextAnchor.UpperCenter;
+            GUI.skin.button.alignment = TextAnchor.LowerCenter;
+            GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
+            if (GUI.Button(new Rect(237.5f, 310f, 80f, 30f), "Close")) mShowStatMenu = !mShowStatMenu;
+            GUI.skin.label.alignment = normAlignment;
+            GUILayout.BeginHorizontal();
+
+            //GUI.skin.label.alignment = TextAnchor.UpperLeft;
+            GUILayout.Label("<color=#FFFF00>Yellow:</color>");
+            
+
+            //GUI.skin.label.alignment = TextAnchor.UpperCenter;
+            GUILayout.Label("<color=#0000ff>Blue:</color>");
+            
+
+            //GUI.skin.label.alignment = TextAnchor.UpperRight;
+            GUILayout.Label("<color=#FF0000>Red:</color>");
+
+            GUILayout.Label("<color=#00FF00>Green:</color>");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(yellowStatsText);
+            GUILayout.Label(blueStatsText);
+            GUILayout.Label(redStatsText);
+            GUILayout.Label(greenStatsText);
+            GUILayout.EndHorizontal();
+
+            GUI.DragWindow(new Rect(0, 0, 10000, 10000));
+        }
+
         private bool mShowMenu;
 
+        private bool mShowStatMenu;
+
+        private string yellowStatsText;
+        private string blueStatsText;
+        private string redStatsText;
+        private string greenStatsText;
+
         private Rect MenuRect = new(0f, 100f, 350f, 375f);
+
+        private Rect StatMenuRect = new(800f, 100f, 510f, 350f);
 
         private int WindowId = 100;
 
         private NetworkPlayer[] networkPlayerArray;
+
+        //private CharacterStats[] statsHolder;
 
         private string playerNamesStr = "Players in Room: \n";
 

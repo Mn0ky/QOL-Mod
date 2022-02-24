@@ -2,6 +2,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using HarmonyLib.Tools;
 using UnityEngine;
 
 namespace QOL
@@ -20,7 +21,7 @@ namespace QOL
                 Harmony harmony = new Harmony("monky.QOL"); // Creates harmony instance with identifier
                 Logger.LogInfo("Applying ChatManager patches...");
                 ChatManagerPatches.Patches(harmony);
-                Logger.LogInfo("Applying MatchmakingHandler patch...");
+                Logger.LogInfo("Applying MatchmakingHandler patch..."); 
                 MatchmakingHandlerPatches.Patch(harmony);
                 Logger.LogInfo("Applying MultiplayerManager patches...");
                 MultiplayerManagerPatches.Patches(harmony);
@@ -30,6 +31,8 @@ namespace QOL
                 ControllerPatch.Patch(harmony);
                 Logger.LogInfo("Applying GameManager patch...");
                 GameManagerPatch.Patch(harmony);
+                Logger.LogInfo("Applying OnlinePlayerUI patch...");
+                // OnlinePlayerUIPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
@@ -75,10 +78,10 @@ namespace QOL
                     false,
                     "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
 
-                // configCustomName = Config.Bind("Startup Options",
-                //     "CustomUsername",
-                //     string.Empty,
-                //     "Specify a custom username? (client-side only)");
+                configCustomName = Config.Bind("Startup Options",
+                    "CustomUsername",
+                    string.Empty,
+                    "Specify a custom username? (client-side only)");
 
                 configAuthKeyForTranslation = Config.Bind("Startup Options",
                     "AutoAuthTranslationsAPIKey",
@@ -98,6 +101,7 @@ namespace QOL
         public static ConfigEntry<bool> configNoResize;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
+        public static ConfigEntry<string> configCustomName;
 
         public const string VersionNumber = "1.0.11"; // Version number
     }
