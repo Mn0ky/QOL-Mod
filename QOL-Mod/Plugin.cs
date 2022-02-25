@@ -77,7 +77,7 @@ namespace QOL
 
                 configNoResize = Config.Bind("Startup Options",
                     "NoResize",
-                    false,
+                    true,
                     "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
 
                 configCustomName = Config.Bind("Startup Options",
