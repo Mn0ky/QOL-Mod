@@ -1,4 +1,5 @@
-﻿using Steamworks;
+﻿using System;
+using Steamworks;
 using System.Reflection;
 using UnityEngine;
 
@@ -44,27 +45,44 @@ namespace QOL
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
 
+            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F2))
+            {
+                //UpdateStatMenuFields();
+                mStatsShown = true;
+                mShowStatMenu = !mShowStatMenu;
+            }
+
             if (mShowStatMenu && mStatsShown)
             {
+                yellowStatsText = "";
+                blueStatsText = "";
+                redStatsText = "";
+                greenStatsText = "";
+                Array.Clear(playersInLobby, 0, playersInLobby.Length);
+
                 foreach (var stat in FindObjectsOfType<CharacterStats>())
                 {
                     switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
                     {
                         case 0:
                             yellowStatsText = stat.GetString();
+                            playersInLobby[0] = "Yellow";
                             break;
                         case 1:
                             blueStatsText = stat.GetString();
+                            playersInLobby[1] = "Blue";
                             break;
                         case 2:
                             redStatsText = stat.GetString();
+                            playersInLobby[2] = "Red";
                             break;
                         default:
                             greenStatsText = stat.GetString();
+                            playersInLobby[3] = "Green";
                             break;
                     }
                 }
-                Debug.Log("stats being set to false via update");
+                Debug.Log("show stats being set to false via update");
                 mStatsShown = false;
             }
 
@@ -112,7 +130,7 @@ namespace QOL
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
             {
                 mShowStatMenu = !mShowStatMenu;
-                mStatsShown = !mStatsShown;
+                mStatsShown = true;
                 Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
@@ -157,25 +175,14 @@ namespace QOL
             if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close"))
             {
                 mShowStatMenu = !mShowStatMenu;
-                mStatsShown = !mStatsShown;
-                Debug.Log("stats being changed with close button: " + mStatsShown);
             }
 
             GUI.skin.label.alignment = normAlignment;
             GUILayout.BeginHorizontal();
-
-            //GUI.skin.label.alignment = TextAnchor.UpperLeft;
-            GUILayout.Label("<color=yellow>Yellow:</color>");
-            
-
-            //GUI.skin.label.alignment = TextAnchor.UpperCenter;
-            GUILayout.Label("<color=blue>Blue:</color>");
-            
-
-            //GUI.skin.label.alignment = TextAnchor.UpperRight;
-            GUILayout.Label("<color=red>Red:</color>");
-
-            GUILayout.Label("<color=green>Green:</color>");
+            foreach (string color in playersInLobby)
+            {
+                GUILayout.Label($"<color={color}>{color}</color>");
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -205,6 +212,7 @@ namespace QOL
         private int WindowId = 100;
 
         private NetworkPlayer[] networkPlayerArray;
+        private string[] playersInLobby = {"", "", "", ""};
 
         //private CharacterStats[] statsHolder;
 

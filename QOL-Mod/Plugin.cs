@@ -105,6 +105,6 @@ namespace QOL
         public static ConfigEntry<string> configAuthKeyForTranslation;
         public static ConfigEntry<string> configCustomName;
 
-        public const string VersionNumber = "1.0.11"; // Version number
+        public const string VersionNumber = "1.0.12.1"; // Version number
     }
 }
