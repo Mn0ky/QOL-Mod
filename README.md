@@ -18,11 +18,11 @@ Scroll to the bottom of this README for a video of a general overview of this mo
 ## Installation
 
 To use the mod, here are the steps required:<br/> 
-  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases), grab the lastest release of version **``5.4``** (**must be 32-bit, x86**).
+  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.19), make sure it's version **``5.4.19``** (**must be 32-bit, x86**).
   2)  Extract the newly downloaded zip into the ``StickFightTheGame`` folder.
   3)  Drag all contents from the folder into the ``StickFightTheGame`` folder (``winhttp.dll``, ``doorstop_config.ini``, the ``BepInEx`` folder etc.).
   4)  Launch the game and then exit (BepInEx will have generated new files and folders).
-  5)  Download the latest version of the QOL mod from the [releases](https://github.com/Mn0ky/QOL-Mod/releases/latest) section.
+  5)  Download the latest version of the QOL mod from the [Releases](https://github.com/Mn0ky/QOL-Mod/releases/latest) section.
   6)  Put the mod into the now generated folder located at ``BepInEx/plugins``  for BepInEx to load.
   7)  Start the game, join a lobby, and enjoy!
 

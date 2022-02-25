@@ -43,13 +43,9 @@ namespace QOL
                 Debug.Log("this.theLobbyID : " + theLobbyID);
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
-        }
-        public void OnGUI() 
-        {
-            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
-            if (mShowStatMenu)
-            {
 
+            if (mShowStatMenu && mStatsShown)
+            {
                 foreach (var stat in FindObjectsOfType<CharacterStats>())
                 {
                     switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
@@ -68,8 +64,18 @@ namespace QOL
                             break;
                     }
                 }
+                Debug.Log("stats being set to false via update");
+                mStatsShown = false;
+            }
 
+        }
+        public void OnGUI() 
+        {
+            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
+            if (mShowStatMenu)
+            {
                 StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Window");
+                //if (!mStatsShown) 
             }
         }
 		private void KickWindow(int window)
@@ -106,6 +112,8 @@ namespace QOL
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
             {
                 mShowStatMenu = !mShowStatMenu;
+                mStatsShown = !mStatsShown;
+                Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
@@ -146,22 +154,28 @@ namespace QOL
             GUI.skin.label.alignment = TextAnchor.UpperCenter;
             GUI.skin.button.alignment = TextAnchor.LowerCenter;
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
-            if (GUI.Button(new Rect(237.5f, 310f, 80f, 30f), "Close")) mShowStatMenu = !mShowStatMenu;
+            if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close"))
+            {
+                mShowStatMenu = !mShowStatMenu;
+                mStatsShown = !mStatsShown;
+                Debug.Log("stats being changed with close button: " + mStatsShown);
+            }
+
             GUI.skin.label.alignment = normAlignment;
             GUILayout.BeginHorizontal();
 
             //GUI.skin.label.alignment = TextAnchor.UpperLeft;
-            GUILayout.Label("<color=#FFFF00>Yellow:</color>");
+            GUILayout.Label("<color=yellow>Yellow:</color>");
             
 
             //GUI.skin.label.alignment = TextAnchor.UpperCenter;
-            GUILayout.Label("<color=#0000ff>Blue:</color>");
+            GUILayout.Label("<color=blue>Blue:</color>");
             
 
             //GUI.skin.label.alignment = TextAnchor.UpperRight;
-            GUILayout.Label("<color=#FF0000>Red:</color>");
+            GUILayout.Label("<color=red>Red:</color>");
 
-            GUILayout.Label("<color=#00FF00>Green:</color>");
+            GUILayout.Label("<color=green>Green:</color>");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -175,6 +189,7 @@ namespace QOL
         }
 
         private bool mShowMenu;
+        private bool mStatsShown;
 
         private bool mShowStatMenu;
 

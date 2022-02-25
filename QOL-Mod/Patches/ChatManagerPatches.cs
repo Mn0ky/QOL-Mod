@@ -283,11 +283,11 @@ namespace QOL
                 GameObject myCharacter = Helper.localNetworkPlayer.gameObject;
                 Helper.localNetworkPlayer.OnTalked("Not implemented");
             }
-            else if (text == "customname_test")
-            {
-                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
-                playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
-            }
+            // else if (text == "customname_test")
+            // {
+            //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
+            //     playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
+            // }
             else if (text == "ver")
             {
                 Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);

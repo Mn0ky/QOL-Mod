@@ -31,7 +31,9 @@ namespace QOL
                 ControllerPatch.Patch(harmony);
                 Logger.LogInfo("Applying GameManager patch...");
                 GameManagerPatch.Patch(harmony);
-                Logger.LogInfo("Applying OnlinePlayerUI patch...");
+                // Logger.LogInfo("Applying CharacterStats patch...");
+                // CharacterStatsPatch.Patch(harmony);
+                // Logger.LogInfo("Applying OnlinePlayerUI patch...");
                 // OnlinePlayerUIPatch.Patch(harmony);
             }
             catch (Exception ex)
