@@ -108,7 +108,7 @@ namespace QOL
                 NetworkPlayer networkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
                 if (networkPlayer.HasLocalControl)
                 {
-                    networkPlayer.OnTalked(ChatManagerPatches.UwUify(message));
+                    networkPlayer.OnTalked(UwUify(message));
                     return false;
                 }
             }
@@ -288,6 +288,10 @@ namespace QOL
             //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
             //     playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
             // }
+            else if (text == "help")
+            {
+                SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
+            }
             else if (text == "ver")
             {
                 Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);

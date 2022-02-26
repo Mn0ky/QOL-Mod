@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
-using TMPro;
 using UnityEngine;
 
 namespace QOL
@@ -25,21 +24,21 @@ namespace QOL
             {
                 Debug.Log("Winner is me :D");
                 Helper.winStreak++;
-                if (Helper.winStreakEnabled)
-                {
-                    Helper.localNetworkPlayer.OnTalked("Winstreak of: " + Helper.winStreak);
-                }
+                // if (Helper.winStreakEnabled)
+                // {
+                //     Helper.localNetworkPlayer.OnTalked("Winstreak of: " + Helper.winStreak);
+                // }
 
                 __instance.winText.color = Helper.winStreak switch
                 {
-                    < 3 => Color.red,
-                    <= 5 => Color.yellow,
+                    1 => Color.red,
+                    2 => Color.yellow,
                     _ => Color.green
                 };
 
                 __instance.winText.text = "Winstreak of " + Helper.winStreak;
                 __instance.winText.gameObject.SetActive(true);
-                Debug.Log("wintext font size: " + __instance.winText.fontSize);
+                //Debug.Log("wintext font size: " + __instance.winText.fontSize);
                 return;
             }
             Helper.winStreak = 0;

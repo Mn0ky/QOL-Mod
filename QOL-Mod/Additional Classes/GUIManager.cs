@@ -23,9 +23,8 @@ namespace QOL
                 Debug.Log("chatText.richText : " + Helper.tmpText.richText);
 
                 mShowMenu = !mShowMenu;
-                networkPlayerArray = FindObjectsOfType<NetworkPlayer>();
                 playerNamesStr = string.Empty;
-                foreach (NetworkPlayer player in networkPlayerArray)
+                foreach (NetworkPlayer player in FindObjectsOfType<NetworkPlayer>())
                 {
                     string str = string.Concat(new object[]
                     {
@@ -133,6 +132,10 @@ namespace QOL
                 mStatsShown = true;
                 Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
+            if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
+            {
+                SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
+            }
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
                 if (matchmaking.IsHost)
@@ -211,10 +214,7 @@ namespace QOL
 
         private int WindowId = 100;
 
-        private NetworkPlayer[] networkPlayerArray;
         private string[] playersInLobby = {"", "", "", ""};
-
-        //private CharacterStats[] statsHolder;
 
         private string playerNamesStr = "Players in Room: \n";
 

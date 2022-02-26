@@ -23,8 +23,8 @@ namespace QOL
             harmonyInstance.Patch(OnServerCreatedMethod, postfix: OnServerCreatedMethodPostfix);
 
             var InitDataFromServerRecievedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnInitFromServer");
-            var InitDataFromServerRecievedMethodTranspiler = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.InitDataFromServerRecievedMethodTranspiler))); // Patches InitDataFromServerRecieved() with transpiler method
-            harmonyInstance.Patch(InitDataFromServerRecievedMethod, postfix: InitDataFromServerRecievedMethodTranspiler);
+            var InitDataFromServerRecievedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.InitDataFromServerRecievedMethodPostfix))); // Patches InitDataFromServerRecieved() with transpiler method
+            harmonyInstance.Patch(InitDataFromServerRecievedMethod, postfix: InitDataFromServerRecievedMethodPostfix);
         }
 
         public static void OnServerJoinedMethodPostfix()
@@ -37,7 +37,7 @@ namespace QOL
             InitGUI();
         }
 
-        public static void InitDataFromServerRecievedMethodTranspiler(ref byte[] data, MultiplayerManager __instance)
+        public static void InitDataFromServerRecievedMethodPostfix(ref byte[] data, MultiplayerManager __instance)
         {
             Color defaultColor = new(1, 1, 1);
 

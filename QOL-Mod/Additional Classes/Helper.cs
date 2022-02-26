@@ -3,7 +3,6 @@ using UnityEngine;
 using Steamworks;
 using HarmonyLib;
 using TMPro;
-using Object = UnityEngine.Object;
 
 namespace QOL
 {
@@ -79,7 +78,7 @@ namespace QOL
                 Debug.Log("Assigned the localNetworkPlayer!");
                 Helper.tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
                 Helper.tmpText.richText = Plugin.configRichText.Value;
-                TextMeshProUGUI[] playerNames = Traverse.Create(Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
+                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
 
                 if (Helper.GetPlayerName(Helper.localPlayerSteamID).Length > 12 && !Helper.NoResize) // If reading custom names then make sure to add conditional here
                 {
