@@ -127,6 +127,13 @@ namespace QOL
 
         public static TextMeshPro tmpText;
 
+        public static Color[] defaultColors = {
+            new(0.846f, 0.549f, 0.280f),
+            new(0.333f, 0.449f, 0.676f),
+            new(0.838f, 0.335f, 0.302f),
+            new(0.339f, 0.544f, 0.288f)
+        };
+
         public static int winStreak = 0;
     }
 }

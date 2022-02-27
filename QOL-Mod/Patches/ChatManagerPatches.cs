@@ -190,12 +190,24 @@ namespace QOL
                 theText.richText = !theText.richText;
 
             }
-            else if (text == "rich") // Enables rich text for chat messages
+            /*else if (text == "testcol") // Enables rich text for chat messages
             {
-                TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
-                theText.richText = !theText.richText;
+                var oldCharacter = Helper.GetNetworkPlayer(0);
 
-            }
+                foreach (SpriteRenderer spriteRenderer in oldCharacter.GetComponentsInChildren<SpriteRenderer>())
+                {
+                    Debug.Log("renderer name: " + spriteRenderer.gameObject);
+                    //spriteRenderer.color = Helper.defaultColors[0];
+                    spriteRenderer.GetComponentInParent<SetColorWhenDamaged>().startColor = Helper.defaultColors[0];
+                }
+
+                foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>())
+                {
+                    partSys.startColor = Helper.defaultColors[0];
+                }
+
+                Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(Helper.defaultColors[0]);
+            }*/
             else if (text == "uwu") // Enables uwuifier
             {
                 Helper.uwuifyText = !Helper.uwuifyText;
@@ -278,11 +290,11 @@ namespace QOL
                 string nameWanted = Helper.GetPlayerName(Helper.GetSteamID(Helper.GetIDFromColor(text.Substring(5))));
                 Helper.localNetworkPlayer.OnTalked(nameWanted);
             }
-            else if (text == "color")
-            {
-                GameObject myCharacter = Helper.localNetworkPlayer.gameObject;
-                Helper.localNetworkPlayer.OnTalked("Not implemented");
-            }
+            // else if (text == "color")
+            // {
+            //     GameObject myCharacter = Helper.localNetworkPlayer.gameObject;
+            //     Helper.localNetworkPlayer.OnTalked("Not implemented");
+            // }
             // else if (text == "customname_test")
             // {
             //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
