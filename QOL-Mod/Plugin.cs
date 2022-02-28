@@ -2,7 +2,6 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using HarmonyLib.Tools;
 using UnityEngine;
 
 namespace QOL
@@ -45,6 +44,21 @@ namespace QOL
             {
                 Logger.LogInfo("Loading configuration options from config file...");
 
+                configCustomColor = Config.Bind("Startup Options",
+                    "CustomColor",
+                    new Color(1, 1, 1),
+                    "Specify a custom player color? (Use a HEX value)");
+
+                configQOLMenuKeybind = Config.Bind("Startup Options", // The section under which the option is shown
+                    "QOLMenuKeybind",
+                    new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
+                    "Change the keybind for opening the QOL Menu? (Only specify a single key or two keys)"); // Description of the option to show in the config file
+
+                configStatMenuKeybind = Config.Bind("Startup Options", // The section under which the option is shown
+                    "StatWindowKeybind",
+                    new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2), // The key of the configuration option in the configuration file
+                    "Change the keybind for opening the Stat Window? (Only specify a single key or two keys)"); // Description of the option to show in the config file
+
                 configAutoGG = Config.Bind("Startup Options", // The section under which the option is shown
                     "AutoGG",
                     false, // The key of the configuration option in the configuration file
@@ -69,11 +83,6 @@ namespace QOL
                     "AutoTranslations",
                     false,
                     "Enable auto-translation for chat messages to English on startup?");
-
-                configCustomColor = Config.Bind("Startup Options",
-                    "CustomColor",
-                    new Color(1, 1, 1),
-                    "Specify a custom player color? (Use a HEX value)");
 
                 configNoResize = Config.Bind("Startup Options",
                     "NoResize",
@@ -104,7 +113,10 @@ namespace QOL
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
         public static ConfigEntry<string> configCustomName;
+        public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
+        public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
+        
 
-        public const string VersionNumber = "1.0.12.2"; // Version number
+        public const string VersionNumber = "1.0.13"; // Version number
     }
 }

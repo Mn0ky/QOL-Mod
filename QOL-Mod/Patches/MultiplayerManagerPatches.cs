@@ -44,7 +44,7 @@ namespace QOL
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
             //Debug.Log(__instance.LocalPlayerIndex);
-            if (Helper.customPlayerColor == defaultColor && !__instance.ConnectedClients[__instance.LocalPlayerIndex].ControlledLocally) return;
+            if (Helper.customPlayerColor == defaultColor) return;
             //count += 1;
 
             Debug.Log("My index: " + __instance.LocalPlayerIndex);

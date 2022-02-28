@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Steamworks;
 using System.Reflection;
+using BepInEx.Configuration;
 using UnityEngine;
 
 namespace QOL
@@ -14,10 +16,43 @@ namespace QOL
         }
         private void Awake()
         {
+            QOLMenuKey1 = Plugin.configQOLMenuKeybind.Value.MainKey;
+
+            if (Plugin.configQOLMenuKeybind.Value.Modifiers.Any())
+            {
+                foreach (var modifier in Plugin.configQOLMenuKeybind.Value.Modifiers)
+                {
+                    Debug.Log("Assigning secondary key, menu: " + modifier);
+                    QOLMenuKey2 = modifier;
+                }
+            }
+            else
+            {
+                Debug.Log("Anykeymenu true");
+                anyKeyMenu = true;
+            }
+
+            statWindowKey1 = Plugin.configStatMenuKeybind.Value.MainKey;
+
+            if (Plugin.configStatMenuKeybind.Value.Modifiers.Any())
+            {
+                foreach (var modifier in Plugin.configStatMenuKeybind.Value.Modifiers)
+                {
+                    Debug.Log("Assigning secondary key, stat: " + modifier);
+                    statWindowKey2 = modifier;
+                    return;
+                }
+            }
+            else
+            {
+                Debug.Log("Anykeystat true");
+                anyKeyStat = true;
+            }
+            
         }
         private void Update()
         {
-            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F1))
+            if (Input.GetKey(QOLMenuKey1) && Input.GetKeyDown(QOLMenuKey2) || Input.GetKeyDown(QOLMenuKey1) && anyKeyMenu)
             {
                 Debug.Log("Trying to open GUI menu!");
                 Debug.Log("chatText.richText : " + Helper.tmpText.richText);
@@ -44,7 +79,7 @@ namespace QOL
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
 
-            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F2))
+            if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && anyKeyStat)
             {
                 //UpdateStatMenuFields();
                 mStatsShown = true;
@@ -221,6 +256,14 @@ namespace QOL
         private string theLobbyHost;
 
         private static MatchmakingHandler matchmaking;
+
+        private KeyCode QOLMenuKey1;
+        private KeyCode QOLMenuKey2 = KeyCode.Joystick8Button19;
+        private bool anyKeyMenu;
+
+        private KeyCode statWindowKey1;
+        private KeyCode statWindowKey2 = KeyCode.Joystick8Button19;
+        private bool anyKeyStat;
 
         private CSteamID theLobbyID;
     }
