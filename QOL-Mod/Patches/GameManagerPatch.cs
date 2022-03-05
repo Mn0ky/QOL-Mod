@@ -34,13 +34,14 @@ namespace QOL
             {
                 Debug.Log("Winner is me :D");
                 Helper.winStreak++;
+                var isHigher = DetermineNewHighScore(Helper.winStreak);
 
                 if (!Helper.winStreakEnabled) return;
 
                 __instance.winText.color = DetermineStreakColor();
              
                 __instance.winText.fontSize = Plugin.configWinStreakFontsize.Value;
-                __instance.winText.text = "Winstreak Of " + Helper.winStreak;
+                __instance.winText.text = (isHigher) ? $"New Highscore: {Helper.winStreak}" : $"Winstreak Of {Helper.winStreak}";
 
                 __instance.winText.gameObject.SetActive(true);
                 return;
@@ -48,7 +49,6 @@ namespace QOL
 
             Debug.Log("winstreak lost");
             __instance.winText.fontSize = 200;
-            DetermineHighScore(Helper.winStreak);
             winstreakRanges1 = new List<int>(winstreakRanges2);
             winstreakColors1 = new List<Color>(winstreakColors2);
             Helper.winStreak = 0;
@@ -82,17 +82,19 @@ namespace QOL
             return Color.white;
         }
 
-        public static void DetermineHighScore(int score)
+        public static bool DetermineNewHighScore(int score)
         {
             var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
 
-            if (File.Exists(scorePath) && int.Parse(File.ReadAllText(scorePath)) < score)
+            if (highScore < score)
             {
-                File.WriteAllText(scorePath, score.ToString());
-                return;
+                highScore = score;
+                File.WriteAllText(scorePath, highScore.ToString());
+                return true;
             }
 
             File.WriteAllText(scorePath, score.ToString());
+            return false;
         }
 
         public static List<Color> winstreakColors1 = new (50);
@@ -100,5 +102,7 @@ namespace QOL
 
         public static List<int> winstreakRanges1 = new(50);
         public static List<int> winstreakRanges2 = new(50);
+
+        public static int highScore;
     }
 }

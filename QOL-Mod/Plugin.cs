@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -153,8 +154,8 @@ namespace QOL
 
                 configEmoji = Config.Bind("Misc. Options",
                     "ShrugEmoji",
-                    "☹",
-                    "Specify the emoji used in the shrug command? Only the 15 TMP defaults are available: 😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
+                    '☹',
+                    "Specify the emoji used in the shrug command? Only the following 15 TMP defaults are available: 😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
 
                 configAuthKeyForTranslation = Config.Bind("Misc. Options",
                     "AutoAuthTranslationsAPIKey",
@@ -165,6 +166,17 @@ namespace QOL
             {   
                 Logger.LogError("Exception on loading configuration: " + ex.InnerException);
             }
+
+            var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
+
+            if (File.Exists(scorePath))
+            {
+                GameManagerPatch.highScore = int.Parse(File.ReadAllText(scorePath));
+                return;
+            }
+
+            File.WriteAllText(scorePath, "0");
+            GameManagerPatch.highScore = 0;
         }
 
         private float[] MenuPosParser(string menuPos) => Array.ConvertAll(menuPos.Replace("X", "").Replace("Y", "").Split(' '), float.Parse);
@@ -185,7 +197,7 @@ namespace QOL
         public static ConfigEntry<string> configWinStreakRanges;
         public static ConfigEntry<int> configWinStreakFontsize;
         public static ConfigEntry<string> configAdvCmd;
-        public static ConfigEntry<string> configEmoji;
+        public static ConfigEntry<char> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
         public static ConfigEntry<string> configStatMenuPlacement;
 
