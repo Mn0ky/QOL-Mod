@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 
@@ -46,6 +48,7 @@ namespace QOL
 
             Debug.Log("winstreak lost");
             __instance.winText.fontSize = 200;
+            DetermineHighScore(Helper.winStreak);
             winstreakRanges1 = new List<int>(winstreakRanges2);
             winstreakColors1 = new List<Color>(winstreakColors2);
             Helper.winStreak = 0;
@@ -77,6 +80,19 @@ namespace QOL
 
             Debug.Log("Something went wrong!");
             return Color.white;
+        }
+
+        public static void DetermineHighScore(int score)
+        {
+            var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
+
+            if (File.Exists(scorePath) && int.Parse(File.ReadAllText(scorePath)) < score)
+            {
+                File.WriteAllText(scorePath, score.ToString());
+                return;
+            }
+
+            File.WriteAllText(scorePath, score.ToString());
         }
 
         public static List<Color> winstreakColors1 = new (50);

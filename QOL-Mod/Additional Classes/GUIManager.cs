@@ -168,9 +168,9 @@ namespace QOL
                 mStatsShown = true;
                 Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
-            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Winstreak"))
+            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
             {
-                Helper.ToggleWinstreak();
+                Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.configEmoji.Value}_/\u00af");
             }
             if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
             {
@@ -240,6 +240,8 @@ namespace QOL
 
         private bool mShowMenu;
         private bool mStatsShown;
+        public static float[] QOLMenuPos;
+        public static float[] StatMenuPos;
 
         private bool mShowStatMenu;
 
@@ -248,9 +250,9 @@ namespace QOL
         private string redStatsText;
         private string greenStatsText;
 
-        private Rect MenuRect = new(0f, 100f, 350f, 375f);
+        private Rect MenuRect = new(QOLMenuPos[0], QOLMenuPos[1], 350f, 375f);
 
-        private Rect StatMenuRect = new(800f, 100f, 510f, 350f);
+        private Rect StatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
 
         private int WindowId = 100;
 

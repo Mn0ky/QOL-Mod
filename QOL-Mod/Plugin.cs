@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -51,15 +50,28 @@ namespace QOL
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
 
-                configQOLMenuKeybind = Config.Bind("Keybind Options", // The section under which the option is shown
+                configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
                     "Change the keybind for opening the QOL Menu? (Only specify a single key or two keys)"); // Description of the option to show in the config file
 
-                configStatMenuKeybind = Config.Bind("Keybind Options", // The section under which the option is shown
+                configStatMenuKeybind = Config.Bind("Menu Options",
                     "StatWindowKeybind",
-                    new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2), // The key of the configuration option in the configuration file
-                    "Change the keybind for opening the Stat Window? (Only specify a single key or two keys)"); // Description of the option to show in the config file
+                    new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
+                    "Change the keybind for opening the Stat Window? (Only specify a single key or two keys)");
+
+                configQOLMenuPlacement = Config.Bind("Menu Options",
+                    "QOLMenuLocation",
+                    "0X 100Y",
+                    "Change the default opening position of the QOL menu?");
+
+                configStatMenuPlacement = Config.Bind("Menu Options",
+                    "StatMenuLocation",
+                    "800X 100Y",
+                    "Change the default opening position of the Stat menu?");
+
+                GUIManager.QOLMenuPos = MenuPosParser(configQOLMenuPlacement.Value);
+                GUIManager.StatMenuPos = MenuPosParser(configStatMenuPlacement.Value);
 
                 configWinStreakLog = Config.Bind("Winstreak Options",
                     "AlwaysTrackWinstreak",
@@ -124,7 +136,7 @@ namespace QOL
                     false,
                     "Enable auto-translation for chat messages to English on startup?");
 
-                configNoResize = Config.Bind("On-Startup Options",
+                configNoResize = Config.Bind("Misc. Options",
                     "NoResize",
                     true,
                     "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
@@ -150,10 +162,13 @@ namespace QOL
                     "Put your API key for Google Translate V2 here (Optional)");
             }
             catch (Exception ex)
-            {
+            {   
                 Logger.LogError("Exception on loading configuration: " + ex.InnerException);
             }
         }
+
+        private float[] MenuPosParser(string menuPos) => Array.ConvertAll(menuPos.Replace("X", "").Replace("Y", "").Split(' '), float.Parse);
+
         public static ConfigEntry<bool> configchatCensorshipBypass;
         public static ConfigEntry<bool> configAutoGG;
         public static ConfigEntry<bool> configRichText;
@@ -163,7 +178,7 @@ namespace QOL
         public static ConfigEntry<bool> configHPWinner;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
-        public static ConfigEntry<string> configCustomName;
+        //public static ConfigEntry<string> configCustomName;
         public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
         public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
         public static ConfigEntry<string> configWinStreakColors;
@@ -171,6 +186,8 @@ namespace QOL
         public static ConfigEntry<int> configWinStreakFontsize;
         public static ConfigEntry<string> configAdvCmd;
         public static ConfigEntry<string> configEmoji;
+        public static ConfigEntry<string> configQOLMenuPlacement;
+        public static ConfigEntry<string> configStatMenuPlacement;
 
 
         public const string VersionNumber = "1.0.13"; // Version number
