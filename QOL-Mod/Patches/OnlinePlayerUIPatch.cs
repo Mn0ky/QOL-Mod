@@ -23,9 +23,9 @@ namespace QOL
         {
             Debug.Log("Displaying instructions for Update() in OnlinePlayerUI\n**********************************************");
 
-            MethodInfo checkForCustomNameMethod = typeof(OnlinePlayerUIPatch).GetMethod(nameof(CheckForCustomName), BindingFlags.Static | BindingFlags.Public); // Get MethodInfo for checkForCustomName() 
+            //MethodInfo checkForCustomNameMethod = typeof(OnlinePlayerUIPatch).GetMethod(nameof(CheckForCustomName), BindingFlags.Static | BindingFlags.Public); // Get MethodInfo for checkForCustomName() //TODO: uncom for testing
             MethodInfo HelloWorldMethod = typeof(OnlinePlayerUIPatch).GetMethod(nameof(HelloWorld), BindingFlags.Static | BindingFlags.Public);
-            Debug.Log("checkForCustomNameMethod: " + checkForCustomNameMethod);
+            //Debug.Log("checkForCustomNameMethod: " + checkForCustomNameMethod);
             List<CodeInstruction> instructionsList = instructions.ToList();
 
             var len = instructionsList.Count;
@@ -49,8 +49,8 @@ namespace QOL
 
             instructionsList[36].labels.Clear();
 
-            CodeInstruction instruction2 = new CodeInstruction(OpCodes.Call, checkForCustomNameMethod);
-            instructionsList.Insert(39, instruction2);
+            //CodeInstruction instruction2 = new CodeInstruction(OpCodes.Call, checkForCustomNameMethod); //TODO: uncom for testing
+            //instructionsList.Insert(39, instruction2); //TODO: uncom for testing
 
             instructionsList.RemoveRange(40, 4);
 
@@ -73,17 +73,17 @@ namespace QOL
             return instructionsList.AsEnumerable();
         }
 
-        public static void CheckForCustomName(int i, TextMeshProUGUI[] playerNames, ConnectedClientData clientData)
-        {
-            Debug.Log("Made it to check for custom name!");
-            if (i == Helper.localNetworkPlayer.NetworkSpawnID && Helper.isCustomName) // Add conditional if working on this to check Helper.isCustomName
-            {
-                Debug.Log("custom name wanted: " + Plugin.configCustomName.Value);
-                playerNames[i].text = "this is a test";
-            }
-            playerNames[i].text = clientData.PlayerName;
-            Debug.Log("more test message");
-        }
+        // public static void CheckForCustomName(int i, TextMeshProUGUI[] playerNames, ConnectedClientData clientData) //TODO: uncom for testing
+        // {
+        //     Debug.Log("Made it to check for custom name!");
+        //     if (i == Helper.localNetworkPlayer.NetworkSpawnID && Helper.isCustomName) // Add conditional if working on this to check Helper.isCustomName
+        //     {
+        //         Debug.Log("custom name wanted: " + Plugin.configCustomName.Value);
+        //         playerNames[i].text = "this is a test";
+        //     }
+        //     playerNames[i].text = clientData.PlayerName;
+        //     Debug.Log("more test message");
+        // }
 
         public static void HelloWorld()
         {

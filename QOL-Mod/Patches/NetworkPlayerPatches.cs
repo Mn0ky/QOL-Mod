@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 using HarmonyLib;
 using UnityEngine;
 namespace QOL

@@ -18,30 +18,71 @@ namespace QOL
 
         public static void networkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
+            if (Plugin.configHPWinner.Value)
+            {
+                string winnerColor = Helper.GetColorFromID(winner);
+
+                Helper.localNetworkPlayer.OnTalked(winnerColor + " HP: " + Helper.GetHPOfPlayer(winner));
+            }
+
             Debug.Log("winner int: " + winner);
             Debug.Log("spawnID: " + Helper.localNetworkPlayer.NetworkSpawnID);
-            if (winner == Helper.localNetworkPlayer.NetworkSpawnID && (Helper.winStreakEnabled || Helper.AlwaysTrackWinstreak))
+
+            if (winner == Helper.localNetworkPlayer.NetworkSpawnID)
             {
                 Debug.Log("Winner is me :D");
                 Helper.winStreak++;
-                // if (Helper.winStreakEnabled)
-                // {
-                //     Helper.localNetworkPlayer.OnTalked("Winstreak of: " + Helper.winStreak);
-                // }
 
-                __instance.winText.color = Helper.winStreak switch
-                {
-                    1 => Color.red,
-                    2 => Color.yellow,
-                    _ => Color.green
-                };
+                if (!Helper.winStreakEnabled) return;
 
-                __instance.winText.text = "Winstreak of " + Helper.winStreak;
+                __instance.winText.color = DetermineStreakColor();
+             
+                __instance.winText.fontSize = Plugin.configWinStreakFontsize.Value;
+                __instance.winText.text = "Winstreak Of " + Helper.winStreak;
+
                 __instance.winText.gameObject.SetActive(true);
-                //Debug.Log("wintext font size: " + __instance.winText.fontSize);
                 return;
             }
+
+            Debug.Log("winstreak lost");
+            __instance.winText.fontSize = 200;
+            winstreakRanges1 = new List<int>(winstreakRanges2);
+            winstreakColors1 = new List<Color>(winstreakColors2);
             Helper.winStreak = 0;
         }
+
+        public static Color DetermineStreakColor()
+        {
+            for (int i = 0; i < winstreakRanges1.Count; i++)
+            {
+                i = 0;
+                Debug.Log("streak range value: " + winstreakRanges1[i]);
+                if (winstreakRanges1[i] > 0)
+                {
+                    Debug.Log("Deducting!, ranges count: " + winstreakRanges1.Count);
+                    winstreakRanges1[i]--;
+                    return winstreakColors1[i];
+                }
+
+                if (winstreakRanges1[i] == 0 && winstreakRanges1.Count == 2)
+                {
+                    Debug.Log("Sending last color!");
+                    return winstreakColors2[winstreakColors2.Count - 1];
+                }
+
+                Debug.Log("Removing range and color!");
+                winstreakRanges1.RemoveAt(i);
+                winstreakColors1.RemoveAt(i);
+            }
+
+            Debug.Log("Something went wrong!");
+            return Color.white;
+        }
+
+        public static List<Color> winstreakColors1 = new (50);
+        public static List<Color> winstreakColors2 = new(50);
+
+        public static List<int> winstreakRanges1 = new(50);
+        public static List<int> winstreakRanges2 = new(50);
     }
 }

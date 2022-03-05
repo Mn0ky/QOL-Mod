@@ -22,10 +22,6 @@ namespace QOL
             var OnServerCreatedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.OnServerCreatedMethodPostfix))); // Patches OnServerCreated with postfix method
             harmonyInstance.Patch(OnServerCreatedMethod, postfix: OnServerCreatedMethodPostfix);
 
-            // var InitDataFromServerRecievedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnInitFromServer");
-            // var InitDataFromServerRecievedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.InitDataFromServerRecievedMethodPostfix))); // Patches InitDataFromServerRecieved() with transpiler method
-            // harmonyInstance.Patch(InitDataFromServerRecievedMethod, postfix: InitDataFromServerRecievedMethodPostfix);
-
             var OnPlayerSpawnedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnPlayerSpawned");
             var OnPlayerSpawnedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.OnPlayerSpawnedMethodPostfix)));
             harmonyInstance.Patch(OnPlayerSpawnedMethod, postfix: OnPlayerSpawnedMethodPostfix);
@@ -43,9 +39,7 @@ namespace QOL
 
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
-            //Debug.Log(__instance.LocalPlayerIndex);
             if (Helper.customPlayerColor == defaultColor) return;
-            //count += 1;
 
             Debug.Log("My index: " + __instance.LocalPlayerIndex);
             Debug.Log("Checking players");
@@ -53,97 +47,62 @@ namespace QOL
             {
                 if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
                 {
-                    Debug.Log("id not equal");
                     if (colorsToReset.Contains(player.NetworkSpawnID))
                     {
+                        Debug.Log("id not equal");
                         Debug.Log("resetting now, id of: " + player.NetworkSpawnID);
-                        Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
+                        //Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
 
                         var oldCharacter = player.transform.root.gameObject;
+                        var oldColor = Helper.defaultColors[player.NetworkSpawnID];
                         Debug.Log("Assigned old character");
 
-                        foreach (var t in oldCharacter.GetComponentsInChildren<LineRenderer>())
-                        {
-                            t.sharedMaterial.color = Helper.defaultColors[player.NetworkSpawnID];
-                            Debug.Log("Assigned old color");
-                        }
-
-                        foreach (SpriteRenderer spriteRenderer in oldCharacter.GetComponentsInChildren<SpriteRenderer>())
-                        {
-                            spriteRenderer.color = Helper.defaultColors[player.NetworkSpawnID];
-                            spriteRenderer.GetComponentInParent<SetColorWhenDamaged>().startColor = Helper.defaultColors[player.NetworkSpawnID];
-                        }
+                        ChangeLineRendColor(oldColor, oldCharacter);
+                        ChangeSpriteRendColor(oldColor, oldCharacter);
 
                         foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>())
                         {
-                            partSys.startColor = Helper.defaultColors[player.NetworkSpawnID];
+                            partSys.startColor = oldColor;
                         }
-                        Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(Helper.defaultColors[player.NetworkSpawnID]);
 
+                        Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
                         colorsToReset.Remove(player.NetworkSpawnID);
                     }
                     continue;
                 }
-
-                Debug.Log("doing color stuff");
-
                 Debug.Log("Found ourselves!");
                 if (!colorsToReset.Contains(player.NetworkSpawnID))
                 {
                     colorsToReset.Add(player.NetworkSpawnID);
                     Debug.Log("reset count: " + colorsToReset.Count);
                 }
+
                 var character = player.transform.root.gameObject;
                 Debug.Log("Assigned character");
 
-                foreach (var t in character.GetComponentsInChildren<LineRenderer>())
-                {
-                    t.sharedMaterial.color = Helper.customPlayerColor;
-                    Debug.Log("Assigned color");
-                }
-
-                foreach (SpriteRenderer spriteRenderer in character.GetComponentsInChildren<SpriteRenderer>())
-                {
-                    if (spriteRenderer.transform.tag != "DontChangeColor")
-                    {
-                        spriteRenderer.color = Helper.customPlayerColor;
-                    }
-                }
+                ChangeLineRendColor(Helper.customPlayerColor, character);
+                ChangeSpriteRendColor(Helper.customPlayerColor, character);
             }
         }
 
-        /*public static void InitDataFromServerRecievedMethodPostfix(ref byte[] data, MultiplayerManager __instance)
+        public static void ChangeSpriteRendColor(Color colorWanted, GameObject character)
         {
-            Color defaultColor = new(1, 1, 1);
-
-            if (Helper.customPlayerColor == defaultColor) return;
-            Debug.Log("Color not equal to nothing: " + Helper.customPlayerColor);
-
-            Material[] myColors = Traverse.Create(__instance).Field("m_Colors").GetValue() as Material[];
-            if (oldColor != defaultColor)
+            foreach (SpriteRenderer spriteRenderer in character.GetComponentsInChildren<SpriteRenderer>())
             {
-                myColors[(int)playerByte].SetColor("_Color", oldColor);
-                Debug.Log("Old color was not default!");
+                spriteRenderer.color = colorWanted;
+                spriteRenderer.GetComponentInParent<SetColorWhenDamaged>().startColor = colorWanted;
             }
+        }
 
-            using (MemoryStream memoryStream = new MemoryStream(data))
+        public static void ChangeLineRendColor(Color colorWanted, GameObject character)
+        {
+            foreach (var t in character.GetComponentsInChildren<LineRenderer>())
             {
-                using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-                {
-                    binaryReader.ReadByte();
-                    playerByte = binaryReader.ReadByte();
-                }
+                t.sharedMaterial.color = colorWanted;
+                Debug.Log("Assigned color");
             }
-            oldColor = myColors[playerByte].color;
-            Debug.Log("Old color is: " + oldColor);
-
-            myColors[playerByte].SetColor("_Color", Helper.customPlayerColor);
-            Debug.Log("color I wanted: " + Helper.customPlayerColor);
-            Debug.Log("color I set it to: "+ myColors[playerByte].color);
-        }*/
-
-
-
+        }
+        
         public static void InitGUI()
         {
             try

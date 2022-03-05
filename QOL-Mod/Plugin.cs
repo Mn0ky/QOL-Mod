@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -44,57 +46,105 @@ namespace QOL
             {
                 Logger.LogInfo("Loading configuration options from config file...");
 
-                configCustomColor = Config.Bind("Startup Options",
+                configCustomColor = Config.Bind("Player Color Options",
                     "CustomColor",
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
 
-                configQOLMenuKeybind = Config.Bind("Startup Options", // The section under which the option is shown
+                configQOLMenuKeybind = Config.Bind("Keybind Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
                     "Change the keybind for opening the QOL Menu? (Only specify a single key or two keys)"); // Description of the option to show in the config file
 
-                configStatMenuKeybind = Config.Bind("Startup Options", // The section under which the option is shown
+                configStatMenuKeybind = Config.Bind("Keybind Options", // The section under which the option is shown
                     "StatWindowKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2), // The key of the configuration option in the configuration file
                     "Change the keybind for opening the Stat Window? (Only specify a single key or two keys)"); // Description of the option to show in the config file
 
-                configAutoGG = Config.Bind("Startup Options", // The section under which the option is shown
-                    "AutoGG",
-                    false, // The key of the configuration option in the configuration file
-                    "Enable AutoGG on startup?"); // Description of the option to show in the config file
-
-                configchatCensorshipBypass = Config.Bind("Startup Options",
-                    "ChatCensorshipBypass",
-                    false,
-                    "Disable chat censorship on startup?");
-
-                configWinStreakLog = Config.Bind("Startup Options",
+                configWinStreakLog = Config.Bind("Winstreak Options",
                     "AlwaysTrackWinstreak",
                     false,
                     "Always keep track of your winstreak instead of only when enabled?");
 
-                configRichText = Config.Bind("Startup Options",
+                configWinStreakFontsize = Config.Bind("Winstreak Options",
+                    "WinstreakFontsize",
+                    200,
+                    "Change the fontsize of your winstreak message?");
+
+                configWinStreakColors = Config.Bind("Winstreak Options",
+                    "WinstreakColors",
+                    "FF0000 FFEB04 00FF00",
+                    "Change the default winstreak colors? HEX values only, space separated. Each color will show in the order of the ranges below. The number of colors should be equal to the number of ranges! Max 50.");
+
+                foreach (var colorStr in configWinStreakColors.Value.Split(' '))
+                {
+                    ColorUtility.TryParseHtmlString('#' + colorStr, out var color);
+                    Logger.LogInfo("color :" + color);
+                    GameManagerPatch.winstreakColors1.Add(color);
+                }
+                GameManagerPatch.winstreakColors2 = new List<Color>(GameManagerPatch.winstreakColors1);
+
+                configWinStreakRanges = Config.Bind("Winstreak Options",
+                    "WinstreakRanges",
+                    "0-1 1-2 2-3",
+                    "Change the default ranges? Add more ranges, space separated, to support more colors. Once the last range is reached the corresponding color will be used for all subsequent wins until the streak is lost. Max 50.");
+
+                foreach (var streakRange in configWinStreakRanges.Value.Split(' '))
+                {
+                    Logger.LogInfo("range: " + streakRange);
+                    int[] streakRangeNums = Array.ConvertAll(streakRange.Split('-'), int.Parse);
+                    Logger.LogInfo("nums: " + streakRangeNums[0] + " " + streakRangeNums[1]);
+                    
+                    GameManagerPatch.winstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
+                }
+                GameManagerPatch.winstreakRanges2 = new List<int>(GameManagerPatch.winstreakRanges1);
+
+                configAutoGG = Config.Bind("On-Startup Options", // The section under which the option is shown
+                    "AutoGG",
+                    false, // The key of the configuration option in the configuration file
+                    "Enable AutoGG on startup?"); // Description of the option to show in the config file
+
+                configchatCensorshipBypass = Config.Bind("On-Startup Options",
+                    "ChatCensorshipBypass",
+                    false,
+                    "Disable chat censorship on startup?");
+
+                configRichText = Config.Bind("On-Startup Options",
                     "RichText",
                     false,
                     "Enable rich text for chat on startup?");
 
-                configTranslation = Config.Bind("Startup Options",
+                configAdvCmd = Config.Bind("Startup Options",
+                    "AdvertiseMsg",
+                    "",
+                    "Modify the output of /adv? By default the message is blank but can be changed to anything.");
+
+                configTranslation = Config.Bind("On-Startup Options",
                     "AutoTranslations",
                     false,
                     "Enable auto-translation for chat messages to English on startup?");
 
-                configNoResize = Config.Bind("Startup Options",
+                configNoResize = Config.Bind("On-Startup Options",
                     "NoResize",
                     true,
                     "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
 
-                configCustomName = Config.Bind("Startup Options",
-                    "CustomUsername",
-                    string.Empty,
-                    "Specify a custom username? (client-side only)");
+                // configCustomName = Config.Bind("On-Startup Options",
+                //     "CustomUsername",
+                //     string.Empty,
+                //     "Specify a custom username? (client-side only)");
 
-                configAuthKeyForTranslation = Config.Bind("Startup Options",
+                configHPWinner = Config.Bind("Misc. Options",
+                    "AlwaysShowHPOfWinner",
+                    false,
+                    "Always show the HP of the winner of the round?");
+
+                configEmoji = Config.Bind("Misc. Options",
+                    "ShrugEmoji",
+                    "☹",
+                    "Specify the emoji used in the shrug command? Only the 15 TMP defaults are available: 😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
+
+                configAuthKeyForTranslation = Config.Bind("Misc. Options",
                     "AutoAuthTranslationsAPIKey",
                     string.Empty,
                     "Put your API key for Google Translate V2 here (Optional)");
@@ -110,12 +160,18 @@ namespace QOL
         public static ConfigEntry<bool> configTranslation;
         public static ConfigEntry<bool> configWinStreakLog;
         public static ConfigEntry<bool> configNoResize;
+        public static ConfigEntry<bool> configHPWinner;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
         public static ConfigEntry<string> configCustomName;
         public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
         public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
-        
+        public static ConfigEntry<string> configWinStreakColors;
+        public static ConfigEntry<string> configWinStreakRanges;
+        public static ConfigEntry<int> configWinStreakFontsize;
+        public static ConfigEntry<string> configAdvCmd;
+        public static ConfigEntry<string> configEmoji;
+
 
         public const string VersionNumber = "1.0.13"; // Version number
     }

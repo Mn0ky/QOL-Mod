@@ -12,8 +12,10 @@ namespace QOL
         public static CSteamID GetSteamID(ushort targetID) // Returns the steamID of the specified spawnID
         {
             ConnectedClientData[] connectedClients = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mConnectedClients").GetValue() as ConnectedClientData[];
+
             return connectedClients[(int)targetID].ClientID;
         }
+
         public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
         {
             return targetSpawnColor switch
@@ -25,6 +27,7 @@ namespace QOL
                 _ => ushort.MaxValue,
             };
         }
+
         public static string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
         {
             return x switch
@@ -35,6 +38,12 @@ namespace QOL
                 _ => "Yellow",
             };
         }
+
+        public static string GetCapitalColor(string color) // Returns the corresponding color from the specified spawnID
+        {
+            return char.ToUpper(color[0]) + color.Substring(1);
+        }
+
         public static NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
         {
             foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
@@ -50,11 +59,18 @@ namespace QOL
         {
             return SteamFriends.GetFriendPersonaName(passedClientID);
         }
+
         public static string GetHPOfPlayer(string colorWanted)
         {
             Debug.Log("colorwanted, hpofplayer: " + colorWanted);
             return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health + "%");
         }
+
+        public static string GetHPOfPlayer(ushort idWanted)
+        {
+            return (Helper.GetNetworkPlayer(idWanted).GetComponentInChildren<HealthHandler>().health + "%");
+        }
+
         public static string GetJoinGameLink() // Actually sticks the "join game" link together
         {
             string urlAndProtocolPrefix = "steam://joinlobby/";
@@ -97,6 +113,19 @@ namespace QOL
             Debug.Log("That wasn't the local player!");
         }
 
+        public static void ToggleWinstreak()
+        {
+            if (!winStreakEnabled)
+            {
+                winStreakEnabled = true;
+                gameManager.winText.fontSize = Plugin.configWinStreakFontsize.Value;
+                return;
+            }
+
+            winStreakEnabled = false;
+            //gameManager.winText.fontSize = 200;
+        }
+
         public static bool IsVowel(char c) // Fancy bit manipulation of a character's ASCII values to check if it's a vowel or not
         {
             return (0x208222 >> (c & 0x1f) & 1) != 0;
@@ -105,26 +134,21 @@ namespace QOL
         public static CSteamID lobbyID; // The ID of the current lobby
         
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
-
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
 
         public static bool isTranslating = Plugin.configTranslation.Value; // True if auto-translations are enabled, false by default
-        
         public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
-
         public static bool uwuifyText; // True if uwufiy text is enabled, false by default
-
-        public static bool winStreakEnabled;
-
-        public static bool AlwaysTrackWinstreak = Plugin.configWinStreakLog.Value;
-
+        public static bool winStreakEnabled = Plugin.configWinStreakLog.Value;
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
-
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
-
-        public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
-
+        //public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
         public static bool NoResize = Plugin.configNoResize.Value;
+        public static bool nukChat;
+
+        public static MatchmakingHandler matchmaking;
+        public static GameManager gameManager;
+
 
         public static TextMeshPro tmpText;
 

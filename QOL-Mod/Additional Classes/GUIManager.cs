@@ -12,7 +12,8 @@ namespace QOL
         private void Start()
         {
             Debug.Log("Started GUI in GUIManager!");
-            matchmaking = FindObjectOfType<MatchmakingHandler>();
+            Helper.matchmaking = FindObjectOfType<MatchmakingHandler>();
+            Helper.gameManager = FindObjectOfType<GameManager>();
         }
         private void Awake()
         {
@@ -73,8 +74,8 @@ namespace QOL
                 Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
                 theLobbyID = Helper.lobbyID;
                 Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
-                Debug.Log("findobject lobbyowner: " + matchmaking.LobbyOwner);
-                theLobbyHost = Helper.GetPlayerName(matchmaking.LobbyOwner);
+                Debug.Log("findobject lobbyowner: " + Helper.matchmaking.LobbyOwner);
+                theLobbyHost = Helper.GetPlayerName(Helper.matchmaking.LobbyOwner);
                 Debug.Log("this.theLobbyID : " + theLobbyID);
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
@@ -167,16 +168,20 @@ namespace QOL
                 mStatsShown = true;
                 Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
+            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Winstreak"))
+            {
+                Helper.ToggleWinstreak();
+            }
             if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
             {
                 SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
             }
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
             {
-                if (matchmaking.IsHost)
+                if (Helper.matchmaking.IsHost)
                 {
                     MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly });
+                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly });
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
                 }
                 else
@@ -186,10 +191,10 @@ namespace QOL
             }
             if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
             {
-                if (matchmaking.IsHost)
+                if (Helper.matchmaking.IsHost)
                 {
                     MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic});
+                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic});
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
                 }
                 else
@@ -254,8 +259,6 @@ namespace QOL
         private string playerNamesStr = "Players in Room: \n";
 
         private string theLobbyHost;
-
-        private static MatchmakingHandler matchmaking;
 
         private KeyCode QOLMenuKey1;
         private KeyCode QOLMenuKey2 = KeyCode.Joystick8Button19;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
@@ -103,14 +104,28 @@ namespace QOL
                 return false;
             }
 
-            if (Helper.uwuifyText && !string.IsNullOrEmpty(message))
+            else if (Helper.uwuifyText && !string.IsNullOrEmpty(message))
             {
                 NetworkPlayer networkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
                 if (networkPlayer.HasLocalControl)
                 {
+                    if (Helper.nukChat)
+                    {
+                        message = UwUify(message);
+                        coroutineUsed = WaitCoroutine(message);
+                        __instance.StartCoroutine(coroutineUsed);
+                        return false;
+                    }
                     networkPlayer.OnTalked(UwUify(message));
                     return false;
                 }
+            }
+
+            else if (Helper.nukChat)
+            {
+                coroutineUsed = WaitCoroutine(message);
+                __instance.StartCoroutine(coroutineUsed);
+                return false;
             }
 
             return true;
@@ -142,7 +157,7 @@ namespace QOL
                     string colorWanted = text.Substring(3);
                     Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
                     Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
-                    Helper.localNetworkPlayer.OnTalked(colorWanted + " HP: " + Helper.GetHPOfPlayer(colorWanted));
+                    Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(colorWanted) + " HP: " + Helper.GetHPOfPlayer(colorWanted));
                     return;
                 }
 
@@ -163,11 +178,15 @@ namespace QOL
             //    Debug.Log("clipboard: " + GUIUtility.systemCopyBuffer);
             //    __instance.StartCoroutine(WaitCoroutine(GUIUtility.systemCopyBuffer));
             //}
-            // else if (text == "stopspam")
+            // else if (text == "stopspam") 
             // {
             //     Debug.Log("stopping spam");
             //     stopSpam = true;
             // }
+            else if (text == "adv")
+            {
+                Helper.localNetworkPlayer.OnTalked(Plugin.configAdvCmd.Value);
+            }
             else if (text == "uncensor") // Enables or disables skip for chat censorship
             {
                 Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
@@ -175,12 +194,12 @@ namespace QOL
             }
             else if (text == "winstreak")
             {
-                Helper.winStreakEnabled = !Helper.winStreakEnabled;
+                Helper.ToggleWinstreak();
             }
             else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
             {
                 message = message.Replace("/shrug", "");
-                message += " \u00af\\_(ツ)_/\u00af";
+                message += $" \u00af\\_{Plugin.configEmoji.Value}_/\u00af";
                 Helper.localNetworkPlayer.OnTalked(message);
 
             }
@@ -285,16 +304,23 @@ namespace QOL
                 }
                 Helper.localNetworkPlayer.OnTalked("Can't ping yourself!");
             }
-            else if (text.Contains("name"))
-            {
-                string nameWanted = Helper.GetPlayerName(Helper.GetSteamID(Helper.GetIDFromColor(text.Substring(5))));
-                Helper.localNetworkPlayer.OnTalked(nameWanted);
-            }
-            // else if (text == "color")
+            // TODO: Work on this later!!
+            // else if (text == "rainbow")
             // {
-            //     GameObject myCharacter = Helper.localNetworkPlayer.gameObject;
-            //     Helper.localNetworkPlayer.OnTalked("Not implemented");
+            //     new GameObject("RainbowHandler").AddComponent<RainbowManager>();
             // }
+            else if (text.StartsWith("id"))
+            {
+                string colorWanted = text.Substring(3);
+                GUIUtility.systemCopyBuffer = Helper.GetSteamID(Helper.GetIDFromColor(colorWanted)).ToString();
+
+                Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(colorWanted) + "'s steamID copied to clipboard");
+            }
+            else if (text == "nukychat")
+            {
+                Helper.nukChat = !Helper.nukChat;
+                if (coroutineUsed != null) __instance.StopCoroutine(coroutineUsed);
+            }
             // else if (text == "customname_test")
             // {
             //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
@@ -329,15 +355,6 @@ namespace QOL
             }
         }
 
-        public static IEnumerator WaitCoroutine(string clipboard)
-        {
-            for (;;)
-            {
-                if (stopSpam) break;
-                Helper.localNetworkPlayer.OnTalked(clipboard);
-                yield return new WaitForSeconds(0.1f);
-            }
-        }
         public static void SaveForUpArrow(string backupThisText) // Checks if the message should be inserted then inserts it into the 0th index of backup list 
         {
 
@@ -349,6 +366,17 @@ namespace QOL
             {
                 ChatManagerPatches.backupTextList.RemoveAt(19);
                 ChatManagerPatches.backupTextList.Insert(0, backupThisText);
+            }
+        }
+
+        public static IEnumerator WaitCoroutine(string msg)
+        {
+            var msgParts = msg.Split(' ');
+
+            foreach (var text in msgParts)
+            {
+                Helper.localNetworkPlayer.OnTalked(text);
+                yield return new WaitForSeconds(0.45f);
             }
         }
 
@@ -405,7 +433,7 @@ namespace QOL
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
 
-        public static bool stopSpam;
+        private static IEnumerator coroutineUsed;
 
         private static MatchmakingHandler matchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
     }
