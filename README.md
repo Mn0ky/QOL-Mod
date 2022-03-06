@@ -32,9 +32,7 @@ The following are some general things to take note of:
   - Both the ``/private`` & ``/public`` commands require you to be the host in order to function.
   - The ``/rich`` command only enables rich text for you, a.k.a client-side only.
   - The auto-translation feature uses the Google Translate API and has a rate-limit of **``100``** requests per hour.
-  - The ``ツ`` character outputted by the ``/shrug`` command shows up as invalid (�) ingame.
   - A custom player color only shows for you, a.k.a client-side only.
-  - Currently, a custom player color only shows up when *joining* a server and not when creating one.
 
 ## GUI Menu
 
@@ -48,17 +46,26 @@ Alternative chat commands are listed directly below.
 Command | Description
 --------- | -----------
 **Usage:**		| ```/<command_name> [<additional parameter>]```
+/adv		| Outputs whatever you set it to in the config.
 /gg		| Enables automatic sending of "gg" upon death of mod user.
-/shrug ```[<message>]```		| Appends ¯\\\_(ツ)\_/¯ to the end of the typed message.
-/rich		| Enables rich text for chat (**visible to mod user only**).
+/help		| Opens up the Steam overlay and takes you to this page.
+/hp	```[<target_color>]```	| Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.
+/id	```[<target_color>]```		| Copies the Steam ID of the target player to clipboard.
+/invite		| Generates a "join game" link and copies it to clipboard.
+/lobhealth		| Outputs the health set for the whole lobby.
+/lobregen		| Outputs whether or not regen is enabled for the lobby.
+/nukychat		| Lets you talk like Nuky. Splits up any message you send and outputs it word by word.
+/ping ```[<target_color>]```		| Outpus the ping for the targeted player.
 /private		| Privates the current lobby (**must be host**).
 /public		| Opens the current lobby to the public (**must be host**).
-/uncensor		| Disables chat censorship.
-/hp	```[<target_color>]```	| Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.
-/lobhealth		| Outputs the health set for the whole lobby.
-/uwu		| *uwuifies* any message you send.
-/invite		| Generates a "join game" link and copies it to clipboard.
+/rich		| Enables rich text for chat (**visible to mod user only**).
+/shrug ```[<message>]```		| Appends ¯\\\_(ツ)\_/¯ to the end of the typed message.
+/stat ```[<target_color> <stat_type>]```		| Opens/closes the stats menu.
 /translate		| Enables auto-translation for messages from others to English.
+/uncensor		| Disables chat censorship.
+/uwu		| *uwuifies* any message you send.
+/ver		| Outputs the mod version string.
+/winstreak		| Enables winstreak mode.
 
 ## Using The Config
 
