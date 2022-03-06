@@ -150,7 +150,7 @@ namespace QOL
             string text = message.ToLower();
             text = text.TrimStart('/');
 
-            if (text.Contains("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
+            if (text.StartsWith("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
             {
                 if (text.Length > 2)
                 {
@@ -268,7 +268,7 @@ namespace QOL
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
             }
-            else if (text.StartsWith("stats"))
+            else if (text.StartsWith("stat"))
             {
                 string[] commandArr = text.Split(' ');
                 if (commandArr.Length == 3)
@@ -320,6 +320,10 @@ namespace QOL
             {
                 Helper.nukChat = !Helper.nukChat;
                 if (coroutineUsed != null) __instance.StopCoroutine(coroutineUsed);
+            }
+            else if (text == "winnerhp")
+            {
+                Helper.HPWinner = !Helper.HPWinner;
             }
             // else if (text == "customname_test")
             // {

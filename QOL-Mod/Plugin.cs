@@ -54,12 +54,12 @@ namespace QOL
                 configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
-                    "Change the keybind for opening the QOL Menu? (Only specify a single key or two keys)"); // Description of the option to show in the config file
+                    "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html"); // Description of the option to show in the config file
 
                 configStatMenuKeybind = Config.Bind("Menu Options",
                     "StatWindowKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
-                    "Change the keybind for opening the Stat Window? (Only specify a single key or two keys)");
+                    "Change the keybind for opening the Stat Window? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html");
 
                 configQOLMenuPlacement = Config.Bind("Menu Options",
                     "QOLMenuLocation",
@@ -147,14 +147,14 @@ namespace QOL
                 //     string.Empty,
                 //     "Specify a custom username? (client-side only)");
 
-                configHPWinner = Config.Bind("Misc. Options",
+                configHPWinner = Config.Bind("On-Startup Options",
                     "AlwaysShowHPOfWinner",
                     false,
-                    "Always show the HP of the winner of the round?");
+                    "Enable always show the HP for the winner of the round on-startup?");
 
                 configEmoji = Config.Bind("Misc. Options",
                     "ShrugEmoji",
-                    '☹',
+                    "☹",
                     "Specify the emoji used in the shrug command? Only the following 15 TMP defaults are available: 😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
 
                 configAuthKeyForTranslation = Config.Bind("Misc. Options",
@@ -164,7 +164,7 @@ namespace QOL
             }
             catch (Exception ex)
             {   
-                Logger.LogError("Exception on loading configuration: " + ex.InnerException);
+                Logger.LogError("Exception on loading configuration: " + ex.StackTrace + ex.Message + ex.Source + ex.InnerException);
             }
 
             var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
@@ -197,11 +197,11 @@ namespace QOL
         public static ConfigEntry<string> configWinStreakRanges;
         public static ConfigEntry<int> configWinStreakFontsize;
         public static ConfigEntry<string> configAdvCmd;
-        public static ConfigEntry<char> configEmoji;
+        public static ConfigEntry<string> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
         public static ConfigEntry<string> configStatMenuPlacement;
 
 
-        public const string VersionNumber = "1.0.13"; // Version number
+        public const string VersionNumber = "1.0.13.1"; // Version number
     }
 }

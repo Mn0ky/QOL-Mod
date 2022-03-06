@@ -20,7 +20,7 @@ namespace QOL
 
         public static void networkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
-            if (Plugin.configHPWinner.Value)
+            if (Helper.HPWinner)
             {
                 string winnerColor = Helper.GetColorFromID(winner);
 
@@ -85,6 +85,7 @@ namespace QOL
         public static bool DetermineNewHighScore(int score)
         {
             var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
+            Debug.Log("high: " + highScore + "score: " + score);
 
             if (highScore < score)
             {
@@ -93,7 +94,6 @@ namespace QOL
                 return true;
             }
 
-            File.WriteAllText(scorePath, score.ToString());
             return false;
         }
 

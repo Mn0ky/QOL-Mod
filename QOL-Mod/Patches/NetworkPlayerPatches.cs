@@ -38,7 +38,7 @@ namespace QOL
 
             if ((bool)mHasLocalControl)
             {
-                if (usingKey)
+                if (!usingKey)
                 {
                     __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
                     return;
@@ -48,7 +48,7 @@ namespace QOL
             }
 
             ChatManager mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue() as ChatManager;
-            if (usingKey)
+            if (!usingKey)
             {
                 __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
                 return;

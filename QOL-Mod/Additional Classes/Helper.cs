@@ -145,6 +145,7 @@ namespace QOL
         //public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
         public static bool NoResize = Plugin.configNoResize.Value;
         public static bool nukChat;
+        public static bool HPWinner = Plugin.configHPWinner.Value;
 
         public static MatchmakingHandler matchmaking;
         public static GameManager gameManager;
