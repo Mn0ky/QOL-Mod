@@ -34,12 +34,12 @@ The following are some general things to take note of:
   - The auto-translation feature uses the Google Translate API and has a rate-limit of **``100``** requests per hour.
   - A custom player color only shows for you, a.k.a client-side only.
 
-## GUI Menu
+## QOL Menu
 
-The menu is the primary way to use and enable/disable features.<br/>
+This menu is the primary way to use and enable/disable features.<br/>
 It can be opened with the keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
 An image below shows a visual overview:<br/>
-![Image of QOL Menu](https://i.ibb.co/LhWr9hV/QOL-MENU-cropped.png)<br/>
+![Image of QOL Menu](https://i.ibb.co/pXhrfN7/menu-v14.png)<br/>
 Alternative chat commands are listed directly below.
 ## Chat Commands
 
@@ -66,6 +66,11 @@ Command | Description
 /uwu		| *uwuifies* any message you send.
 /ver		| Outputs the mod version string.
 /winstreak		| Enables winstreak mode.
+
+## Stat Menu
+
+The stat menu provides an easy way to view the statistics of certain player actions that the game tracks. By default can be opened via the keybind <kbd>LeftShift</kbd> + <kbd>F2</kbd>, but also can be accessed through the QOL menu. The stats that are shown should **not** be taken as having absolute accuracy.<br/>
+![Image of Stat Menu](https://i.ibb.co/txjYmP7/statmenu.png)
 
 ## Using The Config
 
