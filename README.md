@@ -59,7 +59,7 @@ Command | Description
 /private		| Privates the current lobby (**must be host**).
 /public		| Opens the current lobby to the public (**must be host**).
 /rich		| Enables rich text for chat (**visible to mod user only**).
-/shrug ```[<message>]```		| Appends ¯\\\_(ツ)\_/¯ to the end of the typed message.
+/shrug ```[<message>]```		| Appends ¯\\\_☹\_/¯ to the end of the typed message.
 /stat ```[<target_color> <stat_type>]```		| Gets the targeted stat of the targeted player. Open the stat menu to see a list of different stat names.
 /translate		| Enables auto-translation for messages from others to English.
 /uncensor		| Disables chat censorship.
