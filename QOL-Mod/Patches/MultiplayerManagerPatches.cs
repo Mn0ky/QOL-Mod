@@ -5,6 +5,7 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using System.Reflection.Emit;
+using TMPro;
 
 
 namespace QOL
@@ -66,6 +67,8 @@ namespace QOL
                         }
 
                         Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
+                        ChangeWinTextColor(oldColor, player.NetworkSpawnID);
+
                         colorsToReset.Remove(player.NetworkSpawnID);
                     }
                     continue;
@@ -82,6 +85,7 @@ namespace QOL
 
                 ChangeLineRendColor(Helper.customPlayerColor, character);
                 ChangeSpriteRendColor(Helper.customPlayerColor, character);
+                ChangeWinTextColor(Helper.customPlayerColor, player.NetworkSpawnID);
             }
         }
 
@@ -101,6 +105,12 @@ namespace QOL
                 t.sharedMaterial.color = colorWanted;
                 Debug.Log("Assigned color");
             }
+        }
+
+        public static void ChangeWinTextColor(Color colorWanted, int playerID) // TODO: Simplify this!
+        {
+            var winTexts = Traverse.Create(UnityEngine.Object.FindObjectOfType<WinCounterUI>()).Field("mPlayerWinTexts").GetValue<TextMeshProUGUI[]>();
+            winTexts[playerID].color = colorWanted;
         }
         
         public static void InitGUI()

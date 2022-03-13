@@ -4,6 +4,7 @@ using UnityEngine;
 using Steamworks;
 using HarmonyLib;
 using TMPro;
+using UnityEngine.Assertions.Must;
 
 namespace QOL
 {
@@ -95,11 +96,17 @@ namespace QOL
                 Debug.Log("Assigned the localNetworkPlayer!");
                 Helper.tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
                 Helper.tmpText.richText = Plugin.configRichText.Value;
-                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
 
-                if (Helper.GetPlayerName(Helper.localPlayerSteamID).Length > 12 && !Helper.NoResize) // If reading custom names then make sure to add conditional here
+                if (Helper.NameResize) // If reading custom names then make sure to add conditional here
                 {
-                    playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().fontSize = 19.5f;
+                    TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[]; //TODO: Simplify this, cough cough references
+
+                    foreach (var name in playerNames)
+                    {
+                        //playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().fontSize = 19.5f;
+                        name.enableAutoSizing = true;
+                        name.fontSizeMax = 45;
+                    }
                 }
 
                 // if (isCustomName)
@@ -108,6 +115,14 @@ namespace QOL
                 //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
                 //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
                 // }
+
+                if (Plugin.configFixCrown.Value)
+                {
+                    foreach (var crownCount in UnityEngine.Object.FindObjectOfType<WinCounterUI>().GetComponentsInChildren<TextMeshProUGUI>())
+                    {
+                        crownCount.enableAutoSizing = true;
+                    }
+                }
                 return;
             }
             Debug.Log("That wasn't the local player!");
@@ -143,7 +158,7 @@ namespace QOL
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
         //public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
-        public static bool NoResize = Plugin.configNoResize.Value;
+        public static bool NameResize = Plugin.configNoResize.Value;
         public static bool nukChat;
         public static bool HPWinner = Plugin.configHPWinner.Value;
 

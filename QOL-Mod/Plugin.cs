@@ -127,7 +127,7 @@ namespace QOL
                     false,
                     "Enable rich text for chat on startup?");
 
-                configAdvCmd = Config.Bind("Startup Options",
+                configAdvCmd = Config.Bind("Misc. Options",
                     "AdvertiseMsg",
                     "",
                     "Modify the output of /adv? By default the message is blank but can be changed to anything.");
@@ -138,14 +138,19 @@ namespace QOL
                     "Enable auto-translation for chat messages to English on startup?");
 
                 configNoResize = Config.Bind("Misc. Options",
-                    "NoResize",
-                    true,
-                    "Do not shrink username font if name is over 12 characters? (This is providing large name support)");
+                    "ResizeName",
+                    false,
+                    "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
-                // configCustomName = Config.Bind("On-Startup Options",
+                // configCustomName = Config.Bind("Misc. Options",
                 //     "CustomUsername",
                 //     string.Empty,
                 //     "Specify a custom username? (client-side only)");
+
+                configFixCrown = Config.Bind("Misc. Options",
+                    "FixCrownTxt",
+                    true,
+                    "Auto-resize win counter font so wins into the hundreds/thousands display properly?");
 
                 configHPWinner = Config.Bind("On-Startup Options",
                     "AlwaysShowHPOfWinner",
@@ -200,8 +205,10 @@ namespace QOL
         public static ConfigEntry<string> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
         public static ConfigEntry<string> configStatMenuPlacement;
+        public static ConfigEntry<bool> configFixCrown;
 
 
-        public const string VersionNumber = "1.0.13.1"; // Version number
+
+        public const string VersionNumber = "1.0.14"; // Version number
     }
 }

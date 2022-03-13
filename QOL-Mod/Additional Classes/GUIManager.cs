@@ -73,11 +73,9 @@ namespace QOL
                     playerNamesStr = playerNamesStr + "\n" + str;
                 }
                 Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
-                theLobbyID = Helper.lobbyID;
                 Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
                 Debug.Log("findobject lobbyowner: " + Helper.matchmaking.LobbyOwner);
                 theLobbyHost = Helper.GetPlayerName(Helper.matchmaking.LobbyOwner);
-                Debug.Log("this.theLobbyID : " + theLobbyID);
                 Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
 
@@ -139,7 +137,6 @@ namespace QOL
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
             GUI.skin.label.alignment = normAlignment;
 
-            GUILayout.Label("<color=red>Lobby ID:</color> " + theLobbyID);
 			GUILayout.Label("Host: " + theLobbyHost);
             GUILayout.Label(playerNamesStr);
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
@@ -270,7 +267,5 @@ namespace QOL
         private KeyCode statWindowKey1;
         private KeyCode statWindowKey2 = KeyCode.Joystick8Button19;
         private bool anyKeyStat;
-
-        private CSteamID theLobbyID;
     }
 }
