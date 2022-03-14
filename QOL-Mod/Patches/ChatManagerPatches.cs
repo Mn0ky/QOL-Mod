@@ -42,7 +42,7 @@ namespace QOL
         public static void StartMethodPostfix(ChatManager __instance)
         {
             NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            Helper.AssignLocalNetworkPlayerAndRichText(localNetworkPlayer, __instance); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours (also if text should be rich or not)
+            Helper.InitValues(localNetworkPlayer, __instance); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours (also if text should be rich or not)
         }
 
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
@@ -106,8 +106,8 @@ namespace QOL
 
             else if (Helper.uwuifyText && !string.IsNullOrEmpty(message))
             {
-                NetworkPlayer networkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-                if (networkPlayer.HasLocalControl)
+
+                if (Helper.localNetworkPlayer.HasLocalControl)
                 {
                     if (Helper.nukChat)
                     {
@@ -116,15 +116,22 @@ namespace QOL
                         __instance.StartCoroutine(coroutineUsed);
                         return false;
                     }
-                    networkPlayer.OnTalked(UwUify(message));
+                    Helper.localNetworkPlayer.OnTalked(UwUify(message));
                     return false;
                 }
             }
 
             else if (Helper.nukChat)
             {
+                if (Helper.onlyLower) message = message.ToLower();
                 coroutineUsed = WaitCoroutine(message);
                 __instance.StartCoroutine(coroutineUsed);
+                return false;
+            }
+
+            else if (Helper.onlyLower)
+            {
+                Helper.localNetworkPlayer.OnTalked(message.ToLower());
                 return false;
             }
 
@@ -286,7 +293,7 @@ namespace QOL
             {
                 Helper.isTranslating = !Helper.isTranslating;
             }
-            else if (text == "lobhealth")
+            else if (text == "lobhp")
             {
                 Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
             }
@@ -305,10 +312,10 @@ namespace QOL
                 Helper.localNetworkPlayer.OnTalked("Can't ping yourself!");
             }
             // TODO: Work on this later!!
-            // else if (text == "rainbow")
-            // {
-            //     new GameObject("RainbowHandler").AddComponent<RainbowManager>();
-            // }
+            else if (text == "rainbow")
+            {
+                Helper.ToggleRainbow();
+            }
             else if (text.StartsWith("id"))
             {
                 string colorWanted = text.Substring(3);
@@ -316,7 +323,7 @@ namespace QOL
 
                 Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(colorWanted) + "'s steamID copied to clipboard");
             }
-            else if (text == "nukychat")
+            else if (text == "nuky")
             {
                 Helper.nukChat = !Helper.nukChat;
                 if (coroutineUsed != null) __instance.StopCoroutine(coroutineUsed);
@@ -330,6 +337,10 @@ namespace QOL
             //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
             //     playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
             // }
+            else if (text == "lowercase")
+            {
+                Helper.onlyLower = !Helper.onlyLower;
+            }
             else if (text == "help")
             {
                 SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");

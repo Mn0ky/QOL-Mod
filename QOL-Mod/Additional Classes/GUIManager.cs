@@ -124,11 +124,7 @@ namespace QOL
         public void OnGUI() 
         {
             if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
-            if (mShowStatMenu)
-            {
-                StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Window");
-                //if (!mStatsShown) 
-            }
+            if (mShowStatMenu) StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Menu");
         }
 		private void KickWindow(int window)
         {

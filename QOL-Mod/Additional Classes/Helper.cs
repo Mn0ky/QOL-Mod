@@ -72,23 +72,15 @@ namespace QOL
             return (Helper.GetNetworkPlayer(idWanted).GetComponentInChildren<HealthHandler>().health + "%");
         }
 
-        public static string GetJoinGameLink() // Actually sticks the "join game" link together
+        public static string GetJoinGameLink() // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
         {
-            string urlAndProtocolPrefix = "steam://joinlobby/";
-            string appID = "674940/";
-            string joinLink = string.Concat(new string[]
-            {
-            urlAndProtocolPrefix,
-            appID,
-            Helper.lobbyID.ToString(),
-            "/",
-            Helper.localPlayerSteamID.ToString()
-            });
+            var joinLink = $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
             Debug.Log("joinLink: " + joinLink);
+
             return joinLink;
         }
 
-        public static void AssignLocalNetworkPlayerAndRichText(NetworkPlayer localNetworkPlayer, ChatManager __instance) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
+        public static void InitValues(NetworkPlayer localNetworkPlayer, ChatManager __instance) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
         {
             if (GetSteamID(localNetworkPlayer.NetworkSpawnID) == Helper.localPlayerSteamID)
             {
@@ -123,6 +115,13 @@ namespace QOL
                         crownCount.enableAutoSizing = true;
                     }
                 }
+
+                if (Plugin.configAlwaysRainbow.Value)
+                {
+                    rainbowEnabled = false;
+                    ToggleRainbow();
+                }
+
                 return;
             }
             Debug.Log("That wasn't the local player!");
@@ -141,10 +140,21 @@ namespace QOL
             //gameManager.winText.fontSize = 200;
         }
 
-        public static bool IsVowel(char c) // Fancy bit manipulation of a character's ASCII values to check if it's a vowel or not
+        public static void ToggleRainbow()
         {
-            return (0x208222 >> (c & 0x1f) & 1) != 0;
+            if (!rainbowEnabled && GameObject.Find("RainbowHandler") == null)
+            {
+                new GameObject("RainbowHandler").AddComponent<RainbowManager>();
+                rainbowEnabled = true;
+                return;
+            }
+
+            UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = false;
+            rainbowEnabled = false;
         }
+
+        // Fancy bit-manipulation of a character's ASCII values to check whether it's a vowel or not
+        public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;
 
         public static CSteamID lobbyID; // The ID of the current lobby
         
@@ -160,11 +170,12 @@ namespace QOL
         //public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
         public static bool NameResize = Plugin.configNoResize.Value;
         public static bool nukChat;
+        public static bool onlyLower;
         public static bool HPWinner = Plugin.configHPWinner.Value;
+        public static bool rainbowEnabled;
 
         public static MatchmakingHandler matchmaking;
         public static GameManager gameManager;
-
 
         public static TextMeshPro tmpText;
 

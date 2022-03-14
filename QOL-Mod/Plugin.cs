@@ -51,6 +51,16 @@ namespace QOL
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
 
+                configRainbowSpeed = Config.Bind("Player Color Options",
+                    "RainbowSpeed",
+                    0.05f,
+                    "Change the speed of the color shifting in rainbow mode (/rainbow)?");
+
+                configAlwaysRainbow = Config.Bind("Player Color Options",
+                    "RainbowEnabled",
+                    false,
+                    "Start with rainbow mode enabled?");
+
                 configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
@@ -201,11 +211,13 @@ namespace QOL
         public static ConfigEntry<string> configWinStreakColors;
         public static ConfigEntry<string> configWinStreakRanges;
         public static ConfigEntry<int> configWinStreakFontsize;
+        public static ConfigEntry<float> configRainbowSpeed;
         public static ConfigEntry<string> configAdvCmd;
         public static ConfigEntry<string> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
         public static ConfigEntry<string> configStatMenuPlacement;
         public static ConfigEntry<bool> configFixCrown;
+        public static ConfigEntry<bool> configAlwaysRainbow;
 
 
 
