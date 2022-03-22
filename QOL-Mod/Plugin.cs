@@ -149,7 +149,7 @@ namespace QOL
 
                 configNoResize = Config.Bind("Misc. Options",
                     "ResizeName",
-                    false,
+                    true,
                     "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
                 // configCustomName = Config.Bind("Misc. Options",

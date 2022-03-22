@@ -61,10 +61,8 @@ namespace QOL
                         ChangeLineRendColor(oldColor, oldCharacter);
                         ChangeSpriteRendColor(oldColor, oldCharacter);
 
-                        foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>())
-                        {
-                            partSys.startColor = oldColor;
-                        }
+                        foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = oldColor;
+
 
                         Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
                         ChangeWinTextColor(oldColor, player.NetworkSpawnID);
@@ -73,12 +71,9 @@ namespace QOL
                     }
                     continue;
                 }
+
                 Debug.Log("Found ourselves!");
-                if (!colorsToReset.Contains(player.NetworkSpawnID))
-                {
-                    colorsToReset.Add(player.NetworkSpawnID);
-                    Debug.Log("reset count: " + colorsToReset.Count);
-                }
+                if (!colorsToReset.Contains(player.NetworkSpawnID)) colorsToReset.Add(player.NetworkSpawnID);
 
                 var character = player.transform.root.gameObject;
                 Debug.Log("Assigned character");
@@ -100,11 +95,8 @@ namespace QOL
 
         public static void ChangeLineRendColor(Color colorWanted, GameObject character)
         {
-            foreach (var t in character.GetComponentsInChildren<LineRenderer>())
-            {
-                t.sharedMaterial.color = colorWanted;
-                Debug.Log("Assigned color");
-            }
+            foreach (var t in character.GetComponentsInChildren<LineRenderer>()) t.sharedMaterial.color = colorWanted;
+            Debug.Log("Assigned color");
         }
 
         public static void ChangeWinTextColor(Color colorWanted, int playerID) // TODO: Simplify this!
@@ -126,14 +118,8 @@ namespace QOL
             }
         }
 
-        //private static byte playerByte;
-        //private static Color oldColor = new(1, 1, 1);
-        private static Color defaultColor = new(1, 1, 1);
+        private static readonly Color defaultColor = new(1, 1, 1);
         private static List<int> colorsToReset = new(3);
-        //private static int count = 0;
-        //private static List<LineRenderer> oldLineRenderers = new(6);
-        //private static List<SpriteRenderer> oldSpriteRenderers = new(6);
-        //private static ushort oldID;
     }
 }
 

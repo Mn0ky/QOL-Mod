@@ -15,14 +15,22 @@ namespace QOL
             harmonyInstance.Patch(GetStringMethod, prefix: GetStringMethodPrefix);
         }
 
+        // Messing around with box-drawing characters, didn't work out
         public static bool GetStringMethodPrefix(ref string __result, CharacterStats __instance)
         {
-            __result = "──────────\nWins: " + __instance.wins + "│\nKills: " + __instance.kills + "│\nDeaths: " + __instance.deaths + "│\nSuicides: " +
-                       __instance.suicides + "│\nFalls: " + __instance.falls + "│\nCrownSteals: " + __instance.crownSteals +
-                       "│\nBulletsHit: " + __instance.bulletsHit + "│\nBulletsMissed: " + __instance.bulletsMissed +
-                       "│\nBulletsShot: " + __instance.bulletsShot + "│\nBlocks: " + __instance.blocks + "│\nPunchesLanded: " +
-                       __instance.punchesLanded + "│\nWeaponsPickedUp: " + __instance.weaponsPickedUp + "│\nWeaponsThrown: " +
-                       __instance.weaponsThrown;
+            __result = string.Concat("──────────\nWins: ", __instance.wins, 
+                                     "│\nKills: ", __instance.kills, 
+                                     "│\nDeaths: ", __instance.deaths, 
+                                     "│\nSuicides: ", __instance.suicides, 
+                                     "│\nFalls: ", __instance.falls, 
+                                     "│\nCrownSteals: ", __instance.crownSteals,
+                                     "│\nBulletsHit: ", __instance.bulletsHit, 
+                                     "│\nBulletsMissed: ", __instance.bulletsMissed,
+                                     "│\nBulletsShot: ", __instance.bulletsShot, 
+                                     "│\nBlocks: ", __instance.blocks,
+                                     "│\nPunchesLanded: ", __instance.punchesLanded, 
+                                     "│\nWeaponsPickedUp: ", __instance.weaponsPickedUp,
+                                     "│\nWeaponsThrown: ", __instance.weaponsThrown);
 
             return false;
         }

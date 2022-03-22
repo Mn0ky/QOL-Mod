@@ -3,7 +3,6 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
@@ -41,8 +40,9 @@ namespace QOL
 
         public static void StartMethodPostfix(ChatManager __instance)
         {
-            NetworkPlayer localNetworkPlayer = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue() as NetworkPlayer;
-            Helper.InitValues(localNetworkPlayer, __instance); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours (also if text should be rich or not)
+            ushort playerID = Traverse.Create(__instance).Field("m_NetworkPlayer").GetValue<NetworkPlayer>().NetworkSpawnID;
+
+            Helper.InitValues(__instance, playerID); // Assigns value of m_NetworkPlayer to Helper.localNetworkPlayer if the networkPlayer is ours (also if text should be rich or not)
         }
 
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
@@ -208,7 +208,6 @@ namespace QOL
                 message = message.Replace("/shrug", "");
                 message += $" \u00af\\_{Plugin.configEmoji.Value}_/\u00af";
                 Helper.localNetworkPlayer.OnTalked(message);
-
             }
             else if (text == "rich") // Enables rich text for chat messages
             {
@@ -216,6 +215,10 @@ namespace QOL
                 theText.richText = !theText.richText;
 
             }
+            // else if (text == "suicide")
+            // {
+            //     Helper.localNetworkPlayer.FallOut(Quaternion.identity, new Vector3(0 , 0, 0));
+            // }
             /*else if (text == "testcol") // Enables rich text for chat messages
             {
                 var oldCharacter = Helper.GetNetworkPlayer(0);
@@ -237,6 +240,7 @@ namespace QOL
             else if (text == "uwu") // Enables uwuifier
             {
                 Helper.uwuifyText = !Helper.uwuifyText;
+                //GameManager.Instance.mMultiplayerManager.
             }
             else if (text == "lobregen")
             {
@@ -244,10 +248,10 @@ namespace QOL
             }
             else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
             {
-                if (matchmaking.IsHost)
+                if (Helper.matchmaking.IsHost)
                 {
                     MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly});
+                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly});
                     Helper.localNetworkPlayer.OnTalked("Lobby made private!");
                 }
                 else
@@ -257,10 +261,10 @@ namespace QOL
             }
             else if (text == "public") // Publicizes the lobby (any player can join through quick match)
             {
-                if (matchmaking.IsHost)
+                if (Helper.matchmaking.IsHost)
                 {
                     MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic });
+                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic });
                     Helper.localNetworkPlayer.OnTalked("Lobby made public!");
                 }
                 else
@@ -280,7 +284,6 @@ namespace QOL
                 string[] commandArr = text.Split(' ');
                 if (commandArr.Length == 3)
                 {
-
                     CharacterStats playerStats = Helper.GetNetworkPlayer(Helper.GetIDFromColor(commandArr[1])).GetComponentInParent<CharacterStats>();
 
                     Helper.localNetworkPlayer.OnTalked(commandArr[1] + ", " + commandArr[2] + ": " + GetTargetStatValue(playerStats, commandArr[2])); 
@@ -299,8 +302,7 @@ namespace QOL
             }
             else if (text.Contains("ping"))
             {
-                ConnectedClientData[] clients = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mClients").GetValue() as ConnectedClientData[];
-                Debug.Log("clients length: " + clients.Length);
+                ConnectedClientData[] clients = GameManager.Instance.mMultiplayerManager.ConnectedClients;
                 ushort colorWanted;
 
                 if (text.Length > 4)
@@ -332,7 +334,7 @@ namespace QOL
             {
                 Helper.HPWinner = !Helper.HPWinner;
             }
-            // else if (text == "customname_test")
+            // else if (text == "customname")
             // {
             //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
             //     playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
@@ -398,7 +400,7 @@ namespace QOL
         public static string UwUify(string targetText)
         {
             int i = 0;
-            StringBuilder newMessage = new StringBuilder(targetText.ToLower()).Append(0);   
+            var newMessage = new StringBuilder(targetText.ToLower()).Append(0);   
             while (i < newMessage.Length)
             {
                 if (!char.IsLetter(newMessage[i]))
@@ -406,8 +408,8 @@ namespace QOL
                     i++;
                     continue;
                 }
-                char curChar = newMessage[i];
-                switch (curChar)
+                char c = newMessage[i];
+                switch (c)
                 {
                     case 'r' or 'l':
                         newMessage[i] = 'w';
@@ -417,7 +419,7 @@ namespace QOL
                         newMessage.Remove(i + 1, 1);
                         break;
                     default:
-                        if (Helper.IsVowel(curChar) && newMessage[i + 1] == 't')
+                        if (Helper.IsVowel(c) && newMessage[i + 1] == 't')
                         {
                             newMessage.Insert(i + 1, 'w');
                         }
@@ -449,7 +451,5 @@ namespace QOL
         };
 
         private static IEnumerator coroutineUsed;
-
-        private static MatchmakingHandler matchmaking = UnityEngine.Object.FindObjectOfType<MatchmakingHandler>();
     }
 }

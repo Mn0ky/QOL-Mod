@@ -1,130 +1,81 @@
 using System;
-using BepInEx.Configuration;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
 using TMPro;
-using UnityEngine.Assertions.Must;
 
 namespace QOL
 {
     public class Helper
     {
-        public static CSteamID GetSteamID(ushort targetID) // Returns the steamID of the specified spawnID
-        {
-            ConnectedClientData[] connectedClients = Traverse.Create(UnityEngine.Object.FindObjectOfType<MultiplayerManager>()).Field("mConnectedClients").GetValue() as ConnectedClientData[];
+        // Returns the steamID of the specified spawnID
+        public static CSteamID GetSteamID(ushort targetID) => clientData[targetID].ClientID;
 
-            return connectedClients[(int)targetID].ClientID;
-        }
+        // Returns the corresponding spawnID from the specified color
+        public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor switch {"yellow" => 0, "blue" => 1, "red" => 2, "green" => 3, _ => ushort.MaxValue};
 
-        public static ushort GetIDFromColor(string targetSpawnColor) // Returns the corresponding spawnID from the specified color
+        // Returns the corresponding color from the specified spawnID
+        public static string GetColorFromID(ushort x) => x switch {1 => "Blue", 2 => "Red", 3 => "Green", _ => "Yellow"};
+
+        // Returns the corresponding color from the specified spawnID
+        public static string GetCapitalColor(string color) => char.ToUpper(color[0]) + color.Substring(1);
+
+        // Returns the targeted player based on the specified spawnID
+        public static NetworkPlayer GetNetworkPlayer(ushort targetID) => clientData[targetID].PlayerObject.GetComponent<NetworkPlayer>();
+
+        // Gets the steam profile name of the specified steamID
+        public static string GetPlayerName(CSteamID passedClientID) => SteamFriends.GetFriendPersonaName(passedClientID);
+
+        public static string GetHPOfPlayer(string colorWanted) => clientData[GetIDFromColor(colorWanted)].PlayerObject.GetComponent<HealthHandler>().health + "%";
+
+        public static string GetHPOfPlayer(ushort idWanted) => GetNetworkPlayer(idWanted).GetComponentInChildren<HealthHandler>().health + "%";
+
+        // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
+        public static string GetJoinGameLink() => $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
+
+        public static void InitValues(ChatManager instance, ushort playerID) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
         {
-            return targetSpawnColor switch
+            if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
+
+            clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
+
+            localNetworkPlayer = clientData[GameManager.Instance.mMultiplayerManager.LocalPlayerIndex].PlayerObject.GetComponent<NetworkPlayer>();
+            Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
+
+            tmpText = Traverse.Create(instance).Field("text").GetValue() as TextMeshPro;
+            tmpText.richText = Plugin.configRichText.Value;
+
+            if (NameResize) // If reading custom names then make sure to add conditional here
             {
-                "yellow" => 0,
-                "blue" => 1,
-                "red" => 2,
-                "green" => 3,
-                _ => ushort.MaxValue,
-            };
-        }
+                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[]; //TODO: Simplify this, cough cough references
 
-        public static string GetColorFromID(ushort x) // Returns the corresponding color from the specified spawnID
-        {
-            return x switch
-            {
-                1 => "Blue",
-                2 => "Red",
-                3 => "Green",
-                _ => "Yellow",
-            };
-        }
-
-        public static string GetCapitalColor(string color) // Returns the corresponding color from the specified spawnID
-        {
-            return char.ToUpper(color[0]) + color.Substring(1);
-        }
-
-        public static NetworkPlayer GetNetworkPlayer(ushort targetID) // Returns the targeted player based on the specified spawnID
-        {
-            foreach (NetworkPlayer networkPlayer in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
-            {
-                if (networkPlayer.NetworkSpawnID == targetID)
+                foreach (var name in playerNames)
                 {
-                    return networkPlayer;
+                    name.enableAutoSizing = true;
+                    name.fontSizeMax = 45;
                 }
             }
-            return null;
-        }
-        public static string GetPlayerName(CSteamID passedClientID) // Gets the steam profile name of the specified steamID
-        {
-            return SteamFriends.GetFriendPersonaName(passedClientID);
-        }
 
-        public static string GetHPOfPlayer(string colorWanted)
-        {
-            Debug.Log("colorwanted, hpofplayer: " + colorWanted);
-            return (Helper.GetNetworkPlayer(Helper.GetIDFromColor(colorWanted)).GetComponentInChildren<HealthHandler>().health + "%");
-        }
+            // if (isCustomName)
+            // {
+            //     Debug.Log("custom name:" + Plugin.configCustomName.Value);
+            //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
+            //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
+            // }
 
-        public static string GetHPOfPlayer(ushort idWanted)
-        {
-            return (Helper.GetNetworkPlayer(idWanted).GetComponentInChildren<HealthHandler>().health + "%");
-        }
-
-        public static string GetJoinGameLink() // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
-        {
-            var joinLink = $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
-            Debug.Log("joinLink: " + joinLink);
-
-            return joinLink;
-        }
-
-        public static void InitValues(NetworkPlayer localNetworkPlayer, ChatManager __instance) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
-        {
-            if (GetSteamID(localNetworkPlayer.NetworkSpawnID) == Helper.localPlayerSteamID)
+            if (Plugin.configFixCrown.Value)
             {
-                Helper.localNetworkPlayer = localNetworkPlayer;
-                Debug.Log("Assigned the localNetworkPlayer!");
-                Helper.tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
-                Helper.tmpText.richText = Plugin.configRichText.Value;
-
-                if (Helper.NameResize) // If reading custom names then make sure to add conditional here
+                foreach (var crownCount in UnityEngine.Object.FindObjectOfType<WinCounterUI>().GetComponentsInChildren<TextMeshProUGUI>())
                 {
-                    TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[]; //TODO: Simplify this, cough cough references
-
-                    foreach (var name in playerNames)
-                    {
-                        //playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().fontSize = 19.5f;
-                        name.enableAutoSizing = true;
-                        name.fontSizeMax = 45;
-                    }
+                    crownCount.enableAutoSizing = true;
                 }
-
-                // if (isCustomName)
-                // {
-                //     Debug.Log("custom name:" + Plugin.configCustomName.Value);
-                //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
-                //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
-                // }
-
-                if (Plugin.configFixCrown.Value)
-                {
-                    foreach (var crownCount in UnityEngine.Object.FindObjectOfType<WinCounterUI>().GetComponentsInChildren<TextMeshProUGUI>())
-                    {
-                        crownCount.enableAutoSizing = true;
-                    }
-                }
-
-                if (Plugin.configAlwaysRainbow.Value)
-                {
-                    rainbowEnabled = false;
-                    ToggleRainbow();
-                }
-
-                return;
             }
-            Debug.Log("That wasn't the local player!");
+
+            if (Plugin.configAlwaysRainbow.Value)
+            {
+                rainbowEnabled = false;
+                ToggleRainbow();
+            }
         }
 
         public static void ToggleWinstreak()
@@ -132,12 +83,11 @@ namespace QOL
             if (!winStreakEnabled)
             {
                 winStreakEnabled = true;
-                gameManager.winText.fontSize = Plugin.configWinStreakFontsize.Value;
+                GameManager.Instance.winText.fontSize = Plugin.configWinStreakFontsize.Value;
                 return;
             }
 
             winStreakEnabled = false;
-            //gameManager.winText.fontSize = 200;
         }
 
         public static void ToggleRainbow()
@@ -153,7 +103,7 @@ namespace QOL
             rainbowEnabled = false;
         }
 
-        // Fancy bit-manipulation of a character's ASCII values to check whether it's a vowel or not
+        // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;
 
         public static CSteamID lobbyID; // The ID of the current lobby
@@ -175,7 +125,9 @@ namespace QOL
         public static bool rainbowEnabled;
 
         public static MatchmakingHandler matchmaking;
-        public static GameManager gameManager;
+
+        public static ConnectedClientData[] clientData;
+        //public static GameManager gameManager;
 
         public static TextMeshPro tmpText;
 

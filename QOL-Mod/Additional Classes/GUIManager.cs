@@ -15,7 +15,6 @@ namespace QOL
         {
             Debug.Log("Started GUI in GUIManager!");
             Helper.matchmaking = FindObjectOfType<MatchmakingHandler>();
-            Helper.gameManager = FindObjectOfType<GameManager>();
         }
         private void Awake()
         {
@@ -57,26 +56,24 @@ namespace QOL
             if (Input.GetKey(QOLMenuKey1) && Input.GetKeyDown(QOLMenuKey2) || Input.GetKeyDown(QOLMenuKey1) && anyKeyMenu)
             {
                 Debug.Log("Trying to open GUI menu!");
-                Debug.Log("chatText.richText : " + Helper.tmpText.richText);
 
                 mShowMenu = !mShowMenu;
-                playerNamesStr = string.Empty;
+                playerNamesStr = "";
                 foreach (NetworkPlayer player in FindObjectsOfType<NetworkPlayer>())
                 {
-                    string str = string.Concat(new object[]
-                    {
+                    string str = string.Concat(
                         "[",
                         Helper.GetColorFromID(player.NetworkSpawnID),
                         "] ",
-                        Helper.GetPlayerName(Helper.GetSteamID(player.NetworkSpawnID))
-                    });
-                    playerNamesStr = playerNamesStr + "\n" + str;
+                        Helper.GetPlayerName(Helper.GetSteamID(player.NetworkSpawnID)));
+                    
+                    playerNamesStr +=  "\n" + str;
                 }
-                Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
-                Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
-                Debug.Log("findobject lobbyowner: " + Helper.matchmaking.LobbyOwner);
+                //Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
+                //Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
+                //Debug.Log("findobject lobbyowner: " + Helper.matchmaking.LobbyOwner);
                 theLobbyHost = Helper.GetPlayerName(Helper.matchmaking.LobbyOwner);
-                Debug.Log("this.theLobbyHost : " + theLobbyHost);
+                //Debug.Log("this.theLobbyHost : " + theLobbyHost);
             }
 
             if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && anyKeyStat)
@@ -123,7 +120,7 @@ namespace QOL
         }
         public void OnGUI() 
         {
-            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, "<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v" + Plugin.VersionNumber + "]");
+            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, $"<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v{Plugin.VersionNumber}]");
             if (mShowStatMenu) StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Menu");
         }
 		private void KickWindow(int window)
