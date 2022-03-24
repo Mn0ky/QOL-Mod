@@ -12,7 +12,7 @@ namespace QOL
 {
     class OnlinePlayerUIPatch
     {
-        public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance
         {
             var UpdateMethod = AccessTools.Method(typeof(OnlinePlayerUI), "Update");
             var UpdateMethodTranspiler= new HarmonyMethod(typeof(OnlinePlayerUIPatch).GetMethod(nameof(OnlinePlayerUIPatch.UpdateMethodTranspiler))); // Patches NetworkAllPlayersDiedButOne() with postfix method

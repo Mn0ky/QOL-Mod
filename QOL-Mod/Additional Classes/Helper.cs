@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
@@ -33,17 +34,31 @@ namespace QOL
         // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
         public static string GetJoinGameLink() => $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
 
-        public static void InitValues(ChatManager instance, ushort playerID) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
+        public static void InitValues(ChatManager __instance, ushort playerID) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
         {
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
 
             clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
 
-            localNetworkPlayer = clientData[GameManager.Instance.mMultiplayerManager.LocalPlayerIndex].PlayerObject.GetComponent<NetworkPlayer>();
+            byte localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
+            localNetworkPlayer = clientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
+            localChat = clientData[localID].PlayerObject.GetComponentInChildren<ChatManager>();
+
             Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
-            tmpText = Traverse.Create(instance).Field("text").GetValue() as TextMeshPro;
+            tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
             tmpText.richText = Plugin.configRichText.Value;
+
+            if (Plugin.configFixCrown.Value)
+            {
+                WinCounterUI counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
+
+                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true))
+                {
+                    Debug.Log("crown autosize: " + crownCount.autoSizeTextContainer);
+                    crownCount.enableAutoSizing = true;
+                }
+            }
 
             if (NameResize) // If reading custom names then make sure to add conditional here
             {
@@ -62,14 +77,6 @@ namespace QOL
             //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
             //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
             // }
-
-            if (Plugin.configFixCrown.Value)
-            {
-                foreach (var crownCount in UnityEngine.Object.FindObjectOfType<WinCounterUI>().GetComponentsInChildren<TextMeshProUGUI>())
-                {
-                    crownCount.enableAutoSizing = true;
-                }
-            }
 
             if (Plugin.configAlwaysRainbow.Value)
             {
@@ -103,6 +110,19 @@ namespace QOL
             rainbowEnabled = false;
         }
 
+        public static string GetTargetStatValue(CharacterStats stats, string targetStat)
+        {
+            foreach (var stat in typeof(CharacterStats).GetFields())
+            {
+                if (stat.Name.ToLower() == targetStat)
+                {
+                    return stat.GetValue(stats).ToString();
+                }
+            }
+
+            return "No value";
+        }
+
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;
 
@@ -123,10 +143,11 @@ namespace QOL
         public static bool onlyLower;
         public static bool HPWinner = Plugin.configHPWinner.Value;
         public static bool rainbowEnabled;
+        public static IEnumerator routineUsed;
 
         public static MatchmakingHandler matchmaking;
-
         public static ConnectedClientData[] clientData;
+        public static ChatManager localChat;
         //public static GameManager gameManager;
 
         public static TextMeshPro tmpText;

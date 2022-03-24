@@ -10,7 +10,7 @@ namespace QOL
 {
     class ControllerPatch
     {
-        public static void Patch(Harmony harmonyInstance) // Controller methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // Controller methods to patch with the harmony __instance
         {
             var OnDeathMethod = AccessTools.Method(typeof(Controller), "OnDeath");
             var OnDeathMethodMethodPostfix = new HarmonyMethod(typeof(ControllerPatch).GetMethod(nameof(ControllerPatch.OnDeathMethodMethodPostfix))); // Patches OnDeathMethod with postfix method

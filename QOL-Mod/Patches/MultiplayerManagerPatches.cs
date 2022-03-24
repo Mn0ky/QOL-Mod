@@ -12,7 +12,7 @@ namespace QOL
 {
     class MultiplayerManagerPatches
     {
-        public static void Patches(Harmony harmonyInstance) // Multiplayer methods to patch with the harmony instance
+        public static void Patches(Harmony harmonyInstance) // Multiplayer methods to patch with the harmony __instance
         {
 
             var OnServerJoinedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnServerJoined");

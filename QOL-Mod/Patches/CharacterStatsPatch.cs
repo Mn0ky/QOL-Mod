@@ -8,7 +8,7 @@ namespace QOL
 {
     class CharacterStatsPatch
     {
-        public static void Patch(Harmony harmonyInstance) // CharacterStats methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // CharacterStats methods to patch with the harmony __instance
         {
             var GetStringMethod = AccessTools.Method(typeof(CharacterStats), "GetString");
             var GetStringMethodPrefix = new HarmonyMethod(typeof(CharacterStatsPatch).GetMethod(nameof(CharacterStatsPatch.GetStringMethodPrefix))); // Patches GetString() with prefix method

@@ -11,7 +11,7 @@ namespace QOL
 {
     class GameManagerPatch
     {
-        public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance
         {
             var networkAllPlayersDiedButOneMethod = AccessTools.Method(typeof(GameManager), "NetworkAllPlayersDiedButOne");
             var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatch).GetMethod(nameof(GameManagerPatch.networkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method

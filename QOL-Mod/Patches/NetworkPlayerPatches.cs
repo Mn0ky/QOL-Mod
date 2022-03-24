@@ -6,7 +6,7 @@ namespace QOL
 {
     class NetworkPlayerPatch
     {
-        public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony __instance
         {
 
             var SyncClientChatMethod = AccessTools.Method(typeof(NetworkPlayer), "SyncClientChat");

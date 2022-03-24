@@ -19,7 +19,7 @@ namespace QOL
             Logger.LogInfo("Hello from monk :D");
             try
             {
-                Harmony harmony = new Harmony("monky.QOL"); // Creates harmony instance with identifier
+                Harmony harmony = new Harmony("monky.QOL"); // Creates harmony __instance with identifier
                 Logger.LogInfo("Applying ChatManager patches...");
                 ChatManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying MatchmakingHandler patch..."); 

@@ -15,7 +15,7 @@ namespace QOL
 {
     public class ChatManagerPatches
     {
-        public static void Patches(Harmony harmonyInstance) // ChatManager methods to patch with the harmony instance
+        public static void Patches(Harmony harmonyInstance) // ChatManager methods to patch with the harmony __instance
         {
             var StartMethod = AccessTools.Method(typeof(ChatManager), "Start");
             var StartMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.StartMethodPostfix))); // Patches Start() with prefix method
@@ -112,8 +112,8 @@ namespace QOL
                     if (Helper.nukChat)
                     {
                         message = UwUify(message);
-                        coroutineUsed = WaitCoroutine(message);
-                        __instance.StartCoroutine(coroutineUsed);
+                        Helper.routineUsed = WaitCoroutine(message);
+                        __instance.StartCoroutine(Helper.routineUsed);
                         return false;
                     }
                     Helper.localNetworkPlayer.OnTalked(UwUify(message));
@@ -124,8 +124,8 @@ namespace QOL
             else if (Helper.nukChat)
             {
                 if (Helper.onlyLower) message = message.ToLower();
-                coroutineUsed = WaitCoroutine(message);
-                __instance.StartCoroutine(coroutineUsed);
+                Helper.routineUsed = WaitCoroutine(message);
+                __instance.StartCoroutine(Helper.routineUsed);
                 return false;
             }
 
@@ -154,202 +154,19 @@ namespace QOL
         public static void Commands(string message, ChatManager __instance)
         {
             Debug.Log("Made it to beginning of commands!");
-            string text = message.ToLower();
-            text = text.TrimStart('/');
+            string[] text = message.ToLower().TrimStart('/').Split(' ');
 
-            if (text.StartsWith("hp") && Helper.localNetworkPlayer.HasLocalControl) // Sends HP of targeted color to chat
+            switch (text.Length)
             {
-                if (text.Length > 2)
-                {
-                    string colorWanted = text.Substring(3);
-                    Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
-                    Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
-                    Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(colorWanted) + " HP: " + Helper.GetHPOfPlayer(colorWanted));
-                    return;
-                }
-
-                Debug.Log("Looking for my health!");
-                Debug.Log("Helper.localNetworkPlayer : " + Helper.localNetworkPlayer);
-                Debug.Log("Helper.localNetworkPlayer.NetworkSpawnID : " + Helper.localNetworkPlayer.NetworkSpawnID);
-                string localHealth = Helper.localNetworkPlayer.GetComponentInChildren<HealthHandler>().health + "%";
-                Debug.Log("Current Health: " + localHealth);
-                Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
-
-            }
-            else if (text == "gg") // Enables or disables automatic "gg" upon death
-            {
-                Helper.autoGG = !Helper.autoGG;
-            }
-            //else if (text == "spam")
-            //{
-            //    Debug.Log("clipboard: " + GUIUtility.systemCopyBuffer);
-            //    __instance.StartCoroutine(WaitCoroutine(GUIUtility.systemCopyBuffer));
-            //}
-            // else if (text == "stopspam") 
-            // {
-            //     Debug.Log("stopping spam");
-            //     stopSpam = true;
-            // }
-            else if (text == "adv")
-            {
-                Helper.localNetworkPlayer.OnTalked(Plugin.configAdvCmd.Value);
-            }
-            else if (text == "uncensor") // Enables or disables skip for chat censorship
-            {
-                Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
-                Debug.Log("Helper.chatCensorshipBypass : " + Helper.chatCensorshipBypass);
-            }
-            else if (text == "winstreak")
-            {
-                Helper.ToggleWinstreak();
-            }
-            else if (text.Contains("shrug")) // Adds shrug emoticon to end of chat message
-            {
-                message = message.Replace("/shrug", "");
-                message += $" \u00af\\_{Plugin.configEmoji.Value}_/\u00af";
-                Helper.localNetworkPlayer.OnTalked(message);
-            }
-            else if (text == "rich") // Enables rich text for chat messages
-            {
-                TextMeshPro theText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
-                theText.richText = !theText.richText;
-
-            }
-            // else if (text == "suicide")
-            // {
-            //     Helper.localNetworkPlayer.FallOut(Quaternion.identity, new Vector3(0 , 0, 0));
-            // }
-            /*else if (text == "testcol") // Enables rich text for chat messages
-            {
-                var oldCharacter = Helper.GetNetworkPlayer(0);
-
-                foreach (SpriteRenderer spriteRenderer in oldCharacter.GetComponentsInChildren<SpriteRenderer>())
-                {
-                    Debug.Log("renderer name: " + spriteRenderer.gameObject);
-                    //spriteRenderer.color = Helper.defaultColors[0];
-                    spriteRenderer.GetComponentInParent<SetColorWhenDamaged>().startColor = Helper.defaultColors[0];
-                }
-
-                foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>())
-                {
-                    partSys.startColor = Helper.defaultColors[0];
-                }
-
-                Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(Helper.defaultColors[0]);
-            }*/
-            else if (text == "uwu") // Enables uwuifier
-            {
-                Helper.uwuifyText = !Helper.uwuifyText;
-                //GameManager.Instance.mMultiplayerManager.
-            }
-            else if (text == "lobregen")
-            {
-                Helper.localNetworkPlayer.OnTalked("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen)); 
-            }
-            else if (text == "private") // Privates the lobby (no player can publicly join unless invited)
-            {
-                if (Helper.matchmaking.IsHost)
-                {
-                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly});
-                    Helper.localNetworkPlayer.OnTalked("Lobby made private!");
-                }
-                else
-                {
-                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                }
-            }
-            else if (text == "public") // Publicizes the lobby (any player can join through quick match)
-            {
-                if (Helper.matchmaking.IsHost)
-                {
-                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic });
-                    Helper.localNetworkPlayer.OnTalked("Lobby made public!");
-                }
-                else
-                {
-                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                }
-            }
-            else if (text == "invite") // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
-            {
-                Debug.Log("LobbyID: " + Helper.lobbyID);
-                Debug.Log("Verification test, should return 25: " + SteamMatchmaking.GetLobbyData(Helper.lobbyID, StickFightConstants.VERSION_KEY));
-                GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
-                Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
-            }
-            else if (text.StartsWith("stat"))
-            {
-                string[] commandArr = text.Split(' ');
-                if (commandArr.Length == 3)
-                {
-                    CharacterStats playerStats = Helper.GetNetworkPlayer(Helper.GetIDFromColor(commandArr[1])).GetComponentInParent<CharacterStats>();
-
-                    Helper.localNetworkPlayer.OnTalked(commandArr[1] + ", " + commandArr[2] + ": " + GetTargetStatValue(playerStats, commandArr[2])); 
-                    return;
-                }
-                CharacterStats myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
-                Helper.localNetworkPlayer.OnTalked("My " + commandArr[1] + ": " + GetTargetStatValue(myStats, commandArr[1]));
-            }
-            else if (text == "translate") // Whether or not to enable automatic translations
-            {
-                Helper.isTranslating = !Helper.isTranslating;
-            }
-            else if (text == "lobhp")
-            {
-                Helper.localNetworkPlayer.OnTalked("Lobby HP: " + OptionsHolder.HP);
-            }
-            else if (text.Contains("ping"))
-            {
-                ConnectedClientData[] clients = GameManager.Instance.mMultiplayerManager.ConnectedClients;
-                ushort colorWanted;
-
-                if (text.Length > 4)
-                {
-                    colorWanted = Helper.GetIDFromColor(text.Substring(5));
-                    Helper.localNetworkPlayer.OnTalked(Helper.GetColorFromID(colorWanted) + " Ping" + clients[colorWanted].Ping);
-                    return;
-                }
-                Helper.localNetworkPlayer.OnTalked("Can't ping yourself!");
-            }
-            // TODO: Work on this later!!
-            else if (text == "rainbow")
-            {
-                Helper.ToggleRainbow();
-            }
-            else if (text.StartsWith("id"))
-            {
-                string colorWanted = text.Substring(3);
-                GUIUtility.systemCopyBuffer = Helper.GetSteamID(Helper.GetIDFromColor(colorWanted)).ToString();
-
-                Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(colorWanted) + "'s steamID copied to clipboard");
-            }
-            else if (text == "nuky")
-            {
-                Helper.nukChat = !Helper.nukChat;
-                if (coroutineUsed != null) __instance.StopCoroutine(coroutineUsed);
-            }
-            else if (text == "winnerhp")
-            {
-                Helper.HPWinner = !Helper.HPWinner;
-            }
-            // else if (text == "customname")
-            // {
-            //     TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
-            //     playerNames[Helper.localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = "test";
-            // }
-            else if (text == "lowercase")
-            {
-                Helper.onlyLower = !Helper.onlyLower;
-            }
-            else if (text == "help")
-            {
-                SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
-            }
-            else if (text == "ver")
-            {
-                Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
+                case 1:
+                    ChatCommands.SingleArgument(text[0], message);
+                    break;
+                case 2:
+                    ChatCommands.DoubleArgument(text, message);
+                    break;
+                default:
+                    ChatCommands.TripleArgument(text, message);
+                    break;
             }
         }
 
@@ -419,10 +236,7 @@ namespace QOL
                         newMessage.Remove(i + 1, 1);
                         break;
                     default:
-                        if (Helper.IsVowel(c) && newMessage[i + 1] == 't')
-                        {
-                            newMessage.Insert(i + 1, 'w');
-                        }
+                        if (Helper.IsVowel(c) && newMessage[i + 1] == 't') newMessage.Insert(i + 1, 'w');
                         break;
                 }
                 i++;
@@ -430,7 +244,7 @@ namespace QOL
             return newMessage.Remove(newMessage.Length - 1, 1).ToString();
         }
 
-        public static string GetTargetStatValue(CharacterStats stats, string targetStat)
+        /*public static string GetTargetStatValue(CharacterStats stats, string targetStat)
         {
             foreach (var stat in typeof(CharacterStats).GetFields())
             {
@@ -441,7 +255,7 @@ namespace QOL
             }
 
             return "No value";
-        }
+        }*/
 
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
 
@@ -450,6 +264,6 @@ namespace QOL
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
 
-        private static IEnumerator coroutineUsed;
+        //private static IEnumerator coroutineUsed;
     }
 }

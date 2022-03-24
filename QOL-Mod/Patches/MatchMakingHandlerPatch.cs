@@ -7,7 +7,7 @@ namespace QOL
 {
     class MatchmakingHandlerPatches
     {
-        public static void Patch(Harmony harmonyInstance) // MatchmakingHandler method to patch with the harmony instance
+        public static void Patch(Harmony harmonyInstance) // MatchmakingHandler method to patch with the harmony __instance
         {
             var ClientInitLobbyAndOwnerMethod = AccessTools.Method(typeof(MatchmakingHandler), "ClientInitLobbyAndOwner");
             var ClientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatches).GetMethod(nameof(MatchmakingHandlerPatches.ClientInitLobbyAndOwnerMethodPostfix))); // Patches ClientInitLobbyAndOwnerMethod with postfix method
