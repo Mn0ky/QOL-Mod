@@ -16,10 +16,10 @@ namespace QOL
 
         public static bool SyncClientChatMethodPrefix(ref byte[] data, NetworkPlayer __instance)
         {
-            if (!Helper.isTranslating)
-            {
-                return true;
-            }
+            if (Helper.mutedPlayers.Contains(__instance.NetworkSpawnID)) return false;
+
+            if (!Helper.isTranslating) return true;
+
             TranslateMessage(data, __instance);
             return false;
         }

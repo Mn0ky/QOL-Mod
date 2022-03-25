@@ -7,6 +7,7 @@ using HarmonyLib;
 using Steamworks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace QOL
 {
@@ -111,6 +112,13 @@ namespace QOL
                 case "ver": // Outputs mod version number to chat
                     Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
                     break;
+                case "text":
+                    var modText = new GameObject("ModText").AddComponent<Text>();
+                    modText.text = "Hello!";
+                    var rectTransform = modText.GetComponent<RectTransform>();
+                    rectTransform.localPosition = new Vector3(0, 0, 0);
+                    rectTransform.sizeDelta = new Vector2(600, 200);
+                    break;
                 default: // Command is invalid or improperly specified
                     Helper.localNetworkPlayer.OnTalked("Command not found.");
                     break;
@@ -143,6 +151,11 @@ namespace QOL
                 case "ping": // Outputs the specified player's ping
                     targetID = Helper.GetIDFromColor(cmds[1]);
                     Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(cmds[1]) + " Ping: " + Helper.clientData[targetID].Ping);
+                    break;
+                case "mute": // Mutes the specified player (Only for the current lobby and only client-side)
+                    targetID = Helper.GetIDFromColor(cmds[1]);
+                    if (!Helper.mutedPlayers.Contains(targetID)) Helper.mutedPlayers.Add(targetID);
+                    else Helper.mutedPlayers.Remove(targetID);
                     break;
                 default: // Command is invalid or improperly specified
                     Helper.localNetworkPlayer.OnTalked("Command not found.");

@@ -4,7 +4,10 @@ using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace QOL
 {
@@ -183,6 +186,13 @@ namespace QOL
             }
 
             var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
+
+            //Debug.Log("scene: " + SceneManager.GetActiveScene().name + " " + SceneManager.GetActiveScene().buildIndex);
+            // var modText = new GameObject("ModText").AddComponent<Text>();
+            // modText.text = "Hello!";
+            // var rectTransform = modText.GetComponent<RectTransform>();
+            // rectTransform.localPosition = new Vector3(0, 0, 0);
+            // rectTransform.sizeDelta = new Vector2(600, 200);
 
             if (File.Exists(scorePath))
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
@@ -39,6 +40,7 @@ namespace QOL
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
 
             clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
+            Helper.mutedPlayers.Clear();
 
             byte localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
             localNetworkPlayer = clientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
@@ -119,7 +121,6 @@ namespace QOL
                     return stat.GetValue(stats).ToString();
                 }
             }
-
             return "No value";
         }
 
@@ -130,6 +131,7 @@ namespace QOL
         
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
+        public static List<ushort> mutedPlayers = new(4);
 
         public static bool isTranslating = Plugin.configTranslation.Value; // True if auto-translations are enabled, false by default
         public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
