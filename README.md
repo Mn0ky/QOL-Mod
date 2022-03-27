@@ -26,7 +26,7 @@ Scroll to the bottom of this README for a video of a general overview of this mo
 ## Installation
 
 To use the mod, here are the steps required:<br/> 
-  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.19), make sure it's version **``5.4.19``** (**must be 32-bit, x86**).
+  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/download/v5.4.19/BepInEx_x86_5.4.19.0.zip), make sure it's version **``5.4.19``** (**must be 32-bit, x86**).
   2)  Extract the newly downloaded zip into the ``StickFightTheGame`` folder.
   3)  Drag all contents from the folder into the ``StickFightTheGame`` folder (``winhttp.dll``, ``doorstop_config.ini``, the ``BepInEx`` folder etc.).
   4)  Launch the game and then exit (BepInEx will have generated new files and folders).
