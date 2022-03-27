@@ -109,7 +109,7 @@ namespace QOL
             try
             {
                 new GameObject("GUIHandler").AddComponent<GUIManager>();
-                Debug.Log("Added GUIManager from MultiplayerManagerPatches!");
+                Debug.Log("Added GUIManager!");
             }
             catch (Exception ex)
             {
