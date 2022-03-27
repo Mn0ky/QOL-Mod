@@ -1,12 +1,16 @@
 # QOL-Mod
 <p align="center">
-  [![forthebadge](https://forthebadge.com/images/badges/made-with-c-sharp.svg)](https://forthebadge.com)
+  <a href="https://forthebadge.com">
+    <img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg">
+  </a>
 </p>
 <p align="center">
   <a href="https://github.com/Mn0ky/QOL-Mod/releases/latest">
     <img src="https://img.shields.io/github/downloads/Mn0ky/QOL-Mod/total?label=Github%20downloads&logo=github">
   </a>
-  [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+  <a href="https://www.gnu.org/licenses/lgpl-3.0">
+    <img src="https://img.shields.io/badge/License-LGPL_v3-blue.svg">
+  </a>
 </p>
 
 A mod that offers quality-of-life improvements and additions to [Stick Fight: The Game](https://store.steampowered.com/app/674940/Stick_Fight_The_Game/).<br/>
