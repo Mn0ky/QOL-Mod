@@ -6,6 +6,7 @@ using HarmonyLib;
 
 namespace QOL
 {
+    // UNUSED, left for reference purposes
     class CharacterStatsPatch
     {
         public static void Patch(Harmony harmonyInstance) // CharacterStats methods to patch with the harmony __instance

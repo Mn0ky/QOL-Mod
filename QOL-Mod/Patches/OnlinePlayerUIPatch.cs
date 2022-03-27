@@ -10,6 +10,7 @@ using TMPro;
 
 namespace QOL
 {
+    // UNUSED, left for reference purposes
     class OnlinePlayerUIPatch
     {
         public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance

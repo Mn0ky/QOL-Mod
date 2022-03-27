@@ -9,13 +9,22 @@ using UnityEngine;
 
 namespace QOL
 {
-    class GameManagerPatch
+    class GameManagerPatches
     {
         public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance
         {
             var networkAllPlayersDiedButOneMethod = AccessTools.Method(typeof(GameManager), "NetworkAllPlayersDiedButOne");
-            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatch).GetMethod(nameof(GameManagerPatch.networkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
+            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.networkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
             harmonyInstance.Patch(networkAllPlayersDiedButOneMethod, postfix: networkAllPlayersDiedButOnePostfix);
+
+            var AwakeMethod = AccessTools.Method(typeof(GameManager), "Awake");
+            var AwakeMethodPostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.AwakeMethodPostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
+            harmonyInstance.Patch(AwakeMethod, postfix: AwakeMethodPostfix);
+        }
+
+        public static void AwakeMethodPostfix()
+        {
+            Plugin.InitModText();
         }
 
         public static void networkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)

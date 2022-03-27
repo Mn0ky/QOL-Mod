@@ -63,7 +63,6 @@ namespace QOL
 
                         foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = oldColor;
 
-
                         Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
                         ChangeWinTextColor(oldColor, player.NetworkSpawnID);
 

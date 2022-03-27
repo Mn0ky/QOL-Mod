@@ -17,7 +17,7 @@ namespace QOL
         void Start()
         {
             Debug.Log("starting rainbow");
-            var character = Helper.localNetworkPlayer.transform.root.gameObject;
+            var character = Helper.clientData[Helper.localNetworkPlayer.NetworkSpawnID].PlayerObject;
 
             rend1 = character.GetComponentsInChildren<SpriteRenderer>();
             rend2 = character.GetComponentsInChildren<LineRenderer>();
@@ -56,6 +56,7 @@ namespace QOL
                 MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.customPlayerColor, player);
                 return;
             }
+
             MultiplayerManagerPatches.ChangeLineRendColor(Helper.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
             MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
             MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);

@@ -112,13 +112,6 @@ namespace QOL
                 case "ver": // Outputs mod version number to chat
                     Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
                     break;
-                case "text":
-                    var modText = new GameObject("ModText").AddComponent<Text>();
-                    modText.text = "Hello!";
-                    var rectTransform = modText.GetComponent<RectTransform>();
-                    rectTransform.localPosition = new Vector3(0, 0, 0);
-                    rectTransform.sizeDelta = new Vector2(600, 200);
-                    break;
                 default: // Command is invalid or improperly specified
                     Helper.localNetworkPlayer.OnTalked("Command not found.");
                     break;

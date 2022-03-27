@@ -34,7 +34,9 @@ namespace QOL
                 Logger.LogInfo("Applying Controller patch...");
                 ControllerPatch.Patch(harmony);
                 Logger.LogInfo("Applying GameManager patch...");
-                GameManagerPatch.Patch(harmony);
+                GameManagerPatches.Patch(harmony);
+                // Logger.LogInfo("Applying SceneManager patch...");
+                // SceneManagerPatch.Patch(harmony);
                 // Logger.LogInfo("Applying CharacterStats patch...");
                 // CharacterStatsPatch.Patch(harmony);
                 // Logger.LogInfo("Applying OnlinePlayerUI patch...");
@@ -106,9 +108,9 @@ namespace QOL
                 {
                     ColorUtility.TryParseHtmlString('#' + colorStr, out var color);
                     Logger.LogInfo("color :" + color);
-                    GameManagerPatch.winstreakColors1.Add(color);
+                    GameManagerPatches.winstreakColors1.Add(color);
                 }
-                GameManagerPatch.winstreakColors2 = new List<Color>(GameManagerPatch.winstreakColors1);
+                GameManagerPatches.winstreakColors2 = new List<Color>(GameManagerPatches.winstreakColors1);
 
                 configWinStreakRanges = Config.Bind("Winstreak Options",
                     "WinstreakRanges",
@@ -121,9 +123,9 @@ namespace QOL
                     int[] streakRangeNums = Array.ConvertAll(streakRange.Split('-'), int.Parse);
                     Logger.LogInfo("nums: " + streakRangeNums[0] + " " + streakRangeNums[1]);
                     
-                    GameManagerPatch.winstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
+                    GameManagerPatches.winstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
                 }
-                GameManagerPatch.winstreakRanges2 = new List<int>(GameManagerPatch.winstreakRanges1);
+                GameManagerPatches.winstreakRanges2 = new List<int>(GameManagerPatches.winstreakRanges1);
 
                 configAutoGG = Config.Bind("On-Startup Options", // The section under which the option is shown
                     "AutoGG",
@@ -185,23 +187,33 @@ namespace QOL
                 Logger.LogError("Exception on loading configuration: " + ex.StackTrace + ex.Message + ex.Source + ex.InnerException);
             }
 
-            var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
+            string scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
 
             //Debug.Log("scene: " + SceneManager.GetActiveScene().name + " " + SceneManager.GetActiveScene().buildIndex);
-            // var modText = new GameObject("ModText").AddComponent<Text>();
-            // modText.text = "Hello!";
-            // var rectTransform = modText.GetComponent<RectTransform>();
-            // rectTransform.localPosition = new Vector3(0, 0, 0);
-            // rectTransform.sizeDelta = new Vector2(600, 200);
+            InitModText();
 
             if (File.Exists(scorePath))
             {
-                GameManagerPatch.highScore = int.Parse(File.ReadAllText(scorePath));
+                GameManagerPatches.highScore = int.Parse(File.ReadAllText(scorePath));
                 return;
             }
 
             File.WriteAllText(scorePath, "0");
-            GameManagerPatch.highScore = 0;
+            GameManagerPatches.highScore = 0;
+        }
+
+        public static void InitModText()
+        {
+            GameObject modText = new GameObject("ModText");
+            modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            TextMeshProUGUI modTextTMP = modText.AddComponent<TextMeshProUGUI>();
+
+            modTextTMP.text = "<color=red>Monk's QOL Mod</color> " + "<color=white>v" + Plugin.VersionNumber;
+            modTextTMP.fontSize = 25;
+            modTextTMP.color = Color.red;
+            modTextTMP.fontStyle = FontStyles.Bold;
+            modTextTMP.alignment = TextAlignmentOptions.TopRight;
+            modTextTMP.richText = true;
         }
 
         private float[] MenuPosParser(string menuPos) => Array.ConvertAll(menuPos.Replace("X", "").Replace("Y", "").Split(' '), float.Parse);
@@ -228,8 +240,6 @@ namespace QOL
         public static ConfigEntry<string> configStatMenuPlacement;
         public static ConfigEntry<bool> configFixCrown;
         public static ConfigEntry<bool> configAlwaysRainbow;
-
-
 
         public const string VersionNumber = "1.0.14"; // Version number
     }

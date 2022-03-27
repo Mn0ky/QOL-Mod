@@ -77,7 +77,7 @@ namespace QOL
                 }
             }
 
-            // TODO: Make above more flexible!
+            // TODO: Make the above more flexible!
             // for (var i = 0; i < len; i++)
             // {
             //     Debug.Log(i + "\t" + instructionList[i]);
@@ -93,10 +93,7 @@ namespace QOL
         }
         public static bool SendChatMessageMethodPrefix(ref string message, ChatManager __instance) // Prefix method for patching the original (SendChatMessageMethod)
         {
-            if (ChatManagerPatches.backupTextList[0] != message && message.Length <= 350)
-            {
-                ChatManagerPatches.SaveForUpArrow(message);
-            }
+            if (ChatManagerPatches.backupTextList[0] != message && message.Length <= 350) ChatManagerPatches.SaveForUpArrow(message);
 
             if (message.StartsWith("/"))
             {
@@ -244,26 +241,10 @@ namespace QOL
             return newMessage.Remove(newMessage.Length - 1, 1).ToString();
         }
 
-        /*public static string GetTargetStatValue(CharacterStats stats, string targetStat)
-        {
-            foreach (var stat in typeof(CharacterStats).GetFields())
-            {
-                if (stat.Name.ToLower() == targetStat)
-                {
-                    return stat.GetValue(stats).ToString();
-                }
-            }
-
-            return "No value";
-        }*/
-
         public static int upArrowCounter; // Holds how many times the uparrow key is pressed
-
         public static List<string> backupTextList = new(21) // Ends up containing previous messages sent by us (up to 20)
         {
             string.Empty // Initialized with an empty string so that the list isn't null when attempting to perform on it
         };
-
-        //private static IEnumerator coroutineUsed;
     }
 }

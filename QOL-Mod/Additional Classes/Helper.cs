@@ -40,7 +40,7 @@ namespace QOL
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
 
             clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
-            Helper.mutedPlayers.Clear();
+            mutedPlayers.Clear();
 
             byte localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
             localNetworkPlayer = clientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
@@ -80,11 +80,11 @@ namespace QOL
             //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
             // }
 
-            if (Plugin.configAlwaysRainbow.Value)
-            {
-                rainbowEnabled = false;
-                ToggleRainbow();
-            }
+            GameObject rbHand = new("RainbowHandler");
+            rbHand.AddComponent<RainbowManager>().enabled = false;
+            rainbowEnabled = false;
+
+            if (Plugin.configAlwaysRainbow.Value) ToggleRainbow();
         }
 
         public static void ToggleWinstreak()
@@ -101,9 +101,10 @@ namespace QOL
 
         public static void ToggleRainbow()
         {
-            if (!rainbowEnabled && GameObject.Find("RainbowHandler") == null)
+            if (!rainbowEnabled)
             {
-                new GameObject("RainbowHandler").AddComponent<RainbowManager>();
+                Debug.Log("trying to start RainBowHandler");
+                UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = true;
                 rainbowEnabled = true;
                 return;
             }

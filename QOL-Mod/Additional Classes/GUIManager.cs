@@ -1,10 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Steamworks;
 using System.Reflection;
-using BepInEx;
-using BepInEx.Configuration;
 using UnityEngine;
 
 namespace QOL
