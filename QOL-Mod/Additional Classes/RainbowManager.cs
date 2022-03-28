@@ -47,8 +47,8 @@ namespace QOL
                 return;
             }
 
-            MultiplayerManagerPatches.ChangeLineRendColor(Helper.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
-            MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
+            MultiplayerManagerPatches.ChangeLineRendColor(Plugin.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
+            MultiplayerManagerPatches.ChangeSpriteRendColor(Plugin.defaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
         }
     }
 }

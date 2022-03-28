@@ -66,6 +66,18 @@ namespace QOL
                     false,
                     "Start with rainbow mode enabled?");
 
+                configDefaultColors = Config.Bind("Player Color Options",
+                    "DefaultPlayerColors",
+                    "FF69B4 5573AD D6554D 578B49",
+                    "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");  
+
+                foreach (var strColor in configDefaultColors.Value.Split(' '))
+                {
+                    ColorUtility.TryParseHtmlString(strColor.Insert(0, "#"), out Color convColor);
+                    //Logger.LogInfo("Adding color: " + ColorUtility.ToHtmlStringRGB(convColor));
+                    defaultColors.Add(convColor);
+                }
+
                 configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
@@ -230,6 +242,7 @@ namespace QOL
         //public static ConfigEntry<string> configCustomName;
         public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
         public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
+        public static ConfigEntry<string> configDefaultColors;
         public static ConfigEntry<string> configWinStreakColors;
         public static ConfigEntry<string> configWinStreakRanges;
         public static ConfigEntry<int> configWinStreakFontsize;
@@ -240,6 +253,8 @@ namespace QOL
         public static ConfigEntry<string> configStatMenuPlacement;
         public static ConfigEntry<bool> configFixCrown;
         public static ConfigEntry<bool> configAlwaysRainbow;
+
+        public static List<Color> defaultColors = new(4);
 
         public const string VersionNumber = "1.0.14"; // Version number
     }

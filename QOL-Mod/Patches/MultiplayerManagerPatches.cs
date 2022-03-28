@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using System.Reflection.Emit;
 using TMPro;
 
 
@@ -40,7 +39,6 @@ namespace QOL
 
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
-            if (Helper.customPlayerColor == defaultColor) return;
 
             Debug.Log("My index: " + __instance.LocalPlayerIndex);
             Debug.Log("Checking players");
@@ -48,31 +46,34 @@ namespace QOL
             {
                 if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
                 {
-                    if (colorsToReset.Contains(player.NetworkSpawnID))
-                    {
-                        Debug.Log("id not equal");
-                        Debug.Log("resetting now, id of: " + player.NetworkSpawnID);
-                        //Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
 
-                        var oldCharacter = player.transform.root.gameObject;
-                        var oldColor = Helper.defaultColors[player.NetworkSpawnID];
-                        Debug.Log("Assigned old character");
+                    Debug.Log("id not equal");
+                    Debug.Log("resetting now, id of: " + player.NetworkSpawnID);
+                    //Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
 
-                        ChangeLineRendColor(oldColor, oldCharacter);
-                        ChangeSpriteRendColor(oldColor, oldCharacter);
+                    TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
 
-                        foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = oldColor;
+                    var oldCharacter = player.transform.root.gameObject;
+                    var oldColor = Plugin.defaultColors[player.NetworkSpawnID];
+                    Debug.Log("Assigned old character");
 
-                        Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
-                        ChangeWinTextColor(oldColor, player.NetworkSpawnID);
+                    ChangeLineRendColor(oldColor, oldCharacter);
+                    ChangeSpriteRendColor(oldColor, oldCharacter);
 
-                        colorsToReset.Remove(player.NetworkSpawnID);
-                    }
+                    foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = oldColor;
+
+                    Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
+                    ChangeWinTextColor(oldColor, player.NetworkSpawnID);
+                    playerNames[player.NetworkSpawnID].color = oldColor;
+
+                    //colorsToReset.Remove(player.NetworkSpawnID);
                     continue;
                 }
 
+                if (Helper.customPlayerColor == defaultColor) continue;
+                    
                 Debug.Log("Found ourselves!");
-                if (!colorsToReset.Contains(player.NetworkSpawnID)) colorsToReset.Add(player.NetworkSpawnID);
+                //if (!colorsToReset.Contains(player.NetworkSpawnID)) colorsToReset.Add(player.NetworkSpawnID);
 
                 var character = player.transform.root.gameObject;
                 Debug.Log("Assigned character");
@@ -118,7 +119,7 @@ namespace QOL
         }
 
         private static readonly Color defaultColor = new(1, 1, 1);
-        private static List<int> colorsToReset = new(3);
+        //private static List<int> colorsToReset = new(3);
     }
 }
 
