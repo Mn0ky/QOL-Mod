@@ -68,7 +68,7 @@ namespace QOL
 
                 configDefaultColors = Config.Bind("Player Color Options",
                     "DefaultPlayerColors",
-                    "FF69B4 5573AD D6554D 578B49",
+                    "D88C47 5573AD D6554D 578B49",
                     "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");  
 
                 foreach (var strColor in configDefaultColors.Value.Split(' '))

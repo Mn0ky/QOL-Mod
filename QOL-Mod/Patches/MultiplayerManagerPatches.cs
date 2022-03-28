@@ -39,7 +39,7 @@ namespace QOL
 
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
-
+            TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
             Debug.Log("My index: " + __instance.LocalPlayerIndex);
             Debug.Log("Checking players");
             foreach (var player in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
@@ -51,11 +51,10 @@ namespace QOL
                     Debug.Log("resetting now, id of: " + player.NetworkSpawnID);
                     //Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
 
-                    TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
-
                     var oldCharacter = player.transform.root.gameObject;
                     var oldColor = Plugin.defaultColors[player.NetworkSpawnID];
                     Debug.Log("Assigned old character");
+                    //Debug.Log("old color to assign: " + oldColor.ToString());
 
                     ChangeLineRendColor(oldColor, oldCharacter);
                     ChangeSpriteRendColor(oldColor, oldCharacter);
@@ -67,20 +66,15 @@ namespace QOL
                     playerNames[player.NetworkSpawnID].color = oldColor;
 
                     //colorsToReset.Remove(player.NetworkSpawnID);
-                    continue;
                 }
+                else
+                {
+                    Debug.Log("Found ourselves!");
+                    var character = player.transform.root.gameObject;
 
-                if (Helper.customPlayerColor == defaultColor) continue;
-                    
-                Debug.Log("Found ourselves!");
-                //if (!colorsToReset.Contains(player.NetworkSpawnID)) colorsToReset.Add(player.NetworkSpawnID);
-
-                var character = player.transform.root.gameObject;
-                Debug.Log("Assigned character");
-
-                ChangeLineRendColor(Helper.customPlayerColor, character);
-                ChangeSpriteRendColor(Helper.customPlayerColor, character);
-                ChangeWinTextColor(Helper.customPlayerColor, player.NetworkSpawnID);
+                    if (Helper.customPlayerColor == defaultColor) ChangeAllCharacterColors(Plugin.defaultColors[player.NetworkSpawnID], character, playerNames);
+                    else ChangeAllCharacterColors(Helper.customPlayerColor, character, playerNames);
+                }
             }
         }
 
@@ -96,7 +90,6 @@ namespace QOL
         public static void ChangeLineRendColor(Color colorWanted, GameObject character)
         {
             foreach (var t in character.GetComponentsInChildren<LineRenderer>()) t.sharedMaterial.color = colorWanted;
-            Debug.Log("Assigned color");
         }
 
         public static void ChangeWinTextColor(Color colorWanted, int playerID) // TODO: Simplify this!
@@ -104,7 +97,20 @@ namespace QOL
             var winTexts = Traverse.Create(UnityEngine.Object.FindObjectOfType<WinCounterUI>()).Field("mPlayerWinTexts").GetValue<TextMeshProUGUI[]>();
             winTexts[playerID].color = colorWanted;
         }
-        
+
+        public static void ChangeAllCharacterColors(Color colorWanted, GameObject character, TextMeshProUGUI[] playerNames)
+        {
+            int playerID = character.GetComponent<NetworkPlayer>().NetworkSpawnID;
+
+            ChangeLineRendColor(colorWanted, character);
+            ChangeSpriteRendColor(colorWanted, character);
+            ChangeWinTextColor(colorWanted, playerID);
+            foreach (var partSys in character.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = colorWanted;
+            Traverse.Create(character.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(colorWanted);
+            playerNames[playerID].color = colorWanted;
+        }
+
+
         public static void InitGUI()
         {
             try

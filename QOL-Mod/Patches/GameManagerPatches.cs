@@ -14,7 +14,7 @@ namespace QOL
         public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance
         {
             var networkAllPlayersDiedButOneMethod = AccessTools.Method(typeof(GameManager), "NetworkAllPlayersDiedButOne");
-            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.networkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
+            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.NetworkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
             harmonyInstance.Patch(networkAllPlayersDiedButOneMethod, postfix: networkAllPlayersDiedButOnePostfix);
 
             var AwakeMethod = AccessTools.Method(typeof(GameManager), "Awake");
@@ -27,7 +27,7 @@ namespace QOL
             Plugin.InitModText();
         }
 
-        public static void networkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
+        public static void NetworkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
             if (Helper.HPWinner)
             {
