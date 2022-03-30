@@ -124,6 +124,24 @@ namespace QOL
             }
             return "No value";
         }
+        
+        public static void SendCommandError(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#8b0000>", msg));
+
+        public static void SendCommandWarn(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#ffae42>", msg));
+
+        public static void SendCommandSuccess(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#006400>", msg));
+
+        public static IEnumerator SendClientSideMsg(string logLevel, string msg)
+        {
+            bool origRichTextValue = tmpText.richText;
+            float chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
+
+            tmpText.richText = true;
+            localChat.Talk(logLevel + msg);
+
+            yield return new WaitForSeconds(chatMsgDuration + 3f); // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
+            tmpText.richText = origRichTextValue;
+        }
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;

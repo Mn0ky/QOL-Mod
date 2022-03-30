@@ -256,6 +256,6 @@ namespace QOL
 
         public static List<Color> defaultColors = new(4);
 
-        public const string VersionNumber = "1.0.14"; // Version number
+        public const string VersionNumber = "1.0.15"; // Version number
     }
 }

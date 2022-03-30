@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using HarmonyLib;
 using Steamworks;
@@ -113,7 +114,7 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
                     break;
                 default: // Command is invalid or improperly specified
-                    Helper.localNetworkPlayer.OnTalked("Command not found.");
+                    Helper.SendCommandError("Command not found.");
                     break;
             }
         }
@@ -151,7 +152,7 @@ namespace QOL
                     else Helper.mutedPlayers.Remove(targetID);
                     break;
                 default: // Command is invalid or improperly specified
-                    Helper.localNetworkPlayer.OnTalked("Command not found.");
+                    Helper.SendCommandError("Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.");
                     break;
             }
         }
@@ -169,7 +170,7 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked(cmds[1] + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetPlayerStats, cmds[2]));
                     break;
                 default:
-                    Helper.localNetworkPlayer.OnTalked("Command not found.");
+                    Helper.SendCommandError("Command not found.");
                     break;
             }
         }
