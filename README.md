@@ -35,7 +35,7 @@ To install the mod, watch the video below, or follow the written steps:<br/>
 
 #### Installation Tutorial Video:
 
-Video coming soon!
+https://user-images.githubusercontent.com/67206766/161408215-1f6e3d3e-5424-4942-8a4c-0543906c8557.mp4
 
 ## Caveats
 
