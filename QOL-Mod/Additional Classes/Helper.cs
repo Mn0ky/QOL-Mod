@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
@@ -34,6 +35,29 @@ namespace QOL
 
         // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
         public static string GetJoinGameLink() => $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
+
+        public static void ToggleLobbyVisibility(bool open)
+        {
+            if (MatchmakingHandler.Instance.IsHost)
+            {
+                MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (open)
+                {
+                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePublic });
+                    localNetworkPlayer.OnTalked("Lobby made public!");
+                }
+                else
+                {
+                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
+                    localNetworkPlayer.OnTalked("Lobby made private!");
+                }
+                
+                return;
+            }
+            
+            localNetworkPlayer.OnTalked("Need to be host!");
+        }
 
         public static void InitValues(ChatManager __instance, ushort playerID) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
         {
@@ -166,7 +190,6 @@ namespace QOL
         public static bool rainbowEnabled;
         public static IEnumerator routineUsed;
 
-        public static MatchmakingHandler matchmaking;
         public static ConnectedClientData[] clientData;
         public static ChatManager localChat;
         //public static GameManager gameManager;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Steamworks;
-using System.Reflection;
 using UnityEngine;
 
 namespace QOL
@@ -11,7 +10,6 @@ namespace QOL
         private void Start()
         {
             Debug.Log("Started GUI in GUIManager!");
-            Helper.matchmaking = FindObjectOfType<MatchmakingHandler>();
         }
         private void Awake()
         {
@@ -56,6 +54,7 @@ namespace QOL
 
                 mShowMenu = !mShowMenu;
                 playerNamesStr = "";
+
                 foreach (NetworkPlayer player in FindObjectsOfType<NetworkPlayer>())
                 {
                     string str = string.Concat(
@@ -66,11 +65,8 @@ namespace QOL
                     
                     playerNamesStr +=  "\n" + str;
                 }
-                //Debug.Log("Helper.LobbyID : " + Helper.lobbyID);
-                //Debug.Log(FindObjectOfType<MatchmakingHandler>().LobbyOwner);
-                //Debug.Log("findobject lobbyowner: " + Helper.matchmaking.LobbyOwner);
-                theLobbyHost = Helper.GetPlayerName(Helper.matchmaking.LobbyOwner);
-                //Debug.Log("this.theLobbyHost : " + theLobbyHost);
+
+                theLobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
             }
 
             if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && anyKeyStat)
@@ -110,6 +106,7 @@ namespace QOL
                             break;
                     }
                 }
+
                 Debug.Log("show stats being set to false via update");
                 mStatsShown = false;
             }
@@ -129,23 +126,13 @@ namespace QOL
 
 			GUILayout.Label("Host: " + theLobbyHost);
             GUILayout.Label(playerNamesStr);
-            if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
-            {
-                Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));
-            }
-            if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
-            {
-                Helper.localNetworkPlayer.OnTalked("Blue HP: " + Helper.GetHPOfPlayer("blue"));
-            }
-            if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
-            {
-                Helper.localNetworkPlayer.OnTalked("Red HP: " + Helper.GetHPOfPlayer("red"));
-            }
-            if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
-            {
-                Helper.localNetworkPlayer.OnTalked("Green HP: " + Helper.GetHPOfPlayer("green"));
-            }
-			if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
+
+            if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>")) Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));
+            if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>")) Helper.localNetworkPlayer.OnTalked("Blue HP: " + Helper.GetHPOfPlayer("blue"));
+            if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>")) Helper.localNetworkPlayer.OnTalked("Red HP: " + Helper.GetHPOfPlayer("red"));
+            if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>")) Helper.localNetworkPlayer.OnTalked("Green HP: " + Helper.GetHPOfPlayer("green"));
+
+            if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
@@ -154,46 +141,19 @@ namespace QOL
             {
                 mShowStatMenu = !mShowStatMenu;
                 mStatsShown = true;
-                Debug.Log("stats being changed with stat men button: " + mStatsShown);
             }
-            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
-            {
-                Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.configEmoji.Value}_/\u00af");
-            }
-            if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
-            {
-                SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
-            }
-            if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private"))
-            {
-                if (Helper.matchmaking.IsHost)
-                {
-                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypeFriendsOnly });
-                    Helper.localNetworkPlayer.OnTalked("Lobby made private!");
-                }
-                else
-                {
-                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                }
-            }
-            if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public"))
-            {
-                if (Helper.matchmaking.IsHost)
-                {
-                    MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
-                    ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] { ELobbyType.k_ELobbyTypePublic});
-                    Helper.localNetworkPlayer.OnTalked("Lobby made public!");
-                }
-                else
-                {
-                    Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                }
-            }
+
+            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug")) Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.configEmoji.Value}_/\u00af");
+            if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help")) SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
+
+            if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private")) Helper.ToggleLobbyVisibility(false);
+            if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public")) Helper.ToggleLobbyVisibility(true);
+
             Helper.autoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), Helper.autoGG, "AutoGG");
             Helper.isTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), Helper.isTranslating, "AutoTranslations");
             Helper.tmpText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), Helper.tmpText.richText, "RichText");
             Helper.chatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), Helper.chatCensorshipBypass, "ChatCensorshipBypass");
+
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
 
@@ -203,17 +163,12 @@ namespace QOL
             GUI.skin.label.alignment = TextAnchor.UpperCenter;
             GUI.skin.button.alignment = TextAnchor.LowerCenter;
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
-            if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close"))
-            {
-                mShowStatMenu = !mShowStatMenu;
-            }
 
+            if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close")) mShowStatMenu = !mShowStatMenu;
             GUI.skin.label.alignment = normAlignment;
+
             GUILayout.BeginHorizontal();
-            foreach (string color in playersInLobby)
-            {
-                GUILayout.Label($"<color={color}>{color}</color>");
-            }
+            foreach (string color in playersInLobby) GUILayout.Label("<color=" + color + ">" + color + "</color>");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();

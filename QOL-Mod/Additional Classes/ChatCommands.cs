@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using HarmonyLib;
 using Steamworks;
@@ -12,6 +8,7 @@ using UnityEngine.UI;
 
 namespace QOL
 {
+
     public class ChatCommands
     {
         public static void SingleArgument(string cmd, string msg)
@@ -49,34 +46,11 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen));
                     break;
                 case "private": // Privates the lobby (no player can publicly join unless invited)
-                    if (Helper.matchmaking.IsHost)
-                    {
-                        MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType",
-                            BindingFlags.NonPublic | BindingFlags.Instance);
-                        ChangeLobbyTypeMethod.Invoke(Helper.matchmaking,
-                            new object[] {ELobbyType.k_ELobbyTypeFriendsOnly});
-                        Helper.localNetworkPlayer.OnTalked("Lobby made private!");
-                        break;
-                    }
-                    else
-                    {
-                        Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                        break;
-                    }
+                    Helper.ToggleLobbyVisibility(false);
+                    break;
                 case "public": // Publicizes the lobby (any player can join through quick match)
-                    if (Helper.matchmaking.IsHost)
-                    {
-                        MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType",
-                            BindingFlags.NonPublic | BindingFlags.Instance);
-                        ChangeLobbyTypeMethod.Invoke(Helper.matchmaking, new object[] {ELobbyType.k_ELobbyTypePublic});
-                        Helper.localNetworkPlayer.OnTalked("Lobby made public!");
-                        break;
-                    }
-                    else
-                    {
-                        Helper.localNetworkPlayer.OnTalked("Need to be host!");
-                        break;
-                    }
+                    Helper.ToggleLobbyVisibility(true);
+                    break;
                 case "invite": // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
                     GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                     Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
@@ -106,6 +80,9 @@ namespace QOL
                     break;
                 case "lowercase": // Enables/Disables chat messages always being sent in lowercase
                     Helper.onlyLower = !Helper.onlyLower;
+                    break;
+                case "suicide":
+                    Helper.localNetworkPlayer.UnitWasDamaged(5, true, DamageType.LocalDamage, true);
                     break;
                 case "help": // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
                     SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
@@ -152,7 +129,7 @@ namespace QOL
                     else Helper.mutedPlayers.Remove(targetID);
                     break;
                 default: // Command is invalid or improperly specified
-                    Helper.SendCommandError("Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.Command not found.");
+                    Helper.SendCommandError("Command not found.");
                     break;
             }
         }
