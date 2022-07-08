@@ -7,48 +7,22 @@ namespace QOL
 {
     public class GUIManager : MonoBehaviour
     {
-        private void Start()
-        {
-            Debug.Log("Started GUI in GUIManager!");
-        }
+        private void Start() => Debug.Log("Started GUI in GUIManager!");
+        
         private void Awake()
         {
             QOLMenuKey1 = Plugin.configQOLMenuKeybind.Value.MainKey;
-
-            if (Plugin.configQOLMenuKeybind.Value.Modifiers.Any())
-            {
-                foreach (var modifier in Plugin.configQOLMenuKeybind.Value.Modifiers)
-                {
-                    Debug.Log("Assigning secondary key, menu: " + modifier);
-                    QOLMenuKey2 = modifier;
-                }
-            }
-            else
-            {
-                Debug.Log("Anykeymenu true");
-                anyKeyMenu = true;
-            }
+            QOLMenuKey2 = Plugin.configQOLMenuKeybind.Value.Modifiers.LastOrDefault();
+            if (QOLMenuKey2 == KeyCode.None) singleMenuKey = true;
 
             statWindowKey1 = Plugin.configStatMenuKeybind.Value.MainKey;
-
-            if (Plugin.configStatMenuKeybind.Value.Modifiers.Any())
-            {
-                foreach (var modifier in Plugin.configStatMenuKeybind.Value.Modifiers)
-                {
-                    Debug.Log("Assigning secondary key, stat: " + modifier);
-                    statWindowKey2 = modifier;
-                    return;
-                }
-            }
-            else
-            {
-                Debug.Log("Anykeystat true");
-                anyKeyStat = true;
-            }
+            statWindowKey2 = Plugin.configStatMenuKeybind.Value.Modifiers.LastOrDefault();
+            if (statWindowKey2 == KeyCode.None) singleStatKey = true;
         }
+
         private void Update()
         {
-            if (Input.GetKey(QOLMenuKey1) && Input.GetKeyDown(QOLMenuKey2) || Input.GetKeyDown(QOLMenuKey1) && anyKeyMenu)
+            if (Input.GetKey(QOLMenuKey1) && Input.GetKeyDown(QOLMenuKey2) || Input.GetKeyDown(QOLMenuKey1) && singleMenuKey)
             {
                 Debug.Log("Trying to open GUI menu!");
 
@@ -69,9 +43,8 @@ namespace QOL
                 theLobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
             }
 
-            if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && anyKeyStat)
+            if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && singleStatKey)
             {
-                //UpdateStatMenuFields();
                 mStatsShown = true;
                 mShowStatMenu = !mShowStatMenu;
             }
@@ -127,10 +100,29 @@ namespace QOL
 			GUILayout.Label("Host: " + theLobbyHost);
             GUILayout.Label(playerNamesStr);
 
-            if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>")) Helper.localNetworkPlayer.OnTalked("Yellow HP: " + Helper.GetHPOfPlayer("yellow"));
-            if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>")) Helper.localNetworkPlayer.OnTalked("Blue HP: " + Helper.GetHPOfPlayer("blue"));
-            if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>")) Helper.localNetworkPlayer.OnTalked("Red HP: " + Helper.GetHPOfPlayer("red"));
-            if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>")) Helper.localNetworkPlayer.OnTalked("Green HP: " + Helper.GetHPOfPlayer("green"));
+            if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
+            {
+                var yellowHP = new PlayerHP("yellow");
+                Helper.localNetworkPlayer.OnTalked(yellowHP.FullColor + " HP: " + yellowHP.HP);
+            }
+
+            if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
+            {
+                var blueHP = new PlayerHP("blue");
+                Helper.localNetworkPlayer.OnTalked(blueHP.FullColor + " HP: " + blueHP.HP);
+            }
+
+            if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
+            {
+                var redHP = new PlayerHP("red");
+                Helper.localNetworkPlayer.OnTalked(redHP.FullColor + " HP: " + redHP.HP);
+            }
+
+            if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
+            {
+                var greenHP = new PlayerHP("green");
+                Helper.localNetworkPlayer.OnTalked(greenHP.FullColor + " HP: " + greenHP.HP);
+            }
 
             if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
@@ -206,11 +198,11 @@ namespace QOL
         private string theLobbyHost;
 
         private KeyCode QOLMenuKey1;
-        private KeyCode QOLMenuKey2 = KeyCode.Joystick8Button19;
-        private bool anyKeyMenu;
+        private KeyCode QOLMenuKey2;
+        private bool singleMenuKey;
 
         private KeyCode statWindowKey1;
-        private KeyCode statWindowKey2 = KeyCode.Joystick8Button19;
-        private bool anyKeyStat;
+        private KeyCode statWindowKey2;
+        private bool singleStatKey;
     }
 }

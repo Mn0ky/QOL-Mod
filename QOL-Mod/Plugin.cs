@@ -11,18 +11,17 @@ using UnityEngine.UI;
 
 namespace QOL
 {
-    [BepInPlugin("monky.plugins.QOL", "QOL Mod", VersionNumber)]
+    [BepInPlugin(Guid, "QOL Mod", VersionNumber)]
     [BepInProcess("StickFight.exe")]    
     public class Plugin : BaseUnityPlugin
     {
         private void Awake()
         {
             // Plugin startup logic
-            Logger.LogInfo("Plugin 'monky.plugins.QOL' is loaded! [v" + VersionNumber + "]");
-            Logger.LogInfo("Hello from monk :D");
+            Logger.LogInfo("Plugin " + Guid + " is loaded! [v" + VersionNumber + "]");
             try
             {
-                Harmony harmony = new Harmony("monky.QOL"); // Creates harmony __instance with identifier
+                Harmony harmony = new Harmony("monky.QOL"); // Creates harmony __insta  nce with identifier
                 Logger.LogInfo("Applying ChatManager patches...");
                 ChatManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying MatchmakingHandler patch..."); 
@@ -39,8 +38,8 @@ namespace QOL
                 // SceneManagerPatch.Patch(harmony);
                 // Logger.LogInfo("Applying CharacterStats patch...");
                 // CharacterStatsPatch.Patch(harmony);
-                // Logger.LogInfo("Applying OnlinePlayerUI patch...");
-                // OnlinePlayerUIPatch.Patch(harmony);
+                Logger.LogInfo("Applying OnlinePlayerUI patch...");
+                OnlinePlayerUIPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
@@ -74,7 +73,6 @@ namespace QOL
                 foreach (var strColor in configDefaultColors.Value.Split(' '))
                 {
                     ColorUtility.TryParseHtmlString(strColor.Insert(0, "#"), out Color convColor);
-                    //Logger.LogInfo("Adding color: " + ColorUtility.ToHtmlStringRGB(convColor));
                     defaultColors.Add(convColor);
                 }
 
@@ -169,10 +167,10 @@ namespace QOL
                     true,
                     "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
-                // configCustomName = Config.Bind("Misc. Options",
-                //     "CustomUsername",
-                //     string.Empty,
-                //     "Specify a custom username? (client-side only)");
+                configCustomName = Config.Bind("Misc. Options",
+                "CustomUsername",
+                string.Empty,
+                "Specify a custom username? (client-side only)");
 
                 configFixCrown = Config.Bind("Misc. Options",
                     "FixCrownTxt",
@@ -201,7 +199,6 @@ namespace QOL
 
             string scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
 
-            //Debug.Log("scene: " + SceneManager.GetActiveScene().name + " " + SceneManager.GetActiveScene().buildIndex);
             InitModText();
 
             if (File.Exists(scorePath))
@@ -220,7 +217,7 @@ namespace QOL
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             TextMeshProUGUI modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
-            modTextTMP.text = "<color=red>Monk's QOL Mod</color> " + "<color=white>v" + Plugin.VersionNumber;
+            modTextTMP.text = "<color=red>Monk's QOL Mod</color> " + "<color=white>v" + VersionNumber;
             modTextTMP.fontSize = 25;
             modTextTMP.color = Color.red;
             modTextTMP.fontStyle = FontStyles.Bold;
@@ -239,7 +236,7 @@ namespace QOL
         public static ConfigEntry<bool> configHPWinner;
         public static ConfigEntry<Color> configCustomColor;
         public static ConfigEntry<string> configAuthKeyForTranslation;
-        //public static ConfigEntry<string> configCustomName;
+        public static ConfigEntry<string> configCustomName;
         public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
         public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
         public static ConfigEntry<string> configDefaultColors;
@@ -257,5 +254,6 @@ namespace QOL
         public static List<Color> defaultColors = new(4);
 
         public const string VersionNumber = "1.0.15"; // Version number
+        public const string Guid = "monky.plugins.QOL";
     }
 }

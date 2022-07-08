@@ -38,3 +38,4 @@ namespace QOL
         private static readonly MethodInfo specificJoinMethod = typeof(MatchmakingHandler).GetMethod("JoinSpecificServer", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 }
+    

@@ -1,9 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Steamworks;
+using SimpleJSON;
 using HarmonyLib;
 using TMPro;
 
@@ -15,23 +19,23 @@ namespace QOL
         public static CSteamID GetSteamID(ushort targetID) => clientData[targetID].ClientID;
 
         // Returns the corresponding spawnID from the specified color
-        public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor switch {"yellow" => 0, "blue" => 1, "red" => 2, "green" => 3, _ => ushort.MaxValue};
+        public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor
+            switch { 
+            "yellow" or "y" => 0, 
+            "blue" or "b" => 1,
+            "red" or "r" => 2,
+            "green" or "g" => 3,
+                _ => ushort.MaxValue
+            };
 
         // Returns the corresponding color from the specified spawnID
-        public static string GetColorFromID(ushort x) => x switch {1 => "Blue", 2 => "Red", 3 => "Green", _ => "Yellow"};
-
-        // Returns the corresponding color from the specified spawnID
-        public static string GetCapitalColor(string color) => char.ToUpper(color[0]) + color.Substring(1);
+        public static string GetColorFromID(ushort x) => x switch { 1 => "Blue", 2 => "Red", 3 => "Green", _ => "Yellow" };
 
         // Returns the targeted player based on the specified spawnID
         public static NetworkPlayer GetNetworkPlayer(ushort targetID) => clientData[targetID].PlayerObject.GetComponent<NetworkPlayer>();
 
         // Gets the steam profile name of the specified steamID
         public static string GetPlayerName(CSteamID passedClientID) => SteamFriends.GetFriendPersonaName(passedClientID);
-
-        public static string GetHPOfPlayer(string colorWanted) => clientData[GetIDFromColor(colorWanted)].PlayerObject.GetComponent<HealthHandler>().health + "%";
-
-        public static string GetHPOfPlayer(ushort idWanted) => GetNetworkPlayer(idWanted).GetComponentInChildren<HealthHandler>().health + "%";
 
         // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
         public static string GetJoinGameLink() => $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
@@ -78,37 +82,28 @@ namespace QOL
             if (Plugin.configFixCrown.Value)
             {
                 WinCounterUI counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
-
-                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true))
-                {
-                    Debug.Log("crown autosize: " + crownCount.autoSizeTextContainer);
-                    crownCount.enableAutoSizing = true;
-                }
+                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true)) crownCount.enableAutoSizing = true;
             }
 
-            if (NameResize) // If reading custom names then make sure to add conditional here
+            if (NameResize)
             {
-                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[]; //TODO: Simplify this, cough cough references
+                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue<TextMeshProUGUI[]>();
 
                 foreach (var name in playerNames)
                 {
-                    name.enableAutoSizing = true;
+                    name.fontSizeMin = 45;
                     name.fontSizeMax = 45;
+                    name.overflowMode = TextOverflowModes.Overflow;
                 }
             }
 
-            // if (isCustomName)
-            // {
-            //     Debug.Log("custom name:" + Plugin.configCustomName.Value);
-            //     playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text = Plugin.configCustomName.Value;
-            //     Debug.Log(playerNames[localNetworkPlayer.NetworkSpawnID].GetComponent<TextMeshProUGUI>().text);
-            // }
-
-            GameObject rbHand = new("RainbowHandler");
+            GameObject rbHand = new ("RainbowHandler");
             rbHand.AddComponent<RainbowManager>().enabled = false;
             rainbowEnabled = false;
 
             if (Plugin.configAlwaysRainbow.Value) ToggleRainbow();
+            
+            OptionsHolder.AvailableFramerates = new [] { 48, 60, 69, 72, 75, 120, 144, 240, 0 };
         }
 
         public static void ToggleWinstreak()
@@ -140,20 +135,13 @@ namespace QOL
         public static string GetTargetStatValue(CharacterStats stats, string targetStat)
         {
             foreach (var stat in typeof(CharacterStats).GetFields())
-            {
                 if (stat.Name.ToLower() == targetStat)
-                {
                     return stat.GetValue(stats).ToString();
-                }
-            }
+
             return "No value";
         }
-        
-        public static void SendCommandError(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#8b0000>", msg));
 
-        public static void SendCommandWarn(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#ffae42>", msg));
-
-        public static void SendCommandSuccess(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#006400>", msg));
+        public static void SendLocalMsg(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#006400>", msg));
 
         public static IEnumerator SendClientSideMsg(string logLevel, string msg)
         {
@@ -182,7 +170,7 @@ namespace QOL
         public static bool winStreakEnabled = Plugin.configWinStreakLog.Value;
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
         public static Color customPlayerColor = Plugin.configCustomColor.Value;
-        //public static bool isCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
+        public static bool IsCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
         public static bool NameResize = Plugin.configNoResize.Value;
         public static bool nukChat;
         public static bool onlyLower;
@@ -192,7 +180,6 @@ namespace QOL
 
         public static ConnectedClientData[] clientData;
         public static ChatManager localChat;
-        //public static GameManager gameManager;
 
         public static TextMeshPro tmpText;
         public static int winStreak = 0;

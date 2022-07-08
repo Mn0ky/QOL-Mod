@@ -25,6 +25,10 @@ namespace QOL
             var OnPlayerSpawnedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnPlayerSpawned");
             var OnPlayerSpawnedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.OnPlayerSpawnedMethodPostfix)));
             harmonyInstance.Patch(OnPlayerSpawnedMethod, postfix: OnPlayerSpawnedMethodPostfix);
+
+            var OnKickedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnKicked");
+            var OnKickedMethodPrefix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(MultiplayerManagerPatches.OnKickedMethodPrefix)));
+            harmonyInstance.Patch(OnKickedMethod, prefix: OnKickedMethodPrefix);
         }
 
         public static void OnServerJoinedMethodPostfix()
@@ -37,6 +41,12 @@ namespace QOL
             InitGUI();
         }
 
+        public static bool OnKickedMethodPrefix()
+        {
+            Debug.Log("Blocking attempted kick!!");
+            return false;
+        }
+
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
             TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue() as TextMeshProUGUI[];
@@ -46,26 +56,17 @@ namespace QOL
             {
                 if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
                 {
+                    var otherCharacter = player.transform.root.gameObject;
+                    var otherColor = Plugin.defaultColors[player.NetworkSpawnID];
 
-                    Debug.Log("id not equal");
-                    Debug.Log("resetting now, id of: " + player.NetworkSpawnID);
-                    //Debug.Log("resetting with old color: " + ColorUtility.ToHtmlStringRGBA(Helper.defaultColors[player.NetworkSpawnID]));
+                    ChangeLineRendColor(otherColor, otherCharacter);
+                    ChangeSpriteRendColor(otherColor, otherCharacter);
 
-                    var oldCharacter = player.transform.root.gameObject;
-                    var oldColor = Plugin.defaultColors[player.NetworkSpawnID];
-                    Debug.Log("Assigned old character");
-                    //Debug.Log("old color to assign: " + oldColor.ToString());
+                    foreach (var partSys in otherCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = otherColor;
 
-                    ChangeLineRendColor(oldColor, oldCharacter);
-                    ChangeSpriteRendColor(oldColor, oldCharacter);
-
-                    foreach (var partSys in oldCharacter.GetComponentsInChildren<ParticleSystem>()) partSys.startColor = oldColor;
-
-                    Traverse.Create(oldCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(oldColor);
-                    ChangeWinTextColor(oldColor, player.NetworkSpawnID);
-                    playerNames[player.NetworkSpawnID].color = oldColor;
-
-                    //colorsToReset.Remove(player.NetworkSpawnID);
+                    Traverse.Create(otherCharacter.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(otherColor);
+                    ChangeWinTextColor(otherColor, player.NetworkSpawnID);
+                    playerNames[player.NetworkSpawnID].color = otherColor;
                 }
                 else
                 {

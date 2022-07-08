@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using HarmonyLib;
 using Steamworks;
@@ -15,9 +18,9 @@ namespace QOL
         {
             switch (cmd)
             {
-                case "hp": // Outputs HP of targeted color to chat
-                    string localHealth = Helper.GetHPOfPlayer(Helper.localNetworkPlayer.NetworkSpawnID);
-                    Helper.localNetworkPlayer.OnTalked("My HP: " + localHealth);
+                case "hp": // Outputs HP of ourselves to chat
+                    var localColor = Helper.GetColorFromID(Helper.localNetworkPlayer.NetworkSpawnID);
+                    Helper.localNetworkPlayer.OnTalked("My HP: " + new PlayerHP(localColor).HP);
                     break;
                 case "gg": // Enables or disables automatic "gg" upon death
                     Helper.autoGG = !Helper.autoGG;
@@ -41,6 +44,10 @@ namespace QOL
                     break;
                 case "uwu": // Enables uwuifier for chat messages
                     Helper.uwuifyText = !Helper.uwuifyText;
+                    break;
+                case "fov":
+                    Debug.Log("camera fov: " + Camera.main.fieldOfView);
+                    Camera.main.fieldOfView = 200;
                     break;
                 case "lobregen": // Outputs whether regen is enabled (true) or disabled (false) for the lobby to chat
                     Helper.localNetworkPlayer.OnTalked("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen));
@@ -91,7 +98,7 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked(Plugin.VersionNumber);
                     break;
                 default: // Command is invalid or improperly specified
-                    Helper.SendCommandError("Command not found.");
+                    Helper.SendLocalMsg("Command not found.");
                     break;
             }
         }
@@ -99,12 +106,15 @@ namespace QOL
         public static void DoubleArgument(string[] cmds, string msg)
         {
             ushort targetID;
-
+                
             switch (cmds[0])
             {
                 case "hp": // Outputs HP of targeted color to chat
-                    string targetHealth = Helper.GetHPOfPlayer(Helper.GetIDFromColor(cmds[1]));
-                    Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(cmds[1]) + " HP: " + targetHealth);
+                    var targetHP = new PlayerHP(cmds[1]);
+                    Helper.localNetworkPlayer.OnTalked(targetHP.FullColor + " HP: " + targetHP.HP);
+                    break;
+                case "fps":
+                    Application.targetFrameRate = int.Parse(cmds[1]);
                     break;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.configEmoji.Value + "_/\u00af";
@@ -115,13 +125,13 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked("My " + cmds[1] + ": " + Helper.GetTargetStatValue(myStats, cmds[1]));
                     break;
                 case "id": // Outputs the specified player's SteamID
-                    targetID = Helper.GetIDFromColor(cmds[1]);
-                    GUIUtility.systemCopyBuffer = Helper.GetSteamID(targetID).ToString();
-                    Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(cmds[1]) + "'s steamID copied to clipboard!");
+                    PlayerSteamID targetSteamID = new (cmds[1]);
+                    GUIUtility.systemCopyBuffer = targetSteamID.SteamID;
+                    Helper.localNetworkPlayer.OnTalked(targetSteamID.FullColor + "'s steamID copied to clipboard!");
                     break;
                 case "ping": // Outputs the specified player's ping
-                    targetID = Helper.GetIDFromColor(cmds[1]);
-                    Helper.localNetworkPlayer.OnTalked(Helper.GetCapitalColor(cmds[1]) + " Ping: " + Helper.clientData[targetID].Ping);
+                    PlayerPing targetPing = new (cmds[1]);
+                    Helper.localNetworkPlayer.OnTalked(targetPing.FullColor + targetPing.Ping);
                     break;
                 case "mute": // Mutes the specified player (Only for the current lobby and only client-side)
                     targetID = Helper.GetIDFromColor(cmds[1]);
@@ -129,7 +139,7 @@ namespace QOL
                     else Helper.mutedPlayers.Remove(targetID);
                     break;
                 default: // Command is invalid or improperly specified
-                    Helper.SendCommandError("Command not found.");
+                    Helper.SendLocalMsg("Command not found.");
                     break;
             }
         }
@@ -143,11 +153,15 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked(msg);
                     break;
                 case "stat": // Outputs a stat of the specified player (WeaponsThrown, Falls, BulletShot, and etc.)
-                    CharacterStats targetPlayerStats = Helper.GetNetworkPlayer(Helper.GetIDFromColor(cmds[1])).GetComponentInParent<CharacterStats>();
-                    Helper.localNetworkPlayer.OnTalked(cmds[1] + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetPlayerStats, cmds[2]));
+                    PlayerStat targetStats = new PlayerStat(cmds[1]);
+                    Helper.localNetworkPlayer.OnTalked(targetStats.FullColor + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetStats.Stats, cmds[2]));
+                    break;
+                case "resolution":
+                    Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]), Convert.ToBoolean(OptionsHolder.fullscreen));
+                    Debug.Log("screen res: " + "height: " + Screen.height + " width: " + Screen.width); 
                     break;
                 default:
-                    Helper.SendCommandError("Command not found.");
+                    Helper.SendLocalMsg("Command not found.");
                     break;
             }
         }

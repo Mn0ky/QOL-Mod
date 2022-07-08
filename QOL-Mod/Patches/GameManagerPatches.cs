@@ -17,23 +17,19 @@ namespace QOL
             var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.NetworkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
             harmonyInstance.Patch(networkAllPlayersDiedButOneMethod, postfix: networkAllPlayersDiedButOnePostfix);
 
-            var AwakeMethod = AccessTools.Method(typeof(GameManager), "Awake");
-            var AwakeMethodPostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(GameManagerPatches.AwakeMethodPostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
-            harmonyInstance.Patch(AwakeMethod, postfix: AwakeMethodPostfix);
+            var awakeMethod = AccessTools.Method(typeof(GameManager), "Awake");
+            var awakeMethodPostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(AwakeMethodPostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
+            harmonyInstance.Patch(awakeMethod, postfix: awakeMethodPostfix);
         }
 
-        public static void AwakeMethodPostfix()
-        {
-            Plugin.InitModText();
-        }
+        public static void AwakeMethodPostfix() => Plugin.InitModText();
 
         public static void NetworkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
             if (Helper.HPWinner)
             {
-                string winnerColor = Helper.GetColorFromID(winner);
-
-                Helper.localNetworkPlayer.OnTalked(winnerColor + " HP: " + Helper.GetHPOfPlayer(winner));
+                var winnerHP = new PlayerHP(Helper.GetColorFromID(winner));
+                Helper.localNetworkPlayer.OnTalked("Winner HP: " + winnerHP.HP);
             }
 
             Debug.Log("winner int: " + winner);
@@ -76,18 +72,13 @@ namespace QOL
                     return winstreakColors1[i];
                 }
 
-                if (winstreakRanges1[i] == 0 && winstreakRanges1.Count == 2)
-                {
-                    Debug.Log("Sending last color!");
-                    return winstreakColors2[winstreakColors2.Count - 1];
-                }
+                if (winstreakRanges1[i] == 0 && winstreakRanges1.Count == 2) return winstreakColors2[winstreakColors2.Count - 1];
 
-                Debug.Log("Removing range and color!");
                 winstreakRanges1.RemoveAt(i);
                 winstreakColors1.RemoveAt(i);
             }
 
-            Debug.Log("Something went wrong!");
+            Debug.Log("Something went wrong with streak!");
             return Color.white;
         }
 
@@ -107,10 +98,10 @@ namespace QOL
         }
 
         public static List<Color> winstreakColors1 = new (50);
-        public static List<Color> winstreakColors2 = new(50);
+        public static List<Color> winstreakColors2 = new (50);
 
-        public static List<int> winstreakRanges1 = new(50);
-        public static List<int> winstreakRanges2 = new(50);
+        public static List<int> winstreakRanges1 = new (50);
+        public static List<int> winstreakRanges2 = new (50);
 
         public static int highScore;
     }
