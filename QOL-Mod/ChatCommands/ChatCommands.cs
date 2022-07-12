@@ -48,7 +48,7 @@ namespace QOL
                     break;
                 case "uwu": // Enables uwuifier for chat messages
                     Helper.uwuifyText = !Helper.uwuifyText;
-                    Helper.SendLocalMsg("Toggled Uwuifier.", LogLevel.Success);
+                    Helper.SendLocalMsg("Toggled UwUifier.", LogLevel.Success);
                     break;
                 case "fov":
                     Debug.Log("camera fov: " + Camera.main.fieldOfView);
