@@ -30,16 +30,14 @@ namespace QOL
                 MultiplayerManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying NetworkPlayer patch...");
                 NetworkPlayerPatch.Patch(harmony);
-                Logger.LogInfo("Applying Controller patch...");
+                Logger.LogInfo("Applying Controller patch..."); 
                 ControllerPatch.Patch(harmony);
                 Logger.LogInfo("Applying GameManager patch...");
                 GameManagerPatches.Patch(harmony);
-                // Logger.LogInfo("Applying SceneManager patch...");
-                // SceneManagerPatch.Patch(harmony);
-                // Logger.LogInfo("Applying CharacterStats patch...");
-                // CharacterStatsPatch.Patch(harmony);
                 Logger.LogInfo("Applying OnlinePlayerUI patch...");
                 OnlinePlayerUIPatch.Patch(harmony);
+                Logger.LogInfo("Applying P2PPackageHandler patch...");
+                P2PPackageHandlerPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
@@ -213,7 +211,7 @@ namespace QOL
 
         public static void InitModText()
         {
-            GameObject modText = new GameObject("ModText");
+            GameObject modText = new ("ModText");
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             TextMeshProUGUI modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
