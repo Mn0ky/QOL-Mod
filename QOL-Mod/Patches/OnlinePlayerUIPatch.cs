@@ -17,11 +17,15 @@ namespace QOL
             var updateMethod = AccessTools.Method(typeof(OnlinePlayerUI), "Update");
             var updateMethodPrefix = new HarmonyMethod(typeof(OnlinePlayerUIPatch).GetMethod(nameof(UpdateMethodPrefix)));
             harmonyInstance.Patch(updateMethod, prefix: updateMethodPrefix);
+
+            var populateMethod = AccessTools.Method(typeof(OnlinePlayerUI), "Populate");
+            var populateMethodPrefix = new HarmonyMethod(typeof(OnlinePlayerUIPatch).GetMethod(nameof(PopulateMethodPrefix)));
+            harmonyInstance.Patch(populateMethod, prefix: populateMethodPrefix);
         }
 
         public static bool UpdateMethodPrefix(ref bool ___mIsStaying, ref ConnectedClientData[] ___mClients, ref TextMeshProUGUI[] ___mPlayerTexts)
         {
-			if (!___mIsStaying) return false;
+            if (!___mIsStaying) return false;
 
 			for (int i = 0; i < ___mClients.Length; i++)
 			{
@@ -32,11 +36,7 @@ namespace QOL
 				{
                     if (Helper.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) ___mPlayerTexts[i].text = Plugin.configCustomName.Value;
                     
-                    else 
-                    {
-                        Debug.Log("assigning normal name");
-                        ___mPlayerTexts[i].text = client.PlayerName;
-                    }
+                    else ___mPlayerTexts[i].text = client.PlayerName;
 
                     CodeStateAnimation component = ___mPlayerTexts[i].GetComponent<CodeStateAnimation>();
 					GameObject gameObject = client.PlayerObject.GetComponentInChildren<Torso>().gameObject;
@@ -51,5 +51,34 @@ namespace QOL
 
             return false;
 		}
+
+        public static bool PopulateMethodPrefix(ref bool ___mIsStaying, ref ConnectedClientData[] ___mClients, ref TextMeshProUGUI[] ___mPlayerTexts, OnlinePlayerUI __instance)
+        {
+            if (___mClients == null) return false;
+
+            ___mIsStaying = false;
+            for (int i = 0; i < ___mClients.Length; i++)
+            {
+                ConnectedClientData connectedClientData = ___mClients[i];
+                if (connectedClientData == null || !connectedClientData.ClientID.IsValid() || connectedClientData.PlayerObject == null) ___mPlayerTexts[i].text = string.Empty;
+                
+                else
+                {
+                    if (Helper.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) ___mPlayerTexts[i].text = Plugin.configCustomName.Value;
+
+                    else ___mPlayerTexts[i].text = connectedClientData.PlayerName + connectedClientData.Ping;
+
+                    var showTextMethod = AccessTools.Method(typeof(OnlinePlayerUI), "ShowText");
+
+                    __instance.StartCoroutine(
+                        (System.Collections.IEnumerator) showTextMethod.Invoke(
+                            __instance, 
+                            new object[] { ___mPlayerTexts[i].GetComponent<CodeStateAnimation>(),
+                            connectedClientData.PlayerObject.GetComponentInChildren<Torso>().gameObject }));
+                }
+            }
+
+            return false;
+        }
     }
 }

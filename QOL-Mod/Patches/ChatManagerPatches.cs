@@ -213,32 +213,30 @@ namespace QOL
         public static string UwUify(string targetText)
         {
             int i = 0;
-            var newMessage = new StringBuilder(targetText.ToLower()).Append(0);   
-
+            var newMessage = new StringBuilder(targetText.ToLower()).Append(0);
             while (i < newMessage.Length)
             {
-                char c = newMessage[i];
-
-                if (char.IsLetter(newMessage[i]))
+                if (!char.IsLetter(newMessage[i]))
                 {
-                    switch (c)
-                    {
-                        case 'r' or 'l':
-                            newMessage[i] = 'w';
-                            break;
-                        case 't' when newMessage[i + 1] == 'h':
-                            newMessage[i] = 'd';
-                            newMessage.Remove(i + 1, 1);
-                            break;
-                        default:
-                            if (Helper.IsVowel(c) && newMessage[i + 1] == 't') newMessage.Insert(i + 1, 'w');
-                            break;
-                    }
                     i++;
+                    continue;
+                }
+                char c = newMessage[i];
+                switch (c)
+                {
+                    case 'r' or 'l':
+                        newMessage[i] = 'w';
+                        break;
+                    case 't' when newMessage[i + 1] == 'h':
+                        newMessage[i] = 'd';
+                        newMessage.Remove(i + 1, 1);
+                        break;
+                    default:
+                        if (Helper.IsVowel(c) && newMessage[i + 1] == 't') newMessage.Insert(i + 1, 'w');
+                        break;
                 }
                 i++;
             }
-
             return newMessage.Remove(newMessage.Length - 1, 1).ToString();
         }
 

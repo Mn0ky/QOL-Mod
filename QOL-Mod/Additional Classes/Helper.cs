@@ -19,14 +19,14 @@ namespace QOL
         public static CSteamID GetSteamID(ushort targetID) => clientData[targetID].ClientID;
 
         // Returns the corresponding spawnID from the specified color
-        public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor
-            switch { 
+        public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor switch
+        { 
             "yellow" or "y" => 0, 
             "blue" or "b" => 1,
             "red" or "r" => 2,
             "green" or "g" => 3,
                 _ => ushort.MaxValue
-            };
+        };
 
         // Returns the corresponding color from the specified spawnID
         public static string GetColorFromID(ushort x) => x switch { 1 => "Blue", 2 => "Red", 3 => "Green", _ => "Yellow" };
@@ -51,12 +51,9 @@ namespace QOL
                     ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePublic });
                     localNetworkPlayer.OnTalked("Lobby made public!");
                 }
-                else
-                {
-                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
-                    localNetworkPlayer.OnTalked("Lobby made private!");
-                }
-                
+
+                else ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
+
                 return;
             }
             
@@ -141,15 +138,21 @@ namespace QOL
             return "No value";
         }
 
-        public static void SendLocalMsg(string msg) => GameManager.Instance.StartCoroutine(SendClientSideMsg("<#006400>", msg));
+        public static void SendLocalMsg(string msg, ChatCommands.LogLevel logLevel) => GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg));
 
-        public static IEnumerator SendClientSideMsg(string logLevel, string msg)
+        private static IEnumerator SendClientSideMsg(ChatCommands.LogLevel logLevel, string msg)
         {
+            string msgColor = logLevel switch
+            {
+                ChatCommands.LogLevel.Warning => "<#FF7F50>",
+                _ => "<#006400>"
+            };
+
             bool origRichTextValue = tmpText.richText;
             float chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
 
             tmpText.richText = true;
-            localChat.Talk(logLevel + msg);
+            localChat.Talk(msgColor + msg);
 
             yield return new WaitForSeconds(chatMsgDuration + 3f); // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
             tmpText.richText = origRichTextValue;

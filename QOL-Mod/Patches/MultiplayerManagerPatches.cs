@@ -31,21 +31,11 @@ namespace QOL
             harmonyInstance.Patch(OnKickedMethod, prefix: OnKickedMethodPrefix);
         }
 
-        public static void OnServerJoinedMethodPostfix()
-        {
-            InitGUI();
-        }
+        public static void OnServerJoinedMethodPostfix() => InitGUI();
 
-        public static void OnServerCreatedMethodPostfix()
-        {
-            InitGUI();
-        }
+        public static void OnServerCreatedMethodPostfix() => InitGUI();
 
-        public static bool OnKickedMethodPrefix()
-        {
-            Debug.Log("Blocking attempted kick!!");
-            return false;
-        }
+        public static bool OnKickedMethodPrefix() => false; // Guards against kick attempts made towards the user by simply not running the method
 
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Steamworks;
 using UnityEngine;
@@ -7,6 +8,33 @@ namespace QOL
 {
     public class GUIManager : MonoBehaviour
     {
+        private bool mShowMenu;
+        private bool mStatsShown;
+        public static float[] QOLMenuPos;
+        public static float[] StatMenuPos;
+
+        private bool mShowStatMenu;
+
+        private Rect MenuRect = new(QOLMenuPos[0], QOLMenuPos[1], 350f, 375f);
+
+        private Rect StatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
+
+        private int WindowId = 100;
+
+        private string[] playerStats = new string[4];
+
+        private string playerNamesStr = "Players in Room: \n";
+
+        private string theLobbyHost;
+
+        private KeyCode QOLMenuKey1;
+        private KeyCode QOLMenuKey2;
+        private bool singleMenuKey;
+
+        private KeyCode statWindowKey1;
+        private KeyCode statWindowKey2;
+        private bool singleStatKey;
+
         private void Start() => Debug.Log("Started GUI in GUIManager!");
         
         private void Awake()
@@ -51,31 +79,27 @@ namespace QOL
 
             if (mShowStatMenu && mStatsShown)
             {
-                yellowStatsText = "";
-                blueStatsText = "";
-                redStatsText = "";
-                greenStatsText = "";
-                Array.Clear(playersInLobby, 0, playersInLobby.Length);
+                //Array.Clear(playerStats, 0, playerStats.Length);
 
                 foreach (var stat in FindObjectsOfType<CharacterStats>())
                 {
                     switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
                     {
                         case 0:
-                            yellowStatsText = stat.GetString();
-                            playersInLobby[0] = "Yellow";
+                            playerStats[0] = stat.GetString();
+                            Debug.Log(playerStats[0]);
                             break;
                         case 1:
-                            blueStatsText = stat.GetString();
-                            playersInLobby[1] = "Blue";
+                            playerStats[1] = stat.GetString();
+                            Debug.Log(playerStats[1]);
                             break;
                         case 2:
-                            redStatsText = stat.GetString();
-                            playersInLobby[2] = "Red";
+                            playerStats[2] = stat.GetString();
+                            Debug.Log(playerStats[2]);
                             break;
                         default:
-                            greenStatsText = stat.GetString();
-                            playersInLobby[3] = "Green";
+                            playerStats[3] = stat.GetString();
+                            Debug.Log(playerStats[3]);
                             break;
                     }
                 }
@@ -129,6 +153,7 @@ namespace QOL
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
                 Helper.localNetworkPlayer.OnTalked("Join link copied to clipboard!");
 			}
+
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
             {
                 mShowStatMenu = !mShowStatMenu;
@@ -160,49 +185,19 @@ namespace QOL
             GUI.skin.label.alignment = normAlignment;
 
             GUILayout.BeginHorizontal();
-            foreach (string color in playersInLobby) GUILayout.Label("<color=" + color + ">" + color + "</color>");
-            GUILayout.EndHorizontal();
+            for (ushort i = 0; i < playerStats.Length; i++)
+            {
+                string stat = playerStats[i];
+                string color = Helper.GetColorFromID(i);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(yellowStatsText);
-            GUILayout.Label(blueStatsText);
-            GUILayout.Label(redStatsText);
-            GUILayout.Label(greenStatsText);
+                GUILayout.BeginVertical();
+                GUILayout.Label("<color=" + color + ">" + color + "</color>");
+                GUILayout.Label(stat);  
+                GUILayout.EndVertical();
+            }
             GUILayout.EndHorizontal();
 
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
-
-        private bool mShowMenu;
-        private bool mStatsShown;
-        public static float[] QOLMenuPos;
-        public static float[] StatMenuPos;
-
-        private bool mShowStatMenu;
-
-        private string yellowStatsText;
-        private string blueStatsText;
-        private string redStatsText;
-        private string greenStatsText;
-
-        private Rect MenuRect = new(QOLMenuPos[0], QOLMenuPos[1], 350f, 375f);
-
-        private Rect StatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
-
-        private int WindowId = 100;
-
-        private string[] playersInLobby = {"", "", "", ""};
-
-        private string playerNamesStr = "Players in Room: \n";
-
-        private string theLobbyHost;
-
-        private KeyCode QOLMenuKey1;
-        private KeyCode QOLMenuKey2;
-        private bool singleMenuKey;
-
-        private KeyCode statWindowKey1;
-        private KeyCode statWindowKey2;
-        private bool singleStatKey;
     }
 }
