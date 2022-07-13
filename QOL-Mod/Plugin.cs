@@ -38,6 +38,8 @@ namespace QOL
                 OnlinePlayerUIPatch.Patch(harmony);
                 Logger.LogInfo("Applying P2PPackageHandler patch...");
                 P2PPackageHandlerPatch.Patch(harmony);
+                Logger.LogInfo("Apply CharacterInformation patch...");
+                CharacterInformationPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
@@ -52,6 +54,11 @@ namespace QOL
                     "CustomColor",
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
+
+                configCustomColorOnParticle = Config.Bind("Player Color Options",
+                    "CustomColorOnParticle",
+                    false,
+                    "Apply your custom color for even your walking and jumping particles?");
 
                 configRainbowSpeed = Config.Bind("Player Color Options",
                     "RainbowSpeed",
@@ -147,7 +154,7 @@ namespace QOL
 
                 configRichText = Config.Bind("On-Startup Options",
                     "RichText",
-                    false,
+                    true,
                     "Enable rich text for chat on startup?");
 
                 configAdvCmd = Config.Bind("Misc. Options",
@@ -233,6 +240,7 @@ namespace QOL
         public static ConfigEntry<bool> configNoResize;
         public static ConfigEntry<bool> configHPWinner;
         public static ConfigEntry<Color> configCustomColor;
+        public static ConfigEntry<bool> configCustomColorOnParticle;
         public static ConfigEntry<string> configAuthKeyForTranslation;
         public static ConfigEntry<string> configCustomName;
         public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
