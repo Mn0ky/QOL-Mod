@@ -48,6 +48,7 @@ namespace QOL
                     break;
                 case "uwu": // Enables uwuifier for chat messages
                     Helper.uwuifyText = !Helper.uwuifyText;
+                    Helper.SendLocalMsg("Toggled UwUifier.", LogLevel.Success);
                     break;
                 case "fov":
                     Debug.Log("camera fov: " + Camera.main.fieldOfView);
@@ -97,6 +98,7 @@ namespace QOL
                     break;
                 case "lowercase": // Enables/Disables chat messages always being sent in lowercase
                     Helper.onlyLower = !Helper.onlyLower;
+                    Helper.SendLocalMsg("Toggled LowercaseOnly.", LogLevel.Success);
                     break;
                 case "suicide": // Kills user
                     Helper.localNetworkPlayer.UnitWasDamaged(5, true, DamageType.LocalDamage, true);
@@ -175,7 +177,7 @@ namespace QOL
                     break;
                 case "stat": // Outputs a stat of the specified player (WeaponsThrown, Falls, BulletShot, and etc.)
                     PlayerStat targetStats = new PlayerStat(cmds[1]);
-                    Helper.localNetworkPlayer.OnTalked(targetStats.FullColor + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetStats.Stats, cmds[2]));
+                    Helper.SendLocalMsg(targetStats.FullColor + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success);
                     break;
                 case "resolution":
                     Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]), Convert.ToBoolean(OptionsHolder.fullscreen));
