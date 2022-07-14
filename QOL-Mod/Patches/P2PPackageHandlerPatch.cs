@@ -15,7 +15,7 @@ namespace QOL
         public static void Patch(Harmony harmonyInstance)
         {
             var checkMessageTypeMethod = AccessTools.Method(typeof(P2PPackageHandler), "CheckMessageType");
-            var checkMessageTypeMethodTranspiler = new HarmonyMethod(typeof(P2PPackageHandlerPatch).GetMethod(nameof(P2PPackageHandlerPatch.CheckMessageTypeMethodTranspiler))); // Patches Start() with prefix method
+            var checkMessageTypeMethodTranspiler = new HarmonyMethod(typeof(P2PPackageHandlerPatch).GetMethod(nameof(CheckMessageTypeMethodTranspiler))); // Patches Start() with prefix method
             harmonyInstance.Patch(checkMessageTypeMethod, transpiler: checkMessageTypeMethodTranspiler);
         }
 
@@ -23,7 +23,7 @@ namespace QOL
         {
             var onKickedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnKicked");
 
-            List<CodeInstruction> instructionList = instructions.ToList(); // Generates a list of CIL instructions for Update() 
+            List<CodeInstruction> instructionList = instructions.ToList();
             var len = instructionList.Count;
               
             for (var i = 0; i < len; i++)
@@ -46,8 +46,10 @@ namespace QOL
 
         private static void FindPlayerWhoSentKickPcktAndAlertUser(CSteamID kickPacketSender)
         {
-            var senderPlayerColor = Helper.GetColorFromID(Helper.clientData.First(data => data.ClientID == kickPacketSender).PlayerObject.GetComponent<NetworkPlayer>().NetworkSpawnID);
-            Helper.SendLocalMsg("Attempted kick by: " + senderPlayerColor, ChatCommands.LogLevel.Warning);
+            var senderPlayerColor = Helper.GetColorFromID(Helper.clientData.First(data => data.ClientID == kickPacketSender)
+                .PlayerObject.GetComponent<NetworkPlayer>().NetworkSpawnID);
+
+            Helper.SendLocalMsg("Blocked kick by: " + senderPlayerColor, ChatCommands.LogLevel.Warning);
         }
     }
 

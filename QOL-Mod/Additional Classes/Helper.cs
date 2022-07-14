@@ -60,7 +60,8 @@ namespace QOL
             localNetworkPlayer.OnTalked("Need to be host!");
         }
 
-        public static void InitValues(ChatManager __instance, ushort playerID) // Assigns the networkPlayer as the local one if it matches our steamID (also if text should be rich or not)
+        // Assigns some commonly accessed values as well as runs anything that needs to be everytime a lobby is joined
+        public static void InitValues(ChatManager __instance, ushort playerID)
         {
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
 
@@ -73,7 +74,7 @@ namespace QOL
 
             Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
-            tmpText = Traverse.Create(__instance).Field("text").GetValue() as TextMeshPro;
+            tmpText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
             tmpText.richText = Plugin.configRichText.Value;
 
             if (Plugin.configFixCrown.Value)
@@ -84,7 +85,8 @@ namespace QOL
 
             if (NameResize)
             {
-                TextMeshProUGUI[] playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue<TextMeshProUGUI[]>();
+                var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts")
+                    .GetValue<TextMeshProUGUI[]>();
 
                 foreach (var name in playerNames)
                 {
@@ -94,13 +96,17 @@ namespace QOL
                 }
             }
 
+            if (Plugin.configCustomCrownColor.Value != (Color) Plugin.configCustomCrownColor.DefaultValue)
+            {
+                var crown = UnityEngine.Object.FindObjectOfType<Crown>().gameObject;
+                foreach (var sprite in crown.GetComponentsInChildren<SpriteRenderer>(true)) sprite.color = Plugin.configCustomCrownColor.Value;
+            }
+
             GameObject rbHand = new ("RainbowHandler");
             rbHand.AddComponent<RainbowManager>().enabled = false;
             rainbowEnabled = false;
 
             if (Plugin.configAlwaysRainbow.Value) ToggleRainbow();
-            
-            OptionsHolder.AvailableFramerates = new [] { 48, 60, 69, 72, 75, 120, 144, 240, 0 };
         }
 
         public static void ToggleWinstreak()
@@ -149,12 +155,16 @@ namespace QOL
             };
 
             bool origRichTextValue = tmpText.richText;
+
             float chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
+            var extraTime = Plugin.configMsgDuration.Value;
+            if (extraTime > 0) chatMsgDuration += extraTime; // Taking into account any possible extra msg time specified in config
 
             tmpText.richText = true;
             localChat.Talk(msgColor + msg);
 
-            yield return new WaitForSeconds(chatMsgDuration + 3f); // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
+            // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
+            yield return new WaitForSeconds(chatMsgDuration + 3f); 
             tmpText.richText = origRichTextValue;
         }
 

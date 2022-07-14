@@ -35,6 +35,10 @@ namespace QOL
             var ReplaceUnacceptableWordsMethod = AccessTools.Method(typeof(ChatManager), "ReplaceUnacceptableWords");
             var ReplaceUnacceptableWordsMethodPrefix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(ChatManagerPatches.ReplaceUnacceptableWordsMethodPrefix))); // Patches ReplaceUnacceptableWords() with prefix method
             harmonyInstance.Patch(ReplaceUnacceptableWordsMethod, prefix: ReplaceUnacceptableWordsMethodPrefix);
+
+            var talkMethod = AccessTools.Method(typeof(ChatManager), "Talk");
+            var talkMethodPostfix = new HarmonyMethod(typeof(ChatManagerPatches).GetMethod(nameof(TalkMethodPostfix)));
+            harmonyInstance.Patch(talkMethod, postfix: talkMethodPostfix);
         }
 
         public static void StartMethodPostfix(ChatManager __instance)
@@ -96,7 +100,7 @@ namespace QOL
 
             if (message.StartsWith("/"))
             {
-                ChatManagerPatches.Commands(message, __instance);
+                ChatManagerPatches.Commands(message);
                 return false;
             }
 
@@ -147,7 +151,13 @@ namespace QOL
             return true;
         }
 
-        public static void Commands(string message, ChatManager __instance)
+        public static void TalkMethodPostfix(ref float ___disableChatIn)
+        {
+            var extraTime = Plugin.configMsgDuration.Value;
+            if (extraTime > 0) ___disableChatIn += extraTime;
+        }
+
+        public static void Commands(string message)
         {
             Debug.Log("Made it to beginning of commands!");
             string[] text = message.ToLower().TrimStart('/').Split(' ');

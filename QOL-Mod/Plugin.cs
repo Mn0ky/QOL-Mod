@@ -75,7 +75,12 @@ namespace QOL
                 configDefaultColors = Config.Bind("Player Color Options",
                     "DefaultPlayerColors",
                     "D88C47 5573AD D6554D 578B49",
-                    "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");  
+                    "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");
+
+                configCustomCrownColor = Config.Bind("Player Color Options",
+                    "CustomCrownColor",
+                    (Color) new Color32(255, 196, 68, 255), // #FFC444FF
+                    "Change the default crown (for when a player wins a match) color? (Use a HEX value)");
 
                 foreach (var strColor in configDefaultColors.Value.Split(' '))
                 {
@@ -164,6 +169,11 @@ namespace QOL
                     "",
                     "Modify the output of /adv? By default the message is blank but can be changed to anything.");
 
+                configMsgDuration = Config.Bind("Misc. Options",
+                    "MsgDuration",
+                    0.0f,
+                    "Extend the amount of time per chat message by a specified amount? (Decimals allowed)");
+
                 configTranslation = Config.Bind("On-Startup Options",
                     "AutoTranslations",
                     false,
@@ -175,9 +185,9 @@ namespace QOL
                     "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
                 configCustomName = Config.Bind("Misc. Options",
-                "CustomUsername",
-                string.Empty,
-                "Specify a custom username? (client-side only)");
+                    "CustomUsername",
+                    string.Empty,
+                    "Specify a custom username? (client-side only)");
 
                 configFixCrown = Config.Bind("Misc. Options",
                     "FixCrownTxt",
@@ -242,6 +252,7 @@ namespace QOL
         public static ConfigEntry<bool> configNoResize;
         public static ConfigEntry<bool> configHPWinner;
         public static ConfigEntry<Color> configCustomColor;
+        public static ConfigEntry<Color> configCustomCrownColor;
         public static ConfigEntry<bool> configCustomColorOnParticle;
         public static ConfigEntry<string> configAuthKeyForTranslation;
         public static ConfigEntry<string> configCustomName;
@@ -252,6 +263,7 @@ namespace QOL
         public static ConfigEntry<string> configWinStreakRanges;
         public static ConfigEntry<int> configWinStreakFontsize;
         public static ConfigEntry<float> configRainbowSpeed;
+        public static ConfigEntry<float> configMsgDuration;
         public static ConfigEntry<string> configAdvCmd;
         public static ConfigEntry<string> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
