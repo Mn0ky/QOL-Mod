@@ -21,7 +21,7 @@ namespace QOL
             Logger.LogInfo("Plugin " + Guid + " is loaded! [v" + VersionNumber + "]");
             try
             {
-                Harmony harmony = new Harmony("monky.QOL"); // Creates harmony __insta  nce with identifier
+                Harmony harmony = new ("monky.QOL"); // Creates harmony __insta  nce with identifier
                 Logger.LogInfo("Applying ChatManager patches...");
                 ChatManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying MatchmakingHandler patch..."); 
@@ -40,6 +40,8 @@ namespace QOL
                 P2PPackageHandlerPatch.Patch(harmony);
                 Logger.LogInfo("Apply CharacterInformation patch...");
                 CharacterInformationPatch.Patch(harmony);
+                Logger.LogInfo("Apply BossTimer patch...");
+                BossTimerPatch.Patch(harmony);
             }
             catch (Exception ex)
             {

@@ -19,7 +19,7 @@ namespace QOL
 
         public static void StartMethodPostfix(CharacterInformation __instance)
         {
-            if (MatchmakingHandler.Instance.IsInsideLobby)
+            if (!MatchmakingHandler.Instance.IsInsideLobby)
             {
                 Color colorWanted = Plugin.configCustomColor.Value != new Color(1, 1, 1) ? Plugin.configCustomColor.Value : Plugin.defaultColors[0];
                 MultiplayerManagerPatches.ChangeAllCharacterColors(colorWanted, __instance.gameObject);
