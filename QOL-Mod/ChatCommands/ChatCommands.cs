@@ -31,6 +31,10 @@ namespace QOL
                     Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
                     Helper.SendLocalMsg("Toggled ChatCensorship.", LogLevel.Success);
                     break;
+                case "ouch":
+                    Helper.IsOwMode = !Helper.IsOwMode;
+                    Helper.SendLocalMsg("Toggled OuchMode.", LogLevel.Success);
+                    break;
                 case "winstreak": // Enables/disables winstreak system
                     Helper.ToggleWinstreak();
                     Helper.SendLocalMsg("Toggled Winstreak system.", LogLevel.Success);

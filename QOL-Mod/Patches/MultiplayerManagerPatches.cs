@@ -52,8 +52,8 @@ namespace QOL
                 {
                     var character = player.transform.root.gameObject;
 
-                    if (Helper.customPlayerColor == defaultColor) ChangeAllCharacterColors(Plugin.defaultColors[player.NetworkSpawnID], character);
-                    else ChangeAllCharacterColors(Helper.customPlayerColor, character);
+                    if (!Helper.IsCustomPlayerColor) ChangeAllCharacterColors(Plugin.defaultColors[player.NetworkSpawnID], character);
+                    else ChangeAllCharacterColors(Helper.CustomPlayerColor, character);
                 }
             }
         }
@@ -74,8 +74,12 @@ namespace QOL
 
         public static void ChangeParticleColor(Color colorWanted, GameObject character)
         {
+            var unchangedEffects = new string[] { "punchPartilce", "JumpParticle", "landParticle (1)", "footParticle", "footParticle (1)" };
+
             foreach (var partSys in character.GetComponentsInChildren<ParticleSystem>())
             {
+                if (unchangedEffects.Contains(partSys.name) && !Plugin.configCustomColorOnParticle.Value) continue;
+                
                 var main = partSys.main;
                 main.startColor = colorWanted;
             }
@@ -94,7 +98,7 @@ namespace QOL
 
             ChangeLineRendColor(colorWanted, character);
             ChangeSpriteRendColor(colorWanted, character);
-            if (Plugin.configCustomColorOnParticle.Value) ChangeParticleColor(colorWanted, character);
+            ChangeParticleColor(colorWanted, character);
             ChangeWinTextColor(colorWanted, playerID);
 
             Traverse.Create(character.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(colorWanted);

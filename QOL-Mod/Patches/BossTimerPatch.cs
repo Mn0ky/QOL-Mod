@@ -18,8 +18,15 @@ namespace QOL
 
         public static void StartMethodPostfix(BossTimer __instance)
         {
-            Color colorWanted = Plugin.configCustomColor.Value != new Color(1, 1, 1) ? Plugin.configCustomColor.Value : Plugin.defaultColors[0];
-            ChangeBossUIColor(colorWanted, __instance.transform.root.gameObject);
+            var spawnID = __instance.transform.root.GetComponent<NetworkPlayer>().NetworkSpawnID;
+
+            if (Helper.IsCustomPlayerColor && spawnID == Helper.localNetworkPlayer.NetworkSpawnID)
+            {
+                ChangeBossUIColor(Helper.CustomPlayerColor, __instance.transform.root.gameObject);
+                return;
+            }
+
+            ChangeBossUIColor(Plugin.defaultColors[spawnID], __instance.transform.root.gameObject);
         }
 
         private static void ChangeBossUIColor(Color colorWanted, GameObject character)

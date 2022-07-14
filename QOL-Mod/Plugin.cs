@@ -30,8 +30,8 @@ namespace QOL
                 MultiplayerManagerPatches.Patches(harmony);
                 Logger.LogInfo("Applying NetworkPlayer patch...");
                 NetworkPlayerPatch.Patch(harmony);
-                Logger.LogInfo("Applying Controller patch..."); 
-                ControllerPatch.Patch(harmony);
+                Logger.LogInfo("Applying Controller patches..."); 
+                ControllerPatches.Patch(harmony);
                 Logger.LogInfo("Applying GameManager patch...");
                 GameManagerPatches.Patch(harmony);
                 Logger.LogInfo("Applying OnlinePlayerUI patch...");
@@ -60,7 +60,7 @@ namespace QOL
                 configCustomColorOnParticle = Config.Bind("Player Color Options",
                     "CustomColorOnParticle",
                     false,
-                    "Apply your custom color for even your walking and jumping particles?");
+                    "Apply your custom color for even your walking, jumping, and punching particles?");
 
                 configRainbowSpeed = Config.Bind("Player Color Options",
                     "RainbowSpeed",
@@ -194,6 +194,11 @@ namespace QOL
                     true,
                     "Auto-resize win counter font so wins into the hundreds/thousands display properly?");
 
+                configOuchPhrases = Config.Bind("Misc. Options",
+                    "OuchPhrases",
+                    "ow ouch ouchie",
+                    "Words to be used by OuchMode? Space seperated. (/ouch)");
+
                 configHPWinner = Config.Bind("On-Startup Options",
                     "AlwaysShowHPOfWinner",
                     false,
@@ -268,6 +273,7 @@ namespace QOL
         public static ConfigEntry<string> configEmoji;
         public static ConfigEntry<string> configQOLMenuPlacement;
         public static ConfigEntry<string> configStatMenuPlacement;
+        public static ConfigEntry<string> configOuchPhrases;
         public static ConfigEntry<bool> configFixCrown;
         public static ConfigEntry<bool> configAlwaysRainbow;
 

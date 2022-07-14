@@ -182,8 +182,11 @@ namespace QOL
         public static bool uwuifyText; // True if uwufiy text is enabled, false by default
         public static bool winStreakEnabled = Plugin.configWinStreakLog.Value;
         public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
-        public static Color customPlayerColor = Plugin.configCustomColor.Value;
+        public static Color CustomPlayerColor = Plugin.configCustomColor.Value;
+        public static bool IsCustomPlayerColor = Plugin.configCustomColor.Value != new Color(1, 1, 1);
         public static bool IsCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
+        public static bool IsOwMode;
+        public static string[] OuchPhrases = Plugin.configOuchPhrases.Value.Split(' ');
         public static bool NameResize = Plugin.configNoResize.Value;
         public static bool nukChat;
         public static bool onlyLower;

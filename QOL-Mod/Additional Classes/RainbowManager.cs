@@ -40,10 +40,10 @@ namespace QOL
             Debug.Log("rainbow disabled");
             var player = Helper.localNetworkPlayer.transform.root.gameObject;
 
-            if (Helper.customPlayerColor != new Color(1, 1, 1))
+            if (Helper.IsCustomPlayerColor)
             {
-                MultiplayerManagerPatches.ChangeLineRendColor(Helper.customPlayerColor, player);
-                MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.customPlayerColor, player);
+                MultiplayerManagerPatches.ChangeLineRendColor(Helper.CustomPlayerColor, player);
+                MultiplayerManagerPatches.ChangeSpriteRendColor(Helper.CustomPlayerColor, player);
                 return;
             }
 
