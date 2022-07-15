@@ -68,7 +68,12 @@ namespace QOL
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
             
             foreach (var filePath in Directory.GetFiles(Plugin.MusicPath))
-                __instance.StartCoroutine(ImportWav(filePath, audioClip => CreateSongAndAddToMusic(audioClip)));
+            {
+                var acceptableFileExtension = filePath.Substring(filePath.Length - 4); // .OGG or .WAV, both are 4 char
+
+                if (acceptableFileExtension == ".ogg" || acceptableFileExtension == ".wav")
+                    __instance.StartCoroutine(ImportWav(filePath, audioClip => CreateSongAndAddToMusic(audioClip)));
+            }
 
             clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
             mutedPlayers.Clear();
@@ -90,7 +95,8 @@ namespace QOL
 
             if (NameResize)
             {
-                var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts")
+                var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>())
+                    .Field("mPlayerTexts")
                     .GetValue<TextMeshProUGUI[]>();
 
                 foreach (var name in playerNames)
@@ -213,6 +219,7 @@ namespace QOL
         public static bool IsCustomPlayerColor = Plugin.configCustomColor.Value != new Color(1, 1, 1);
         public static bool IsCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
         public static bool IsOwMode;
+        public static bool IsSongLoop;
         public static string[] OuchPhrases = Plugin.configOuchPhrases.Value.Split(' ');
         public static bool NameResize = Plugin.configNoResize.Value;
         public static bool nukChat;
