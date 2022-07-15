@@ -61,11 +61,9 @@ namespace QOL
                     return;
                 case "private": // Privates the lobby (no player can publicly join unless invited)
                     Helper.ToggleLobbyVisibility(false);
-                    Helper.SendLocalMsg("Lobby made private!", LogLevel.Success);
                     return;
                 case "public": // Publicizes the lobby (any player can join through quick match)
                     Helper.ToggleLobbyVisibility(true);
-                    Helper.SendLocalMsg("Lobby made public!", LogLevel.Success);
                     return;
                 case "invite": // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
                     GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();

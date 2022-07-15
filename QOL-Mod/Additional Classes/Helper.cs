@@ -51,15 +51,19 @@ namespace QOL
                 if (open)
                 {
                     ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePublic });
-                    localNetworkPlayer.OnTalked("Lobby made public!");
+                    SendLocalMsg("Lobby made public!", ChatCommands.LogLevel.Success);
                 }
 
-                else ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
+                else
+                {
+                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
+                    SendLocalMsg("Lobby made private!", ChatCommands.LogLevel.Success);
+                }
 
                 return;
             }
-            
-            localNetworkPlayer.OnTalked("Need to be host!");
+
+            SendLocalMsg("Need to be host!", ChatCommands.LogLevel.Warning);
         }
 
         // Assigns some commonly accessed values as well as runs anything that needs to be everytime a lobby is joined
