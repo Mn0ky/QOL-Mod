@@ -200,7 +200,7 @@ namespace QOL
 
                 configOuchPhrases = Config.Bind("Misc. Options",
                     "OuchPhrases",
-                    "ow ouch ouchie",
+                    "ow owie ouch ouchie",
                     "Words to be used by OuchMode? Space seperated. (/ouch)");
 
                 configHPWinner = Config.Bind("On-Startup Options",
