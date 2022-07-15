@@ -10,6 +10,8 @@ using Steamworks;
 using SimpleJSON;
 using HarmonyLib;
 using TMPro;
+using BepInEx;
+using UnityEngine.Networking;
 
 namespace QOL
 {
@@ -64,6 +66,9 @@ namespace QOL
         public static void InitValues(ChatManager __instance, ushort playerID)
         {
             if (playerID != GameManager.Instance.mMultiplayerManager.LocalPlayerIndex) return;
+            
+            foreach (var filePath in Directory.GetFiles(Plugin.MusicPath))
+                __instance.StartCoroutine(ImportWav(filePath, audioClip => CreateSongAndAddToMusic(audioClip)));
 
             clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
             mutedPlayers.Clear();
@@ -167,6 +172,28 @@ namespace QOL
             yield return new WaitForSeconds(chatMsgDuration + 3f); 
             tmpText.richText = origRichTextValue;
         }
+
+        // Adapted from: https://github.com/deadlyfingers/UnityWav#notes
+        public static IEnumerator ImportWav(string url, Action<AudioClip> callback)
+        {
+            url = "file:///" + url.Replace(" ", "%20");
+            Debug.Log("Loading song: " + url);
+
+            using var www = UnityWebRequest.GetAudioClip(url, AudioType.UNKNOWN);
+            yield return www.Send();
+
+            if (www.isError)
+            {
+                Debug.LogWarning("Audio error:" + www.error);
+                yield break;
+            }
+
+            var audioClip = DownloadHandlerAudioClip.GetContent(www);
+            callback(audioClip);
+        }
+
+        public static void CreateSongAndAddToMusic(AudioClip audioClip)
+            => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(new() { clip = audioClip });
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;

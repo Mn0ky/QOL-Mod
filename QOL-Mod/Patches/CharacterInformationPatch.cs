@@ -21,7 +21,7 @@ namespace QOL
         {
             if (!MatchmakingHandler.Instance.IsInsideLobby)
             {
-                Color colorWanted = Helper.IsCustomPlayerColor ? Plugin.configCustomColor.Value : Plugin.defaultColors[0];
+                Color colorWanted = Helper.IsCustomPlayerColor ? Plugin.configCustomColor.Value : Plugin.DefaultColors[0];
                 MultiplayerManagerPatches.ChangeAllCharacterColors(colorWanted, __instance.gameObject);
             }
         }

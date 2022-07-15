@@ -31,6 +31,10 @@ namespace QOL
                     Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
                     Helper.SendLocalMsg("Toggled ChatCensorship.", LogLevel.Success);
                     break;
+                case "skipsong": // Skips the current song
+                    var nextSongMethod = AccessTools.Method(typeof(MusicHandler), "PlayNext");
+                    nextSongMethod.Invoke(MusicHandler.Instance, null);
+                    break;
                 case "ouch":
                     Helper.IsOwMode = !Helper.IsOwMode;
                     Helper.SendLocalMsg("Toggled OuchMode.", LogLevel.Success);

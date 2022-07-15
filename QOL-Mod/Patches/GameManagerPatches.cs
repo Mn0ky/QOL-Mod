@@ -84,13 +84,12 @@ namespace QOL
 
         public static bool DetermineNewHighScore(int score)
         {
-            var scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
             Debug.Log("high: " + highScore + "score: " + score);
 
             if (highScore < score)
             {
                 highScore = score;
-                File.WriteAllText(scorePath, highScore.ToString());
+                File.WriteAllText(Plugin.ScorePath, highScore.ToString());
                 return true;
             }
 

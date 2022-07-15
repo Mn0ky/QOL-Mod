@@ -44,7 +44,7 @@ namespace QOL
                 if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
                 {
                     var otherCharacter = player.transform.root.gameObject;
-                    var otherColor = Plugin.defaultColors[player.NetworkSpawnID];
+                    var otherColor = Plugin.DefaultColors[player.NetworkSpawnID];
 
                     ChangeAllCharacterColors(otherColor, otherCharacter);
                 }
@@ -52,7 +52,7 @@ namespace QOL
                 {
                     var character = player.transform.root.gameObject;
 
-                    if (!Helper.IsCustomPlayerColor) ChangeAllCharacterColors(Plugin.defaultColors[player.NetworkSpawnID], character);
+                    if (!Helper.IsCustomPlayerColor) ChangeAllCharacterColors(Plugin.DefaultColors[player.NetworkSpawnID], character);
                     else ChangeAllCharacterColors(Helper.CustomPlayerColor, character);
                 }
             }

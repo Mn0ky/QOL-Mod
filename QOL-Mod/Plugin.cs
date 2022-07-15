@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using BepInEx;
@@ -6,6 +7,7 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -85,7 +87,7 @@ namespace QOL
                 foreach (var strColor in configDefaultColors.Value.Split(' '))
                 {
                     ColorUtility.TryParseHtmlString(strColor.Insert(0, "#"), out Color convColor);
-                    defaultColors.Add(convColor);
+                    DefaultColors.Add(convColor);
                 }
 
                 configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
@@ -218,18 +220,24 @@ namespace QOL
             {   
                 Logger.LogError("Exception on loading configuration: " + ex.StackTrace + ex.Message + ex.Source + ex.InnerException);
             }
-
-            string scorePath = $"{Paths.PluginPath}\\QOL-Mod\\WinstreakData.txt";
-
             InitModText();
 
-            if (File.Exists(scorePath))
+            // Loading music from folder
+            if (!Directory.Exists(MusicPath))
             {
-                GameManagerPatches.highScore = int.Parse(File.ReadAllText(scorePath));
+                Directory.CreateDirectory(MusicPath);
+                File.WriteAllText(MusicPath + "README.txt", 
+                    "Only WAV and OGG audio files are supported.\nFor MP3 and other types, please convert them first!");
+            }
+
+            // Loading highscore from txt
+            if (File.Exists(ScorePath))
+            {
+                GameManagerPatches.highScore = int.Parse(File.ReadAllText(ScorePath));
                 return;
             }
 
-            File.WriteAllText(scorePath, "0");
+            File.WriteAllText(ScorePath, "0");
             GameManagerPatches.highScore = 0;
         }
 
@@ -277,9 +285,12 @@ namespace QOL
         public static ConfigEntry<bool> configFixCrown;
         public static ConfigEntry<bool> configAlwaysRainbow;
 
-        public static List<Color> defaultColors = new(4);
+        public static List<Color> DefaultColors = new(4);
 
         public const string VersionNumber = "1.0.15"; // Version number
         public const string Guid = "monky.plugins.QOL";
+        public static string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
+        public static string ScorePath = Paths.PluginPath + "\\QOL-Mod\\WinstreakData.txt";
+
     }
 }

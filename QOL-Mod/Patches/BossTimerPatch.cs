@@ -26,7 +26,7 @@ namespace QOL
                 return;
             }
 
-            ChangeBossUIColor(Plugin.defaultColors[spawnID], __instance.transform.root.gameObject);
+            ChangeBossUIColor(Plugin.DefaultColors[spawnID], __instance.transform.root.gameObject);
         }
 
         private static void ChangeBossUIColor(Color colorWanted, GameObject character)
