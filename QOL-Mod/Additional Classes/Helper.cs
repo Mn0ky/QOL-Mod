@@ -104,6 +104,7 @@ namespace QOL
                     name.fontSizeMin = 45;
                     name.fontSizeMax = 45;
                     name.overflowMode = TextOverflowModes.Overflow;
+                    name.enableWordWrapping = false;
                 }
             }
 
