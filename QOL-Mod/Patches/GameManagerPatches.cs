@@ -29,7 +29,7 @@ namespace QOL
             if (Helper.HPWinner)
             {
                 var winnerHP = new PlayerHP(Helper.GetColorFromID(winner));
-                Helper.localNetworkPlayer.OnTalked("Winner HP: " + winnerHP.HP);
+                Helper.SendLocalMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success);
             }
 
             Debug.Log("winner int: " + winner);
