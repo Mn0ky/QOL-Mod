@@ -18,13 +18,10 @@ namespace QOL
 
         public static bool PlayNextMethodPrefix(ref AudioSource ___au)
         {
-            if (Helper.IsSongLoop)
-            {
-                ___au.Play();
-                return false;
-            }
-
-            return true;
+            if (!Helper.IsSongLoop) return true;
+            
+            ___au.Play();
+            return false;
         }
     }       
 }

@@ -32,7 +32,7 @@ namespace QOL
                     break;
             }
 
-            _ping = Helper.clientData[_id].Ping;
+            _ping = Helper.ClientData[_id].Ping;
         }
 
         private readonly string _fullColor;

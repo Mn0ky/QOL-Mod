@@ -28,7 +28,7 @@ namespace QOL
         {
             if (Helper.HPWinner)
             {
-                var winnerHP = new PlayerHP(Helper.GetColorFromID(winner));
+                var winnerHP = new PlayerHP(Helper.GetColorFromID(winner).ToLower());
                 Helper.SendLocalMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success);
             }
 
@@ -38,15 +38,17 @@ namespace QOL
             if (winner == Helper.localNetworkPlayer.NetworkSpawnID)
             {
                 Debug.Log("Winner is me :D");
-                Helper.winStreak++;
-                var isHigher = DetermineNewHighScore(Helper.winStreak);
+                Helper.WinStreak++;
+                var isHigher = DetermineNewHighScore(Helper.WinStreak);
 
-                if (!Helper.winStreakEnabled) return;
+                if (!Helper.WinStreakEnabled) return;
 
                 __instance.winText.color = DetermineStreakColor();
-             
-                __instance.winText.fontSize = Plugin.configWinStreakFontsize.Value;
-                __instance.winText.text = (isHigher) ? $"New Highscore: {Helper.winStreak}" : $"Winstreak Of {Helper.winStreak}";
+                
+                __instance.winText.fontSize = Plugin.ConfigWinStreakFontsize.Value;
+                __instance.winText.text = isHigher ? 
+                    $"New Highscore: {Helper.WinStreak}" 
+                    : $"Winstreak Of {Helper.WinStreak}";
 
                 __instance.winText.gameObject.SetActive(true);
                 return;
@@ -54,54 +56,52 @@ namespace QOL
 
             Debug.Log("winstreak lost");
             __instance.winText.fontSize = 200;
-            winstreakRanges1 = new List<int>(winstreakRanges2);
-            winstreakColors1 = new List<Color>(winstreakColors2);
-            Helper.winStreak = 0;
+            WinstreakRanges1 = new List<int>(WinstreakRanges2);
+            WinstreakColors1 = new List<Color>(WinstreakColors2);
+            Helper.WinStreak = 0;
         }
 
-        public static Color DetermineStreakColor()
+        private static Color DetermineStreakColor()
         {
-            for (int i = 0; i < winstreakRanges1.Count; i++)
+            for (var i = 0; i < WinstreakRanges1.Count; i++)
             {
                 i = 0;
-                Debug.Log("streak range value: " + winstreakRanges1[i]);
-                if (winstreakRanges1[i] > 0)
+                Debug.Log("streak range value: " + WinstreakRanges1[i]);
+                switch (WinstreakRanges1[i])
                 {
-                    Debug.Log("Deducting!, ranges count: " + winstreakRanges1.Count);
-                    winstreakRanges1[i]--;
-                    return winstreakColors1[i];
+                    case > 0:
+                        Debug.Log("Deducting!, ranges count: " + WinstreakRanges1.Count);
+                        WinstreakRanges1[i]--;
+                        return WinstreakColors1[i];
+                    case 0 when WinstreakRanges1.Count == 2:
+                        return WinstreakColors2[WinstreakColors2.Count - 1];
+                    default:
+                        WinstreakRanges1.RemoveAt(i);
+                        WinstreakColors1.RemoveAt(i);
+                        break;
                 }
-
-                if (winstreakRanges1[i] == 0 && winstreakRanges1.Count == 2) return winstreakColors2[winstreakColors2.Count - 1];
-
-                winstreakRanges1.RemoveAt(i);
-                winstreakColors1.RemoveAt(i);
             }
 
             Debug.Log("Something went wrong with streak!");
             return Color.white;
         }
 
-        public static bool DetermineNewHighScore(int score)
+        private static bool DetermineNewHighScore(int score)
         {
-            Debug.Log("high: " + highScore + "score: " + score);
-
-            if (highScore < score)
-            {
-                highScore = score;
-                File.WriteAllText(Plugin.ScorePath, highScore.ToString());
-                return true;
-            }
-
-            return false;
+            Debug.Log("high: " + HighScore + "score: " + score);
+            if (score < HighScore) return false;
+            
+            HighScore = score;
+            File.WriteAllText(Plugin.ScorePath, HighScore.ToString());
+            return true;
         }
 
-        public static List<Color> winstreakColors1 = new (50);
-        public static List<Color> winstreakColors2 = new (50);
+        public static List<Color> WinstreakColors1 = new (50);
+        public static List<Color> WinstreakColors2 = new (50);
 
-        public static List<int> winstreakRanges1 = new (50);
-        public static List<int> winstreakRanges2 = new (50);
+        public static List<int> WinstreakRanges1 = new (50);
+        public static List<int> WinstreakRanges2 = new (50);
 
-        public static int highScore;
+        public static int HighScore;
     }
 }

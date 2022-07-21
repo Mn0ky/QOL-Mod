@@ -7,35 +7,43 @@ namespace QOL
 {
     class MatchmakingHandlerPatches
     {
-        public static void Patch(Harmony harmonyInstance) // MatchmakingHandler method to patch with the harmony __instance
+        public static void Patch(Harmony harmonyInstance) // MatchmakingHandler method to patch with the harmony instance
         {
-            var ClientInitLobbyAndOwnerMethod = AccessTools.Method(typeof(MatchmakingHandler), "ClientInitLobbyAndOwner");
-            var ClientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatches).GetMethod(nameof(MatchmakingHandlerPatches.ClientInitLobbyAndOwnerMethodPostfix))); // Patches ClientInitLobbyAndOwnerMethod with postfix method
-            harmonyInstance.Patch(ClientInitLobbyAndOwnerMethod, postfix: ClientInitLobbyAndOwnerMethodPostfix);
+            var clientInitLobbyAndOwnerMethod = AccessTools.Method(typeof(MatchmakingHandler), "ClientInitLobbyAndOwner");
+            var clientInitLobbyAndOwnerMethodPostfix = new HarmonyMethod(typeof(MatchmakingHandlerPatches)
+                .GetMethod(nameof(ClientInitLobbyAndOwnerMethodPostfix)));
+            harmonyInstance.Patch(clientInitLobbyAndOwnerMethod, postfix: clientInitLobbyAndOwnerMethodPostfix);
 
-            var OnLobbyJoinRequestMethod = AccessTools.Method(typeof(MatchmakingHandler), "OnLobbyJoinRequest");
-            var OnLobbyJoinRequestMethodPrefix = new HarmonyMethod(typeof(MatchmakingHandlerPatches).GetMethod(nameof(MatchmakingHandlerPatches.OnLobbyJoinRequestMethodPrefix))); // Patches SyncClientChat with prefix method
-            harmonyInstance.Patch(OnLobbyJoinRequestMethod, prefix: OnLobbyJoinRequestMethodPrefix);
+            var onLobbyJoinRequestMethod = AccessTools.Method(typeof(MatchmakingHandler), "OnLobbyJoinRequest");
+            var onLobbyJoinRequestMethodPrefix = new HarmonyMethod(typeof(MatchmakingHandlerPatches)
+                .GetMethod(nameof(OnLobbyJoinRequestMethodPrefix)));
+            harmonyInstance.Patch(onLobbyJoinRequestMethod, prefix: onLobbyJoinRequestMethodPrefix);
         }
-        public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby) // Sets lobbyID as the ID of the current lobby for easy access
+        
+        // Sets lobbyID as the ID of the current lobby for easy access
+        public static void ClientInitLobbyAndOwnerMethodPostfix(ref CSteamID lobby)
         {
             Debug.Log("Matchmaking lobbyID: " + lobby); 
             Helper.lobbyID = lobby;
         }
 
-        public static bool OnLobbyJoinRequestMethodPrefix(ref GameLobbyJoinRequested_t param, MatchmakingHandler __instance)
+        public static bool OnLobbyJoinRequestMethodPrefix(ref GameLobbyJoinRequested_t param,
+            MatchmakingHandler __instance)
         {
-            Debug.Log("calling joinrequest method!");
+            Debug.Log("calling JoinRequest method!");
             if (!param.m_steamIDFriend.IsValid())
             {
                 Debug.Log("steamfriend is invalid, directly joining lobby");
-                specificJoinMethod.Invoke(__instance, new object[] { param.m_steamIDLobby });
+                SpecificJoinMethod.Invoke(__instance, new object[] { param.m_steamIDLobby });
                 return false;
             }
-            Debug.Log("steamfriendfriend is valid: " + param.m_steamIDFriend);
+            
+            Debug.Log("steamfriend is valid: " + param.m_steamIDFriend);
             return true;
         }
-        private static readonly MethodInfo specificJoinMethod = typeof(MatchmakingHandler).GetMethod("JoinSpecificServer", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly MethodInfo SpecificJoinMethod =
+            AccessTools.Method(typeof(MatchmakingHandler), "JoinSpecificServer");
     }
 }
     

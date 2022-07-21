@@ -39,12 +39,12 @@ namespace QOL
         
         private void Awake()
         {
-            QOLMenuKey1 = Plugin.configQOLMenuKeybind.Value.MainKey;
-            QOLMenuKey2 = Plugin.configQOLMenuKeybind.Value.Modifiers.LastOrDefault();
+            QOLMenuKey1 = Plugin.ConfigQolMenuKeybind.Value.MainKey;
+            QOLMenuKey2 = Plugin.ConfigQolMenuKeybind.Value.Modifiers.LastOrDefault();
             if (QOLMenuKey2 == KeyCode.None) singleMenuKey = true;
 
-            statWindowKey1 = Plugin.configStatMenuKeybind.Value.MainKey;
-            statWindowKey2 = Plugin.configStatMenuKeybind.Value.Modifiers.LastOrDefault();
+            statWindowKey1 = Plugin.ConfigStatMenuKeybind.Value.MainKey;
+            statWindowKey2 = Plugin.ConfigStatMenuKeybind.Value.Modifiers.LastOrDefault();
             if (statWindowKey2 == KeyCode.None) singleStatKey = true;
         }
 
@@ -59,7 +59,7 @@ namespace QOL
 
                 foreach (NetworkPlayer player in FindObjectsOfType<NetworkPlayer>())
                 {
-                    string str = string.Concat(
+                    var str = string.Concat(
                         "[",
                         Helper.GetColorFromID(player.NetworkSpawnID),
                         "] ",
@@ -79,8 +79,6 @@ namespace QOL
 
             if (mShowStatMenu && mStatsShown)
             {
-                //Array.Clear(playerStats, 0, playerStats.Length);
-
                 foreach (var stat in FindObjectsOfType<CharacterStats>())
                 {
                     switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
@@ -111,7 +109,9 @@ namespace QOL
         }
         public void OnGUI() 
         {
-            if (mShowMenu) MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow, $"<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v{Plugin.VersionNumber}]");
+            if (mShowMenu)
+                MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow,
+                    $"<color=red><b><i>Monk's QOL Menu</i></b></color>\t[v{Plugin.VersionNumber}]");
             if (mShowStatMenu) StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Menu");
         }
 		private void KickWindow(int window)
@@ -160,16 +160,29 @@ namespace QOL
                 mStatsShown = true;
             }
 
-            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug")) Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.configEmoji.Value}_/\u00af");
-            if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help")) SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
+            if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
+                Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.ConfigEmoji.Value}_/\u00af");
+            
+            if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
+                SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
+            
+            if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private")) 
+                Helper.ToggleLobbyVisibility(false);
+            
+            if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public")) 
+                Helper.ToggleLobbyVisibility(true);
 
-            if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private")) Helper.ToggleLobbyVisibility(false);
-            if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public")) Helper.ToggleLobbyVisibility(true);
-
-            Helper.autoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), Helper.autoGG, "AutoGG");
-            Helper.isTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), Helper.isTranslating, "AutoTranslations");
-            Helper.tmpText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), Helper.tmpText.richText, "RichText");
-            Helper.chatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), Helper.chatCensorshipBypass, "ChatCensorshipBypass");
+            Helper.AutoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), 
+                Helper.AutoGG, "AutoGG");
+            
+            Helper.IsTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), 
+                Helper.IsTranslating, "AutoTranslations");
+            
+            Helper.TMPText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), 
+                Helper.TMPText.richText, "RichText");
+            
+            Helper.ChatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), 
+                Helper.ChatCensorshipBypass, "ChatCensorshipBypass");
 
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
@@ -181,14 +194,15 @@ namespace QOL
             GUI.skin.button.alignment = TextAnchor.LowerCenter;
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
 
-            if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close")) mShowStatMenu = !mShowStatMenu;
+            if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close")) 
+                mShowStatMenu = !mShowStatMenu;
             GUI.skin.label.alignment = normAlignment;
 
             GUILayout.BeginHorizontal();
             for (ushort i = 0; i < playerStats.Length; i++)
             {
-                string stat = playerStats[i];
-                string color = Helper.GetColorFromID(i);
+                var stat = playerStats[i];
+                var color = Helper.GetColorFromID(i);
 
                 GUILayout.BeginVertical();
                 GUILayout.Label("<color=" + color + ">" + color + "</color>");

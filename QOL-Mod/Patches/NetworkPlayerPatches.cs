@@ -2,58 +2,79 @@
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
+
 namespace QOL
 {
     class NetworkPlayerPatch
     {
-        public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony __instance
+        public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony instance
         {
 
-            var SyncClientChatMethod = AccessTools.Method(typeof(NetworkPlayer), "SyncClientChat");
-            var SyncClientChatMethodPrefix = new HarmonyMethod(typeof(NetworkPlayerPatch).GetMethod(nameof(NetworkPlayerPatch.SyncClientChatMethodPrefix))); // Patches SyncClientChat with prefix method
-            harmonyInstance.Patch(SyncClientChatMethod, prefix: SyncClientChatMethodPrefix);
+            var syncClientChatMethod = AccessTools.Method(typeof(NetworkPlayer), "SyncClientChat");
+            var syncClientChatMethodPrefix = new HarmonyMethod(typeof(NetworkPlayerPatch)
+                .GetMethod(nameof(SyncClientChatMethodPrefix)));
+            harmonyInstance.Patch(syncClientChatMethod, prefix: syncClientChatMethodPrefix);
         }
 
         public static bool SyncClientChatMethodPrefix(ref byte[] data, NetworkPlayer __instance)
         {
-            if (Helper.mutedPlayers.Contains(__instance.NetworkSpawnID)) return false;
+            if (Helper.MutedPlayers.Contains(__instance.NetworkSpawnID)) return false;
 
-            if (!Helper.isTranslating) return true;
+            if (!Helper.IsTranslating) return true;
 
             TranslateMessage(data, __instance);
             return false;
         }
-
-        public static void TranslateMessage(byte[] data, NetworkPlayer __instance) // Checks if auto-translation is enabled, if so then translate it
+        
+        // TODO: Refactor and expand upon this
+        // Checks if auto-translation is enabled, if so then translate it
+        private static void TranslateMessage(byte[] data, NetworkPlayer __instance)
         {
-            string textToTranslate = Encoding.UTF8.GetString(data);
+            var textToTranslate = Encoding.UTF8.GetString(data);
             Debug.Log("Got message: " + textToTranslate);
 
-            bool usingKey = !string.IsNullOrEmpty(Plugin.configAuthKeyForTranslation.Value);
+            var usingKey = !string.IsNullOrEmpty(Plugin.ConfigAuthKeyForTranslation.Value);
 
-            var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue();
-            ChatManager mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), "mLocalChatManager");
+            var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue<bool>();
+            var mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), 
+                "mLocalChatManager");
             Debug.Log("mLocalChatManager : " + mLocalChatManager);
             Debug.Log("mHasLocalControl : " + mHasLocalControl);
 
-            if ((bool)mHasLocalControl)
+            if (mHasLocalControl)
             {
-                if (!usingKey)
+                if (usingKey)
                 {
-                    __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
+                    __instance.StartCoroutine(AuthTranslate.TranslateText("auto",
+                        "en",
+                        textToTranslate,
+                        s => mLocalChatManager.Talk(s)));
+
                     return;
                 }
-                __instance.StartCoroutine(AuthTranslate.TranslateText("auto", "en", textToTranslate, delegate (string s) { mLocalChatManager.Talk(s); }));
-                    return;
-            }
-
-            ChatManager mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue() as ChatManager;
-            if (!usingKey)
-            {
-                __instance.StartCoroutine(Translate.Process("en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
+                
+                __instance.StartCoroutine(Translate.Process("en", 
+                    textToTranslate, 
+                    s => mLocalChatManager.Talk(s)));
+                
                 return;
             }
-            __instance.StartCoroutine(AuthTranslate.TranslateText("auto", "en", textToTranslate, delegate (string s) { mChatManager.Talk(s); }));
+
+            var mChatManager = Traverse.Create(__instance).Field("mChatManager").GetValue<ChatManager>();
+            
+            if (!usingKey)
+            {
+                __instance.StartCoroutine(Translate.Process("en", 
+                    textToTranslate, 
+                    s => mChatManager.Talk(s)));
+                
+                return;
+            }
+            
+            __instance.StartCoroutine(AuthTranslate.TranslateText("auto",
+                "en",
+                textToTranslate,
+                s => mChatManager.Talk(s)));
         }
     }
 }

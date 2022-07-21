@@ -1,15 +1,15 @@
 # QOL-Mod
-<p align="center">
+<p style="text-align: center;">
   <a href="https://forthebadge.com">
-    <img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg">
+    <img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg" alt="">
   </a>
 </p>
-<p align="center">
+<p style="text-align: center;">
   <a href="https://github.com/Mn0ky/QOL-Mod/releases/latest">
-    <img src="https://img.shields.io/github/downloads/Mn0ky/QOL-Mod/total?label=Github%20downloads&logo=github">
+    <img src="https://img.shields.io/github/downloads/Mn0ky/QOL-Mod/total?label=Github%20downloads&logo=github" alt="">
   </a>
   <a href="https://www.gnu.org/licenses/lgpl-3.0">
-    <img src="https://img.shields.io/badge/License-LGPL_v3-blue.svg">
+    <img src="https://img.shields.io/badge/License-LGPL_v3-blue.svg" alt="">
   </a>
 </p>
 
@@ -54,32 +54,32 @@ An image below shows a visual overview:<br/>
 Alternative chat commands are listed directly below.
 ## Chat Commands
 
-Command | Description
---------- | -----------
-**Usage:**		| ```/<command_name> [<additional parameter>]```
-/adv		| Outputs whatever you set it to in the config.
-/gg		| Enables automatic sending of "gg" upon death of mod user.
-/help		| Opens up the Steam overlay and takes you to this page.
-/hp	```[<player_color>]```	| Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.
-/id	```[<player_color>]```		| Copies the Steam ID of the target player to clipboard.
-/invite		| Generates a "join game" link and copies it to clipboard.
-/lobhp		| Outputs the health set for the whole lobby.
-/lobregen		| Outputs whether or not regen is enabled for the lobby.
-/lowercase		| Enables/disables lowercase mode, which has your chat messages always sent in lowercase. Useful for those who keep pressing the caps-lock key.
-/nuky		| Lets you talk like Nuky. Splits up any message you send and outputs it word by word.
-/mute ```[<player_color>]```		| The targeted player's messages wont appear, making them "muted" for you (**client-side only**. A mute only lasts for the lobby you're currently in).
-/ping ```[<player_color>]```		| Outpus the ping for the targeted player.
-/private		| Privates the current lobby (**must be host**).
-/public		| Opens the current lobby to the public (**must be host**).
-/rainbow		| Enables/disables rainbow mode. Dynamically shifts your player color through the color spectrum (the shifting speed of the colors is changeable in the config).
-/rich		| Enables rich text for chat (**client-side only**).
-/shrug ```[<message>]```		| Appends ¯\\\_☹\_/¯ to the end of the typed message (changeable in config).
-/stat ```[<player_color> <stat_type>]```		| Gets the targeted stat of the targeted player. Open the stat menu to see a list of different stat names.
-/translate		| Enables auto-translation for messages from others to English.
-/uncensor		| Disables chat censorship.
-/uwu		| *uwuifies* any message you send.
-/ver		| Outputs the mod version string.
-/winstreak		| Enables winstreak mode.
+| Command                                    | Description                                                                                                                                                    |
+|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Usage:**		                               | ```/<command_name> [<additional parameter>]```                                                                                                                 |
+| /adv		                                     | Outputs whatever you set it to in the config.                                                                                                                  |
+| /gg		                                      | Enables automatic sending of "gg" upon death of mod user.                                                                                                      |
+| /help		                                    | Opens up the Steam overlay and takes you to this page.                                                                                                         |
+| /hp	```[<player_color>]```	                | Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.                                                         |
+| /id	```[<player_color>]```		               | Copies the Steam ID of the target player to clipboard.                                                                                                         |
+| /invite		                                  | Generates a "join game" link and copies it to clipboard.                                                                                                       |
+| /lobhp		                                   | Outputs the health set for the whole lobby.                                                                                                                    |
+| /lobregen		                                | Outputs whether or not regen is enabled for the lobby.                                                                                                         |
+| /lowercase		                               | Enables/disables lowercase mode, which has your chat messages always sent in lowercase. Useful for those who keep pressing the caps-lock key.                  |
+| /nuky		                                    | Lets you talk like Nuky. Splits up any message you send and outputs it word by word.                                                                           |
+| /mute ```[<player_color>]```		             | The targeted player's messages wont appear, making them "muted" for you (**client-side only**. A mute only lasts for the lobby you're currently in).           |
+| /ping ```[<player_color>]```		             | Outpus the ping for the targeted player.                                                                                                                       |
+| /private		                                 | Privates the current lobby (**must be host**).                                                                                                                 |
+| /public		                                  | Opens the current lobby to the public (**must be host**).                                                                                                      |
+| /rainbow		                                 | Enables/disables rainbow mode. Dynamically shifts your player color through the color spectrum (the shifting speed of the colors is changeable in the config). |
+| /rich		                                    | Enables rich text for chat (**client-side only**).                                                                                                             |
+| /shrug ```[<message>]```		                 | Appends ¯\\\_☹\_/¯ to the end of the typed message (changeable in config).                                                                                     |
+| /stat ```[<player_color> <stat_type>]```		 | Gets the targeted stat of the targeted player. Open the stat menu to see a list of different stat names.                                                       |
+| /translate		                               | Enables auto-translation for messages from others to English.                                                                                                  |
+| /uncensor		                                | Disables chat censorship.                                                                                                                                      |
+| /uwu		                                     | *uwuifies* any message you send.                                                                                                                               |
+| /ver		                                     | Outputs the mod version string.                                                                                                                                |
+| /winstreak		                               | Enables winstreak mode.                                                                                                                                        |
 
 ## Stat Menu
 

@@ -33,52 +33,52 @@ namespace QOL
         }
 
         // Exactly the same as above but allow the user to change from Auto, for when Google gets wack
-        public static IEnumerator Process(string sourceLang, string targetLang, string sourceText, Action<string> result)
+        private static IEnumerator Process(string sourceLang, string targetLang, string sourceText,
+            Action<string> result)
         {
             Debug.Log("Process #2");
-            string url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
-                         + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + WWW.EscapeURL(sourceText);
+            var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
+                      + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + WWW.EscapeURL(sourceText);
             Debug.Log(url);
 
-            using (UnityWebRequest www = UnityWebRequest.Get(url))
+            using var www = UnityWebRequest.Get(url);
+            // www.SetRequestHeader("user-agent", "placeholder");
+            yield return www.Send();
+
+            Debug.Log("Got response! (translate)");
+
+            if (www.isDone)
             {
-                // www.SetRequestHeader("user-agent", "placeholder");
-                yield return www.Send();
-
-                Debug.Log("Got response! (translate)");
-
-                if (www.isDone)
+                if (!www.isError)
                 {
-                    if (!www.isError)
-                    {
-                        Debug.Log(www.downloadHandler.text);
-                        Debug.Log("Parsing Json (translate)");
-                        var N = JSONNode.Parse(www.downloadHandler.text);
-                        Debug.Log("Json parsed : " + N);
-                        string translatedText = N[0][0][0];
-                        Debug.Log("translatedText: " + translatedText);
-                        result(translatedText);
-                    }
-                    else
-                    {
-                        Debug.Log("An error occurred during translation; perhaps too many requests");
-                    }
+                    Debug.Log(www.downloadHandler.text);
+                    Debug.Log("Parsing Json (translate)");
+                    var N = JSONNode.Parse(www.downloadHandler.text);
+                    Debug.Log("Json parsed : " + N);
+                    string translatedText = N[0][0][0];
+                    Debug.Log("translatedText: " + translatedText);
+                    result(translatedText);
+                }
+                else
+                {
+                    Debug.Log("An error occurred during translation; perhaps too many requests");
                 }
             }
-
         }
     }
 
     public class AuthTranslate : MonoBehaviour
     {
-        private static readonly string APIKey = Plugin.configAuthKeyForTranslation.Value;
+        private static readonly string APIKey = Plugin.ConfigAuthKeyForTranslation.Value;
 
-        public static IEnumerator TranslateText(string sourceLanguage, string targetLanguage, string sourceText, Action<string> result)
+        public static IEnumerator TranslateText(string sourceLanguage, string targetLanguage, string sourceText,
+            Action<string> result)
         {
             yield return TranslateTextRoutine(sourceLanguage, targetLanguage, sourceText, result);
         }
 
-        private static IEnumerator TranslateTextRoutine(string sourceLanguage, string targetLanguage, string sourceText, Action<string> result)
+        private static IEnumerator TranslateTextRoutine(string sourceLanguage, string targetLanguage, string sourceText,
+            Action<string> result)
         {
             var formData = new List<IMultipartFormSection>
             {
@@ -91,7 +91,7 @@ namespace QOL
 
             var uri = $"https://translation.googleapis.com/language/translate/v2?key={APIKey}";
 
-            var webRequest = UnityWebRequest.Post(uri, formData);
+            using var webRequest = UnityWebRequest.Post(uri, formData);
 
             yield return webRequest.Send();
 

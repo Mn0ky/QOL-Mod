@@ -18,7 +18,7 @@ namespace QOL
     public class Helper
     {
         // Returns the steamID of the specified spawnID
-        public static CSteamID GetSteamID(ushort targetID) => clientData[targetID].ClientID;
+        public static CSteamID GetSteamID(ushort targetID) => ClientData[targetID].ClientID;
 
         // Returns the corresponding spawnID from the specified color
         public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor switch
@@ -34,7 +34,7 @@ namespace QOL
         public static string GetColorFromID(ushort x) => x switch { 1 => "Blue", 2 => "Red", 3 => "Green", _ => "Yellow" };
 
         // Returns the targeted player based on the specified spawnID
-        public static NetworkPlayer GetNetworkPlayer(ushort targetID) => clientData[targetID].PlayerObject.GetComponent<NetworkPlayer>();
+        public static NetworkPlayer GetNetworkPlayer(ushort targetID) => ClientData[targetID].PlayerObject.GetComponent<NetworkPlayer>();
 
         // Gets the steam profile name of the specified steamID
         public static string GetPlayerName(CSteamID passedClientID) => SteamFriends.GetFriendPersonaName(passedClientID);
@@ -75,26 +75,27 @@ namespace QOL
             {
                 var acceptableFileExtension = filePath.Substring(filePath.Length - 4); // .OGG or .WAV, both are 4 char
 
-                if (acceptableFileExtension == ".ogg" || acceptableFileExtension == ".wav")
-                    __instance.StartCoroutine(ImportWav(filePath, audioClip => CreateSongAndAddToMusic(audioClip)));
+                if (acceptableFileExtension is ".ogg" or ".wav")
+                    __instance.StartCoroutine(ImportWav(filePath, CreateSongAndAddToMusic));
             }
 
-            clientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
-            mutedPlayers.Clear();
+            ClientData = GameManager.Instance.mMultiplayerManager.ConnectedClients;
+            MutedPlayers.Clear();
 
-            byte localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
-            localNetworkPlayer = clientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
-            localChat = clientData[localID].PlayerObject.GetComponentInChildren<ChatManager>();
+            var localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
+            localNetworkPlayer = ClientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
+            LocalChat = ClientData[localID].PlayerObject.GetComponentInChildren<ChatManager>();
 
             Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
-            tmpText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
-            tmpText.richText = Plugin.configRichText.Value;
+            TMPText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
+            TMPText.richText = Plugin.ConfigRichText.Value;
 
-            if (Plugin.configFixCrown.Value)
+            if (Plugin.ConfigFixCrownWinCount.Value)
             {
-                WinCounterUI counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
-                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true)) crownCount.enableAutoSizing = true;
+                var counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
+                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true)) 
+                    crownCount.enableAutoSizing = true;
             }
 
             if (NameResize)
@@ -112,43 +113,45 @@ namespace QOL
                 }
             }
 
-            if (Plugin.configCustomCrownColor.Value != (Color) Plugin.configCustomCrownColor.DefaultValue)
+            if (Plugin.ConfigCustomCrownColor.Value != (Color) Plugin.ConfigCustomCrownColor.DefaultValue)
             {
                 var crown = UnityEngine.Object.FindObjectOfType<Crown>().gameObject;
-                foreach (var sprite in crown.GetComponentsInChildren<SpriteRenderer>(true)) sprite.color = Plugin.configCustomCrownColor.Value;
+                
+                foreach (var sprite in crown.GetComponentsInChildren<SpriteRenderer>(true)) 
+                    sprite.color = Plugin.ConfigCustomCrownColor.Value;
             }
 
             GameObject rbHand = new ("RainbowHandler");
             rbHand.AddComponent<RainbowManager>().enabled = false;
-            rainbowEnabled = false;
+            _rainbowEnabled = false;
 
-            if (Plugin.configAlwaysRainbow.Value) ToggleRainbow();
+            if (Plugin.ConfigAlwaysRainbow.Value) ToggleRainbow();
         }
 
         public static void ToggleWinstreak()
         {
-            if (!winStreakEnabled)
+            if (!WinStreakEnabled)
             {
-                winStreakEnabled = true;
-                GameManager.Instance.winText.fontSize = Plugin.configWinStreakFontsize.Value;
+                WinStreakEnabled = true;
+                GameManager.Instance.winText.fontSize = Plugin.ConfigWinStreakFontsize.Value;
                 return;
             }
 
-            winStreakEnabled = false;
+            WinStreakEnabled = false;
         }
 
         public static void ToggleRainbow()
         {
-            if (!rainbowEnabled)
+            if (!_rainbowEnabled)
             {
                 Debug.Log("trying to start RainBowHandler");
                 UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = true;
-                rainbowEnabled = true;
+                _rainbowEnabled = true;
                 return;
             }
 
             UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = false;
-            rainbowEnabled = false;
+            _rainbowEnabled = false;
         }
 
         public static string GetTargetStatValue(CharacterStats stats, string targetStat)
@@ -160,28 +163,29 @@ namespace QOL
             return "No value";
         }
 
-        public static void SendLocalMsg(string msg, ChatCommands.LogLevel logLevel) => GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg));
+        public static void SendLocalMsg(string msg, ChatCommands.LogLevel logLevel) 
+            => GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg));
 
         private static IEnumerator SendClientSideMsg(ChatCommands.LogLevel logLevel, string msg)
         {
-            string msgColor = logLevel switch
+            var msgColor = logLevel switch
             {
                 ChatCommands.LogLevel.Warning => "<#FF7F50>",
                 _ => "<#006400>"
             };
 
-            bool origRichTextValue = tmpText.richText;
+            var origRichTextValue = TMPText.richText;
 
-            float chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
-            var extraTime = Plugin.configMsgDuration.Value;
+            var chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
+            var extraTime = Plugin.ConfigMsgDuration.Value;
             if (extraTime > 0) chatMsgDuration += extraTime; // Taking into account any possible extra msg time specified in config
 
-            tmpText.richText = true;
-            localChat.Talk(msgColor + msg);
+            TMPText.richText = true;
+            LocalChat.Talk(msgColor + msg);
 
             // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
             yield return new WaitForSeconds(chatMsgDuration + 3f); 
-            tmpText.richText = origRichTextValue;
+            TMPText.richText = origRichTextValue;
         }
 
         // Adapted from: https://github.com/deadlyfingers/UnityWav#notes
@@ -204,7 +208,8 @@ namespace QOL
         }
 
         public static void CreateSongAndAddToMusic(AudioClip audioClip)
-            => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(new() { clip = audioClip });
+            => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(
+                new MusicClip { clip = audioClip });
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;
@@ -213,30 +218,31 @@ namespace QOL
         
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
-        public static List<ushort> mutedPlayers = new(4);
+        public static List<ushort> MutedPlayers = new(4);
 
-        public static bool isTranslating = Plugin.configTranslation.Value; // True if auto-translations are enabled, false by default
-        public static bool autoGG = Plugin.configAutoGG.Value; // True if auto gg on death is enabled, false by default
-        public static bool uwuifyText; // True if uwufiy text is enabled, false by default
-        public static bool winStreakEnabled = Plugin.configWinStreakLog.Value;
-        public static bool chatCensorshipBypass = Plugin.configchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
-        public static Color CustomPlayerColor = Plugin.configCustomColor.Value;
-        public static bool IsCustomPlayerColor = Plugin.configCustomColor.Value != new Color(1, 1, 1);
-        public static bool IsCustomName = !string.IsNullOrEmpty(Plugin.configCustomName.Value);
+        public static bool IsTranslating = Plugin.ConfigTranslation.Value; // True if auto-translations are enabled, false by default
+        public static bool AutoGG = Plugin.ConfigAutoGG.Value; // True if auto gg on death is enabled, false by default
+        public static bool UwuifyText; // True if uwufiy text is enabled, false by default
+        public static bool WinStreakEnabled = Plugin.ConfigWinStreakLog.Value;
+        public static bool ChatCensorshipBypass = Plugin.ConfigchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
+        public static readonly Color CustomPlayerColor = Plugin.ConfigCustomColor.Value;
+        public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
+        public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
         public static bool IsOwMode;
         public static bool IsSongLoop;
-        public static string[] OuchPhrases = Plugin.configOuchPhrases.Value.Split(' ');
-        public static bool NameResize = Plugin.configNoResize.Value;
-        public static bool nukChat;
-        public static bool onlyLower;
-        public static bool HPWinner = Plugin.configHPWinner.Value;
-        public static bool rainbowEnabled;
-        public static IEnumerator routineUsed;
+        public static readonly string[] OuchPhrases = Plugin.ConfigOuchPhrases.Value.Split(' ');
+        private static readonly bool NameResize = Plugin.ConfigNoResize.Value;
+        public static bool NukChat;
+        public static bool IsTrustedKicker;
+        public static bool OnlyLower;
+        public static bool HPWinner = Plugin.ConfigHPWinner.Value;
+        private static bool _rainbowEnabled;
+        public static IEnumerator RoutineUsed;
 
-        public static ConnectedClientData[] clientData;
-        public static ChatManager localChat;
+        public static ConnectedClientData[] ClientData;
+        public static ChatManager LocalChat;
 
-        public static TextMeshPro tmpText;
-        public static int winStreak = 0;
+        public static TextMeshPro TMPText;
+        public static int WinStreak = 0;
     }
 }

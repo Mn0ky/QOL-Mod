@@ -15,28 +15,33 @@ namespace QOL
         {
 
             var onServerJoinedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnServerJoined");
-            var onServerJoinedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(OnServerJoinedMethodPostfix)));
+            var onServerJoinedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
+                .GetMethod(nameof(OnServerJoinedMethodPostfix)));
             harmonyInstance.Patch(onServerJoinedMethod, postfix: onServerJoinedMethodPostfix);
 
             var onServerCreatedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnServerCreated");
-            var onServerCreatedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(OnServerCreatedMethodPostfix)));
+            var onServerCreatedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
+                .GetMethod(nameof(OnServerCreatedMethodPostfix)));
             harmonyInstance.Patch(onServerCreatedMethod, postfix: onServerCreatedMethodPostfix);
 
             var onPlayerSpawnedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnPlayerSpawned");
-            var onPlayerSpawnedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(OnPlayerSpawnedMethodPostfix)));
+            var onPlayerSpawnedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
+                .GetMethod(nameof(OnPlayerSpawnedMethodPostfix)));
             harmonyInstance.Patch(onPlayerSpawnedMethod, postfix: onPlayerSpawnedMethodPostfix);
 
             var onKickedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnKicked");
-            var onKickedMethodPrefix = new HarmonyMethod(typeof(MultiplayerManagerPatches).GetMethod(nameof(OnKickedMethodPrefix)));
+            var onKickedMethodPrefix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
+                .GetMethod(nameof(OnKickedMethodPrefix)));
             harmonyInstance.Patch(onKickedMethod, prefix: onKickedMethodPrefix);
         }
 
         public static void OnServerJoinedMethodPostfix() => InitGUI();
 
         public static void OnServerCreatedMethodPostfix() => InitGUI();
-
-        public static bool OnKickedMethodPrefix() => false; // Guards against kick attempts made towards the user by skipping the method
-
+        
+        // Guards against kick attempts made towards the user by skipping the method, if not Monky or Rexi
+        public static bool OnKickedMethodPrefix() => Helper.IsTrustedKicker;
+        
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
             foreach (var player in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
@@ -52,15 +57,17 @@ namespace QOL
                 {
                     var character = player.transform.root.gameObject;
 
-                    if (!Helper.IsCustomPlayerColor) ChangeAllCharacterColors(Plugin.DefaultColors[player.NetworkSpawnID], character);
-                    else ChangeAllCharacterColors(Helper.CustomPlayerColor, character);
+                    ChangeAllCharacterColors(!Helper.IsCustomPlayerColor
+                            ? Plugin.DefaultColors[player.NetworkSpawnID]
+                            : Helper.CustomPlayerColor,
+                        character);
                 }
             }
         }
 
         public static void ChangeSpriteRendColor(Color colorWanted, GameObject character)
         {
-            foreach (SpriteRenderer spriteRenderer in character.GetComponentsInChildren<SpriteRenderer>())
+            foreach (var spriteRenderer in character.GetComponentsInChildren<SpriteRenderer>())
             {
                 spriteRenderer.color = colorWanted;
                 spriteRenderer.GetComponentInParent<SetColorWhenDamaged>().startColor = colorWanted;
@@ -69,16 +76,25 @@ namespace QOL
 
         public static void ChangeLineRendColor(Color colorWanted, GameObject character)
         {
-            foreach (var t in character.GetComponentsInChildren<LineRenderer>()) t.sharedMaterial.color = colorWanted;
+            foreach (var t in character.GetComponentsInChildren<LineRenderer>()) 
+                t.sharedMaterial.color = colorWanted;
         }
 
         public static void ChangeParticleColor(Color colorWanted, GameObject character)
         {
-            var unchangedEffects = new string[] { "punchPartilce", "JumpParticle", "landParticle (1)", "footParticle", "footParticle (1)" };
+            var unchangedEffects = new[]
+            {
+                "punchPartilce",
+                "JumpParticle",
+                "landParticle (1)",
+                "footParticle",
+                "footParticle (1)"
+            };
 
             foreach (var partSys in character.GetComponentsInChildren<ParticleSystem>())
             {
-                if (unchangedEffects.Contains(partSys.name) && !Plugin.configCustomColorOnParticle.Value) continue;
+                if (unchangedEffects.Contains(partSys.name) && !Plugin.ConfigCustomColorOnParticle.Value) 
+                    continue;
                 
                 var main = partSys.main;
                 main.startColor = colorWanted;
@@ -87,14 +103,16 @@ namespace QOL
 
         public static void ChangeWinTextColor(Color colorWanted, int playerID)
         {
-            var winTexts = Traverse.Create(UnityEngine.Object.FindObjectOfType<WinCounterUI>()).Field("mPlayerWinTexts").GetValue<TextMeshProUGUI[]>();
+            var winTexts = Traverse.Create(UnityEngine.Object.FindObjectOfType<WinCounterUI>())
+                .Field("mPlayerWinTexts").GetValue<TextMeshProUGUI[]>();
             winTexts[playerID].color = colorWanted;
         }
 
         public static void ChangeAllCharacterColors(Color colorWanted, GameObject character)
         {
             var playerID = 0;
-            if (MatchmakingHandler.Instance.IsInsideLobby) playerID = character.GetComponent<NetworkPlayer>().NetworkSpawnID;
+            if (MatchmakingHandler.Instance.IsInsideLobby) 
+                playerID = character.GetComponent<NetworkPlayer>().NetworkSpawnID;
 
             ChangeLineRendColor(colorWanted, character);
             ChangeSpriteRendColor(colorWanted, character);
@@ -102,7 +120,8 @@ namespace QOL
             ChangeWinTextColor(colorWanted, playerID);
 
             Traverse.Create(character.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(colorWanted);
-            var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>()).Field("mPlayerTexts").GetValue<TextMeshProUGUI[]>();
+            var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>())
+                .Field("mPlayerTexts").GetValue<TextMeshProUGUI[]>();
 
             playerNames[playerID].color = colorWanted;
         }
@@ -120,8 +139,6 @@ namespace QOL
                 Debug.Log("Exception on starting GUIManager: " + ex.Message);
             }
         }
-
-        private static readonly Color defaultColor = new(1, 1, 1);
     }
 }
 

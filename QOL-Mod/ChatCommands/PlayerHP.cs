@@ -12,34 +12,31 @@ namespace QOL
             switch (playerColor)
             {
                 case "yellow" or "y":
-                    _fullColor = "Yellow";
+                    FullColor = "Yellow";
                     _id = 0;
                     break;
                 case "blue" or "b":
-                    _fullColor = "Blue";
+                    FullColor = "Blue";
                     _id = 1;
                     break;
                 case "red" or "r":
-                    _fullColor = "Red";
+                    FullColor = "Red";
                     _id = 2;
                     break;
                 case "green" or "g":
-                    _fullColor = "Green";
+                    FullColor = "Green";
                     _id = 3;
                     break;
                 default:
-                    _fullColor = "Unknown";
+                    FullColor = "Unknown";
                     break;
             }
 
-            _hp = Helper.GetNetworkPlayer(_id).GetComponentInChildren<HealthHandler>().health + "%";
+            HP = Helper.GetNetworkPlayer(_id).GetComponentInChildren<HealthHandler>().health + "%";
         }
 
-        private readonly string _fullColor;
         private readonly ushort _id;
-        private readonly string _hp;
-
-        public string HP { get => _hp; }
-        public string FullColor { get => _fullColor; }
+        public string HP { get; }
+        public string FullColor { get; }
     }
 }

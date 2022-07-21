@@ -32,7 +32,7 @@ namespace QOL
 
         public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
         {
-            if (Helper.autoGG && __instance.HasControl) Helper.localNetworkPlayer.OnTalked("gg");
+            if (Helper.AutoGG && __instance.HasControl) Helper.localNetworkPlayer.OnTalked("gg");
         }
     }
 }

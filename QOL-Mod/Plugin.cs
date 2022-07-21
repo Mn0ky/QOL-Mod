@@ -7,9 +7,6 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace QOL
 {
@@ -56,172 +53,177 @@ namespace QOL
             {
                 Logger.LogInfo("Loading configuration options from config file...");
 
-                configCustomColor = Config.Bind("Player Color Options",
+                ConfigCustomColor = Config.Bind("Player Color Options",
                     "CustomColor",
                     new Color(1, 1, 1),
                     "Specify a custom player color? (Use a HEX value)");
 
-                configCustomColorOnParticle = Config.Bind("Player Color Options",
+                ConfigCustomColorOnParticle = Config.Bind("Player Color Options",
                     "CustomColorOnParticle",
                     false,
                     "Apply your custom color for even your walking, jumping, and punching particles?");
 
-                configRainbowSpeed = Config.Bind("Player Color Options",
+                ConfigRainbowSpeed = Config.Bind("Player Color Options",
                     "RainbowSpeed",
                     0.05f,
                     "Change the speed of the color shifting in rainbow mode (/rainbow)?");
 
-                configAlwaysRainbow = Config.Bind("Player Color Options",
+                ConfigAlwaysRainbow = Config.Bind("Player Color Options",
                     "RainbowEnabled",
                     false,
                     "Start with rainbow mode enabled?");
 
-                configDefaultColors = Config.Bind("Player Color Options",
+                ConfigDefaultColors = Config.Bind("Player Color Options",
                     "DefaultPlayerColors",
                     "D88C47 5573AD D6554D 578B49",
                     "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");
 
-                configCustomCrownColor = Config.Bind("Player Color Options",
+                ConfigCustomCrownColor = Config.Bind("Player Color Options",
                     "CustomCrownColor",
                     (Color) new Color32(255, 196, 68, 255), // #FFC444FF
                     "Change the default crown (for when a player wins a match) color? (Use a HEX value)");
 
-                foreach (var strColor in configDefaultColors.Value.Split(' '))
+                var spacedColors = ConfigDefaultColors.Value.Split(' ');
+                
+                for (var index = 0; index < spacedColors.Length; index++)
                 {
-                    ColorUtility.TryParseHtmlString(strColor.Insert(0, "#"), out Color convColor);
-                    DefaultColors.Add(convColor);
+                    ColorUtility.TryParseHtmlString(spacedColors[index].Insert(0, "#"), out var convColor);
+                    DefaultColors[index] = convColor;
                 }
 
-                configQOLMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
+                ConfigQolMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
                     "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html"); // Description of the option to show in the config file
 
-                configStatMenuKeybind = Config.Bind("Menu Options",
+                ConfigStatMenuKeybind = Config.Bind("Menu Options",
                     "StatWindowKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
                     "Change the keybind for opening the Stat Window? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html");
 
-                configQOLMenuPlacement = Config.Bind("Menu Options",
+                ConfigQOLMenuPlacement = Config.Bind("Menu Options",
                     "QOLMenuLocation",
                     "0X 100Y",
                     "Change the default opening position of the QOL menu?");
 
-                configStatMenuPlacement = Config.Bind("Menu Options",
+                ConfigStatMenuPlacement = Config.Bind("Menu Options",
                     "StatMenuLocation",
                     "800X 100Y",
                     "Change the default opening position of the Stat menu?");
 
-                GUIManager.QOLMenuPos = MenuPosParser(configQOLMenuPlacement.Value);
-                GUIManager.StatMenuPos = MenuPosParser(configStatMenuPlacement.Value);
+                GUIManager.QOLMenuPos = MenuPosParser(ConfigQOLMenuPlacement.Value);
+                GUIManager.StatMenuPos = MenuPosParser(ConfigStatMenuPlacement.Value);
 
-                configWinStreakLog = Config.Bind("Winstreak Options",
+                ConfigWinStreakLog = Config.Bind("Winstreak Options",
                     "AlwaysTrackWinstreak",
                     false,
                     "Always keep track of your winstreak instead of only when enabled?");
 
-                configWinStreakFontsize = Config.Bind("Winstreak Options",
+                ConfigWinStreakFontsize = Config.Bind("Winstreak Options",
                     "WinstreakFontsize",
                     200,
                     "Change the fontsize of your winstreak message?");
 
-                configWinStreakColors = Config.Bind("Winstreak Options",
+                ConfigWinStreakColors = Config.Bind("Winstreak Options",
                     "WinstreakColors",
                     "FF0000 FFEB04 00FF00",
                     "Change the default winstreak colors? HEX values only, space separated. Each color will show in the order of the ranges below. The number of colors should be equal to the number of ranges! Max 50.");
 
-                foreach (var colorStr in configWinStreakColors.Value.Split(' '))
+                foreach (var colorStr in ConfigWinStreakColors.Value.Split(' '))
                 {
                     ColorUtility.TryParseHtmlString('#' + colorStr, out var color);
-                    Logger.LogInfo("color :" + color);
-                    GameManagerPatches.winstreakColors1.Add(color);
+                    GameManagerPatches.WinstreakColors1.Add(color);
                 }
-                GameManagerPatches.winstreakColors2 = new List<Color>(GameManagerPatches.winstreakColors1);
+                
+                GameManagerPatches.WinstreakColors2 = new List<Color>(GameManagerPatches.WinstreakColors1);
 
-                configWinStreakRanges = Config.Bind("Winstreak Options",
+                ConfigWinStreakRanges = Config.Bind("Winstreak Options",
                     "WinstreakRanges",
                     "0-1 1-2 2-3",
                     "Change the default ranges? Add more ranges, space separated, to support more colors. Once the last range is reached the corresponding color will be used for all subsequent wins until the streak is lost. Max 50.");
 
-                foreach (var streakRange in configWinStreakRanges.Value.Split(' '))
+                foreach (var streakRange in ConfigWinStreakRanges.Value.Split(' '))
                 {
                     Logger.LogInfo("range: " + streakRange);
-                    int[] streakRangeNums = Array.ConvertAll(streakRange.Split('-'), int.Parse);
+                    var streakRangeNums = Array.ConvertAll(streakRange.Split('-'), int.Parse);
                     Logger.LogInfo("nums: " + streakRangeNums[0] + " " + streakRangeNums[1]);
                     
-                    GameManagerPatches.winstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
+                    GameManagerPatches.WinstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
                 }
-                GameManagerPatches.winstreakRanges2 = new List<int>(GameManagerPatches.winstreakRanges1);
+                
+                GameManagerPatches.WinstreakRanges2 = new List<int>(GameManagerPatches.WinstreakRanges1);
 
-                configAutoGG = Config.Bind("On-Startup Options", // The section under which the option is shown
+                ConfigAutoGG = Config.Bind("On-Startup Options", // The section under which the option is shown
                     "AutoGG",
                     false, // The key of the configuration option in the configuration file
                     "Enable AutoGG on startup?"); // Description of the option to show in the config file
 
-                configchatCensorshipBypass = Config.Bind("On-Startup Options",
+                ConfigchatCensorshipBypass = Config.Bind("On-Startup Options",
                     "ChatCensorshipBypass",
                     false,
                     "Disable chat censorship on startup?");
 
-                configRichText = Config.Bind("On-Startup Options",
+                ConfigRichText = Config.Bind("On-Startup Options",
                     "RichText",
                     true,
                     "Enable rich text for chat on startup?");
 
-                configAdvCmd = Config.Bind("Misc. Options",
+                ConfigAdvCmd = Config.Bind("Misc. Options",
                     "AdvertiseMsg",
                     "",
                     "Modify the output of /adv? By default the message is blank but can be changed to anything.");
 
-                configMsgDuration = Config.Bind("Misc. Options",
+                ConfigMsgDuration = Config.Bind("Misc. Options",
                     "MsgDuration",
                     0.0f,
-                    "Extend the amount of time per chat message by a specified amount? (Decimals allowed)");
+                    "Extend the amount of seconds per chat message by a specified amount? (Decimals allowed)");
 
-                configTranslation = Config.Bind("On-Startup Options",
+                ConfigTranslation = Config.Bind("On-Startup Options",
                     "AutoTranslations",
                     false,
                     "Enable auto-translation for chat messages to English on startup?");
 
-                configNoResize = Config.Bind("Misc. Options",
+                ConfigNoResize = Config.Bind("Misc. Options",
                     "ResizeName",
                     true,
                     "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
-                configCustomName = Config.Bind("Misc. Options",
+                ConfigCustomName = Config.Bind("Misc. Options",
                     "CustomUsername",
-                    string.Empty,
+                    "",
                     "Specify a custom username? (client-side only)");
 
-                configFixCrown = Config.Bind("Misc. Options",
+                ConfigFixCrownWinCount = Config.Bind("Misc. Options",
                     "FixCrownTxt",
                     true,
                     "Auto-resize win counter font so wins into the hundreds/thousands display properly?");
 
-                configOuchPhrases = Config.Bind("Misc. Options",
+                ConfigOuchPhrases = Config.Bind("Misc. Options",
                     "OuchPhrases",
                     "ow owie ouch ouchie",
                     "Words to be used by OuchMode? Space seperated. (/ouch)");
 
-                configHPWinner = Config.Bind("On-Startup Options",
+                ConfigHPWinner = Config.Bind("On-Startup Options",
                     "AlwaysShowHPOfWinner",
                     false,
                     "Enable always show the HP for the winner of the round on-startup?");
 
-                configEmoji = Config.Bind("Misc. Options",
+                ConfigEmoji = Config.Bind("Misc. Options",
                     "ShrugEmoji",
                     "☹",
                     "Specify the emoji used in the shrug command? Only the following 15 TMP defaults are available: 😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
 
-                configAuthKeyForTranslation = Config.Bind("Misc. Options",
+                ConfigAuthKeyForTranslation = Config.Bind("Misc. Options",
                     "AutoAuthTranslationsAPIKey",
-                    string.Empty,
+                    "",
                     "Put your API key for Google Translate V2 here (Optional)");
             }
             catch (Exception ex)
             {   
-                Logger.LogError("Exception on loading configuration: " + ex.StackTrace + ex.Message + ex.Source + ex.InnerException);
+                Logger.LogError("Exception on loading configuration: " + ex.StackTrace + ex.Message + ex.Source +
+                                ex.InnerException);
             }
+            
             InitModText();
 
             // Loading music from folder
@@ -229,25 +231,26 @@ namespace QOL
             {
                 Directory.CreateDirectory(MusicPath);
                 File.WriteAllText(MusicPath + "README.txt", 
-                    "Only WAV and OGG audio files are supported.\nFor MP3 and other types, please convert them first!");
+                    "Only WAV and OGG" +
+                    " audio files are supported.\nFor MP3 and other types, please convert them first!");
             }
 
             // Loading highscore from txt
             if (File.Exists(ScorePath))
             {
-                GameManagerPatches.highScore = int.Parse(File.ReadAllText(ScorePath));
+                GameManagerPatches.HighScore = int.Parse(File.ReadAllText(ScorePath));
                 return;
             }
 
             File.WriteAllText(ScorePath, "0");
-            GameManagerPatches.highScore = 0;
+            GameManagerPatches.HighScore = 0;
         }
 
         public static void InitModText()
         {
-            GameObject modText = new ("ModText");
+            var modText = new GameObject("ModText");
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-            TextMeshProUGUI modTextTMP = modText.AddComponent<TextMeshProUGUI>();
+            var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
             modTextTMP.text = "<color=red>Monk's QOL Mod</color> " + "<color=white>v" + VersionNumber;
             modTextTMP.fontSize = 25;
@@ -257,42 +260,45 @@ namespace QOL
             modTextTMP.richText = true;
         }
 
-        private float[] MenuPosParser(string menuPos) => Array.ConvertAll(menuPos.Replace("X", "").Replace("Y", "").Split(' '), float.Parse);
+        private static float[] MenuPosParser(string menuPos)
+            => Array.ConvertAll(menuPos
+                .Replace("X", "")
+                .Replace("Y", "")
+                .Split(' '), float.Parse);
 
-        public static ConfigEntry<bool> configchatCensorshipBypass;
-        public static ConfigEntry<bool> configAutoGG;
-        public static ConfigEntry<bool> configRichText;
-        public static ConfigEntry<bool> configTranslation;
-        public static ConfigEntry<bool> configWinStreakLog;
-        public static ConfigEntry<bool> configNoResize;
-        public static ConfigEntry<bool> configHPWinner;
-        public static ConfigEntry<Color> configCustomColor;
-        public static ConfigEntry<Color> configCustomCrownColor;
-        public static ConfigEntry<bool> configCustomColorOnParticle;
-        public static ConfigEntry<string> configAuthKeyForTranslation;
-        public static ConfigEntry<string> configCustomName;
-        public static ConfigEntry<KeyboardShortcut> configQOLMenuKeybind;
-        public static ConfigEntry<KeyboardShortcut> configStatMenuKeybind;
-        public static ConfigEntry<string> configDefaultColors;
-        public static ConfigEntry<string> configWinStreakColors;
-        public static ConfigEntry<string> configWinStreakRanges;
-        public static ConfigEntry<int> configWinStreakFontsize;
-        public static ConfigEntry<float> configRainbowSpeed;
-        public static ConfigEntry<float> configMsgDuration;
-        public static ConfigEntry<string> configAdvCmd;
-        public static ConfigEntry<string> configEmoji;
-        public static ConfigEntry<string> configQOLMenuPlacement;
-        public static ConfigEntry<string> configStatMenuPlacement;
-        public static ConfigEntry<string> configOuchPhrases;
-        public static ConfigEntry<bool> configFixCrown;
-        public static ConfigEntry<bool> configAlwaysRainbow;
+        public static ConfigEntry<bool> ConfigchatCensorshipBypass;
+        public static ConfigEntry<bool> ConfigAutoGG;
+        public static ConfigEntry<bool> ConfigRichText;
+        public static ConfigEntry<bool> ConfigTranslation;
+        public static ConfigEntry<bool> ConfigWinStreakLog;
+        public static ConfigEntry<bool> ConfigNoResize;
+        public static ConfigEntry<bool> ConfigHPWinner;
+        public static ConfigEntry<Color> ConfigCustomColor;
+        public static ConfigEntry<Color> ConfigCustomCrownColor;
+        public static ConfigEntry<bool> ConfigCustomColorOnParticle;
+        public static ConfigEntry<string> ConfigAuthKeyForTranslation;
+        public static ConfigEntry<string> ConfigCustomName;
+        public static ConfigEntry<KeyboardShortcut> ConfigQolMenuKeybind;
+        public static ConfigEntry<KeyboardShortcut> ConfigStatMenuKeybind;
+        public static ConfigEntry<string> ConfigDefaultColors;
+        public static ConfigEntry<string> ConfigWinStreakColors;
+        public static ConfigEntry<string> ConfigWinStreakRanges;
+        public static ConfigEntry<int> ConfigWinStreakFontsize;
+        public static ConfigEntry<float> ConfigRainbowSpeed;
+        public static ConfigEntry<float> ConfigMsgDuration;
+        public static ConfigEntry<string> ConfigAdvCmd;
+        public static ConfigEntry<string> ConfigEmoji;
+        public static ConfigEntry<string> ConfigQOLMenuPlacement;
+        public static ConfigEntry<string> ConfigStatMenuPlacement;
+        public static ConfigEntry<string> ConfigOuchPhrases;
+        public static ConfigEntry<bool> ConfigFixCrownWinCount;
+        public static ConfigEntry<bool> ConfigAlwaysRainbow;
 
-        public static List<Color> DefaultColors = new(4);
+        public static Color[] DefaultColors = new Color[4];
 
         public const string VersionNumber = "1.0.15"; // Version number
         public const string Guid = "monky.plugins.QOL";
-        public static string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
-        public static string ScorePath = Paths.PluginPath + "\\QOL-Mod\\WinstreakData.txt";
-
+        public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
+        public static readonly string ScorePath = Paths.PluginPath + "\\QOL-Mod\\WinstreakData.txt";
     }
 }
