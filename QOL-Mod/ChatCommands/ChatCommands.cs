@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using System.Text;
 using HarmonyLib;
 using Steamworks;
@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace QOL
 {
-
     public class ChatCommands
     {
         public static void SingleArgument(string cmd, string msg)
@@ -21,14 +20,14 @@ namespace QOL
                     Helper.localNetworkPlayer.OnTalked("My HP: " + new PlayerHP(localColor).HP);
                     return;
                 case "gg": // Enables or disables automatic "gg" upon death
-                    Helper.autoGG = !Helper.autoGG;
+                    Helper.AutoGG = !Helper.AutoGG;
                     Helper.SendLocalMsg("Toggled AutoGG.", LogLevel.Success);
                     return;
                 case "adv": // Outputs player-specified msg from config to chat, blank by default
-                    Helper.localNetworkPlayer.OnTalked(Plugin.configAdvCmd.Value);
+                    Helper.localNetworkPlayer.OnTalked(Plugin.ConfigAdvCmd.Value);
                     return;
                 case "uncensor": // Enables/disables chat censorship
-                    Helper.chatCensorshipBypass = !Helper.chatCensorshipBypass;
+                    Helper.ChatCensorshipBypass = !Helper.ChatCensorshipBypass;
                     Helper.SendLocalMsg("Toggled ChatCensorship.", LogLevel.Success);
                     return;
                 case "ouch":
@@ -40,20 +39,20 @@ namespace QOL
                     Helper.SendLocalMsg("Toggled Winstreak system.", LogLevel.Success);
                     return;
                 case "rich": // Enables rich text for chat messages
-                    TextMeshPro theText = Traverse.Create(Helper.localChat).Field("text").GetValue<TextMeshPro>();
+                    var theText = Traverse.Create(Helper.LocalChat).Field("text").GetValue<TextMeshPro>();
                     theText.richText = !theText.richText;
                     Helper.SendLocalMsg("Toggled Richtext.", LogLevel.Success);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
-                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.configEmoji.Value + "_/\u00af";
+                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
                     Helper.localNetworkPlayer.OnTalked(msg);
                     return;
                 case "uwu": // Enables uwuifier for chat messages
-                    Helper.uwuifyText = !Helper.uwuifyText;
+                    Helper.UwuifyText = !Helper.UwuifyText;
                     Helper.SendLocalMsg("Toggled UwUifier.", LogLevel.Success);
                     return;
                 case "fov":
-                    Debug.Log("camera fov: " + Camera.main.fieldOfView);
+                    Debug.Log("camera fov: " + Camera.main!.fieldOfView);
                     Camera.main.fieldOfView = 200;
                     return;
                 case "lobregen": // Outputs whether regen is enabled (true) or disabled (false) for the lobby to chat
@@ -70,7 +69,7 @@ namespace QOL
                     Helper.SendLocalMsg("Join link copied to clipboard!", LogLevel.Success);
                     return;
                 case "translate": // Enables/disables the auto-translate system for chat
-                    Helper.isTranslating = !Helper.isTranslating;
+                    Helper.IsTranslating = !Helper.IsTranslating;
                     Helper.SendLocalMsg("Toggled Auto-Translate.", LogLevel.Success);
                     return;
                 case "lobhp": // Outputs the HP setting for the lobby to chat
@@ -92,12 +91,12 @@ namespace QOL
                     Helper.SendLocalMsg("Toggled WinnerHP Announcer.", LogLevel.Success);
                     return;
                 case "nuky": // Enables/disables Nuky chat mode
-                    Helper.nukChat = !Helper.nukChat;
-                    if (Helper.routineUsed != null) Helper.localChat.StopCoroutine(Helper.routineUsed);
+                    Helper.NukChat = !Helper.NukChat;
+                    if (Helper.RoutineUsed != null) Helper.LocalChat.StopCoroutine(Helper.RoutineUsed);
                     Helper.SendLocalMsg("Toggled NukyChat.", LogLevel.Success);
                     return;
                 case "lowercase": // Enables/Disables chat messages always being sent in lowercase
-                    Helper.onlyLower = !Helper.onlyLower;
+                    Helper.OnlyLower = !Helper.OnlyLower;
                     Helper.SendLocalMsg("Toggled LowercaseOnly.", LogLevel.Success);
                     return;
                 case "suicide": // Kills user
@@ -128,16 +127,22 @@ namespace QOL
                     return;
                 case "fps":
                     var targetFPS = int.Parse(cmds[1]);
+                    if (targetFPS < 60)
+                    {
+                        Helper.SendLocalMsg("Target FPS cannot be below 60.", LogLevel.Warning);
+                        return;
+                    } 
                     Application.targetFrameRate = targetFPS;
                     Helper.SendLocalMsg("Target framerate is now: " + targetFPS, LogLevel.Success);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
-                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.configEmoji.Value + "_/\u00af";
+                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
                     Helper.localNetworkPlayer.OnTalked(msg);
                     return;
                 case "stat": // Outputs a stat of the local user (WeaponsThrown, Falls, BulletShot, and etc.)
-                    CharacterStats myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
-                    Helper.SendLocalMsg("My " + cmds[1] + ": " + Helper.GetTargetStatValue(myStats, cmds[1]), LogLevel.Success);
+                    var myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
+                    Helper.SendLocalMsg("My " + cmds[1] + ": " + Helper.GetTargetStatValue(myStats, cmds[1]),
+                        LogLevel.Success);
                     return;
                 case "music": // Music commands
                     switch (cmds[1])
@@ -153,7 +158,8 @@ namespace QOL
                             Helper.SendLocalMsg("Song looping toggled.", LogLevel.Success);
                             return;
                         default:
-                            Helper.SendLocalMsg("Please specify a parameter. Use <b>/help</b> to see them all.", LogLevel.Success);
+                            Helper.SendLocalMsg("Please specify a parameter. Use <b>/help</b> to see them all.",
+                                LogLevel.Success);
                             return;
                     }
                 case "id": // Outputs the specified player's SteamID
@@ -168,14 +174,14 @@ namespace QOL
                 case "mute": // Mutes the specified player (Only for the current lobby and only client-side)
                     targetID = Helper.GetIDFromColor(cmds[1]);
 
-                    if (!Helper.mutedPlayers.Contains(targetID))
+                    if (!Helper.MutedPlayers.Contains(targetID))
                     {
-                        Helper.mutedPlayers.Add(targetID);
+                        Helper.MutedPlayers.Add(targetID);
                         Helper.SendLocalMsg("Muted: " + Helper.GetColorFromID(targetID), LogLevel.Success);
                         return;
                     }
 
-                    Helper.mutedPlayers.Remove(targetID);
+                    Helper.MutedPlayers.Remove(targetID);
                     Helper.SendLocalMsg("Unmuted: " + Helper.GetColorFromID(targetID), LogLevel.Success);
                     return;
                 default: // Command is invalid or improperly specified
@@ -189,15 +195,18 @@ namespace QOL
             switch (cmds[0])
             {
                 case "shrug": // Appends shrug emoticon to end of chat message
-                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.configEmoji.Value + "_/\u00af";
+                    msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
                     Helper.localNetworkPlayer.OnTalked(msg);
                     return;
                 case "stat": // Outputs a stat of the specified player (WeaponsThrown, Falls, BulletShot, and etc.)
                     var targetStats = new PlayerStat(cmds[1]);
-                    Helper.SendLocalMsg(targetStats.FullColor + ", " + cmds[2] + ": " + Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success);
+                    Helper.SendLocalMsg(
+                        targetStats.FullColor + ", " + cmds[2] + ": " +
+                        Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success);
                     return;
                 case "resolution":
-                    Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]), Convert.ToBoolean(OptionsHolder.fullscreen));
+                    Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]),
+                        Convert.ToBoolean(OptionsHolder.fullscreen));
                     Helper.SendLocalMsg("Set new resolution of: " + cmds[1] + "x" + cmds[2], LogLevel.Success);
                     return;
                 case "music":
@@ -209,7 +218,9 @@ namespace QOL
 
                             if (songIndex > musicHandler.myMusic.Length - 1 || songIndex < 0)
                             {
-                                Helper.SendLocalMsg($"Invalid index: input must be between 0 and {musicHandler.myMusic.Length - 1}.", LogLevel.Warning);
+                                Helper.SendLocalMsg(
+                                    $"Invalid index: input must be between 0 and {musicHandler.myMusic.Length - 1}.",
+                                    LogLevel.Warning);
                                 return;
                             }
 
@@ -220,10 +231,13 @@ namespace QOL
                             audioSource.volume = musicHandler.myMusic[songIndex].volume;
                             audioSource.Play();
 
-                            Helper.SendLocalMsg($"Now playing song #{songIndex} out of {musicHandler.myMusic.Length - 1}.", LogLevel.Success);
+                            Helper.SendLocalMsg(
+                                $"Now playing song #{songIndex} out of {musicHandler.myMusic.Length - 1}.",
+                                LogLevel.Success);
                             return;
                         default:
-                            Helper.SendLocalMsg("Please specify a parameter. Use <b>/help</b> to see them all.", LogLevel.Success);
+                            Helper.SendLocalMsg("Please specify a parameter. Use <b>/help</b> to see them all.",
+                                LogLevel.Success);
                             return;
                     }
                 default:
