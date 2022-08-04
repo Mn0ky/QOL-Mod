@@ -14,18 +14,25 @@
 </p>
 
 A mod that offers quality-of-life improvements and additions to [Stick Fight: The Game](https://store.steampowered.com/app/674940/Stick_Fight_The_Game/).<br/>
-This is accomplished through a GUI menu but alternative chat commands are listed below.<br/>
+This is accomplished through a GUI menu but alternative [chat commands](https://github.com/Mn0ky/QOL-Mod#chat-commands) are listed below.<br/>
 To open the menu, use the default keybind: <kbd>LeftShift</kbd> + <kbd>F1</kbd><br/>
+
+A large amount of customization is offered to the player, from changing the default player colors (or only your own), crown color, and even the music!
+In addition to those you may specify a custom username, increase chat message duration, add words to say when damaged, and so much more.
+<ins>It is **highly** recommended to skim through the [config](https://github.com/Mn0ky/QOL-Mod#using-the-config) to see just how much you can do.</ins>
 
 A previous message system allows you to use the <kbd>↑</kbd> & <kbd>↓</kbd> keys to easily return to your previous messages.<br/>
 There is a maximum of **``20``** messages stored before they start being overwritten.<br/>
+
+Any green or orange chat messages that are outputted by the mod (in response to a command being run or another setting) are strictly client-side, meaning, you are the
+only one who will see them.
 
 This mod is a plugin for [BepInEx](https://github.com/BepInEx/BepInEx) which is required to load it. Everything is patched at runtime.<br/>
 
 ## Installation
 
 To install the mod, watch the video below, or follow the written steps:<br/> 
-  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/download/v5.4.19/BepInEx_x86_5.4.19.0.zip).
+  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/download/v5.4.20/BepInEx_x86_5.4.20.0.zip).
   2)  Extract the newly downloaded zip into the ``StickFightTheGame`` folder.
   3)  Drag all contents from the folder into the ``StickFightTheGame`` folder (``winhttp.dll``, ``doorstop_config.ini``, the ``BepInEx`` folder etc.).
   4)  Launch the game and then exit (BepInEx will have generated new files and folders).
@@ -42,8 +49,8 @@ https://user-images.githubusercontent.com/67206766/161408215-1f6e3d3e-5424-4942-
 The following are some general things to take note of:
   - Both the ``/private`` & ``/public`` commands require you to be the host in order to function.
   - The ``/rich`` command only enables rich text for you, a.k.a client-side only.
+  - A custom player color and or username only shows for you, a.k.a client-side only.
   - The auto-translation feature uses the Google Translate API and has a rate-limit of **``100``** requests per hour.
-  - A custom player color only shows for you, a.k.a client-side only.
 
 ## QOL Menu
 
@@ -58,6 +65,7 @@ Alternative chat commands are listed directly below.
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Usage:**		                               | ```/<command_name> [<additional parameter>]```                                                                                                                 |
 | /adv		                                     | Outputs whatever you set it to in the config.                                                                                                                  |
+| /fps | Sets the target FPS to the specified amount (this means the FPS will stay around this amount; cannot be below 60).
 | /gg		                                      | Enables automatic sending of "gg" upon death of mod user.                                                                                                      |
 | /help		                                    | Opens up the Steam overlay and takes you to this page.                                                                                                         |
 | /hp	```[<player_color>]```	                | Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.                                                         |
@@ -68,10 +76,15 @@ Alternative chat commands are listed directly below.
 | /lowercase		                               | Enables/disables lowercase mode, which has your chat messages always sent in lowercase. Useful for those who keep pressing the caps-lock key.                  |
 | /nuky		                                    | Lets you talk like Nuky. Splits up any message you send and outputs it word by word.                                                                           |
 | /mute ```[<player_color>]```		             | The targeted player's messages wont appear, making them "muted" for you (**client-side only**. A mute only lasts for the lobby you're currently in).           |
+| /music play ```<song_index>``` |	Plays song at the specified index. Sends 'warning' if index is too high or negative.
+| /music loop | Loops the current song until disabled.
+| /music skip | Skips currently playing song. Will disable song looping if it's enabled.
+| /ouch | Enables/disables OuchMode where your character will send out a randomly picked word when damaged. This list of words can be expanded upon and customized in the config.
 | /ping ```[<player_color>]```		             | Outpus the ping for the targeted player.                                                                                                                       |
 | /private		                                 | Privates the current lobby (**must be host**).                                                                                                                 |
 | /public		                                  | Opens the current lobby to the public (**must be host**).                                                                                                      |
 | /rainbow		                                 | Enables/disables rainbow mode. Dynamically shifts your player color through the color spectrum (the shifting speed of the colors is changeable in the config). |
+| /resolution ```[<width> <height>]``` | Sets the resolution to the specified width and height.
 | /rich		                                    | Enables rich text for chat (**client-side only**).                                                                                                             |
 | /shrug ```[<message>]```		                 | Appends ¯\\\_☹\_/¯ to the end of the typed message (changeable in config).                                                                                     |
 | /stat ```[<player_color> <stat_type>]```		 | Gets the targeted stat of the targeted player. Open the stat menu to see a list of different stat names.                                                       |
