@@ -157,6 +157,11 @@ namespace QOL
                     "AutoGG",
                     false, // The key of the configuration option in the configuration file
                     "Enable AutoGG on startup?"); // Description of the option to show in the config file
+                
+                ConfigAllOutputPublic = Config.Bind("On-Startup Options",
+                    "AlwaysPublicOutput",
+                    false,
+                    "Enable AlwaysPublicOutput on start-up, where all mod logs in chat are no longer client-side?");
 
                 ConfigchatCensorshipBypass = Config.Bind("On-Startup Options",
                     "ChatCensorshipBypass",
@@ -252,7 +257,7 @@ namespace QOL
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
-            modTextTMP.text = "<color=red>Monk's QOL Mod</color> " + "<color=white>v" + VersionNumber;
+            modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber + " </color><color=#00bbff><u>Tester";
             modTextTMP.fontSize = 25;
             modTextTMP.color = Color.red;
             modTextTMP.fontStyle = FontStyles.Bold;
@@ -268,6 +273,7 @@ namespace QOL
 
         public static ConfigEntry<bool> ConfigchatCensorshipBypass;
         public static ConfigEntry<bool> ConfigAutoGG;
+        public static ConfigEntry<bool> ConfigAllOutputPublic;
         public static ConfigEntry<bool> ConfigRichText;
         public static ConfigEntry<bool> ConfigTranslation;
         public static ConfigEntry<bool> ConfigWinStreakLog;
@@ -296,8 +302,9 @@ namespace QOL
 
         public static Color[] DefaultColors = new Color[4];
 
-        public const string VersionNumber = "1.0.15"; // Version number
+        public const string VersionNumber = "1.16.0"; // Version number
         public const string Guid = "monky.plugins.QOL";
+        
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
         public static readonly string ScorePath = Paths.PluginPath + "\\QOL-Mod\\WinstreakData.txt";
     }

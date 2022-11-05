@@ -5,6 +5,7 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using TMPro;
+using Object = UnityEngine.Object;
 
 
 namespace QOL
@@ -13,7 +14,6 @@ namespace QOL
     {
         public static void Patches(Harmony harmonyInstance) // Multiplayer methods to patch with the harmony __instance
         {
-
             var onServerJoinedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnServerJoined");
             var onServerJoinedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
                 .GetMethod(nameof(OnServerJoinedMethodPostfix)));
@@ -23,8 +23,13 @@ namespace QOL
             var onServerCreatedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
                 .GetMethod(nameof(OnServerCreatedMethodPostfix)));
             harmonyInstance.Patch(onServerCreatedMethod, postfix: onServerCreatedMethodPostfix);
-
+            
             var onPlayerSpawnedMethod = AccessTools.Method(typeof(MultiplayerManager), "OnPlayerSpawned");
+            
+            // var onPlayerSpawnedMethodPrefix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
+            //     .GetMethod(nameof(OnPlayerSpawnedMethodPrefix)));
+            // harmonyInstance.Patch(onPlayerSpawnedMethod, prefix: onPlayerSpawnedMethodPrefix);
+            
             var onPlayerSpawnedMethodPostfix = new HarmonyMethod(typeof(MultiplayerManagerPatches)
                 .GetMethod(nameof(OnPlayerSpawnedMethodPostfix)));
             harmonyInstance.Patch(onPlayerSpawnedMethod, postfix: onPlayerSpawnedMethodPostfix);
@@ -41,6 +46,47 @@ namespace QOL
         
         // Guards against kick attempts made towards the user by skipping the method, if not Monky or Rexi
         public static bool OnKickedMethodPrefix() => Helper.IsTrustedKicker;
+
+        public static void OnPlayerSpawnedMethodPrefix(ref GameObject ___m_PlayerPrefab)
+        {
+            Debug.Log("RUNNING OnPlayerSpawned NOW!!!!!");
+            
+            foreach (var hoard in Resources.FindObjectsOfTypeAll<HoardHandler>())
+            {
+                if (hoard.name == "AI spawner (1)") Helper.Hoards[0] = hoard; // Bolt
+                if (hoard.name == "AI spawner (2)") Helper.Hoards[1] = hoard; // Zombie
+            }
+            
+            Debug.Log("Trying to find child objs!!");
+            
+            var predictionSyncCubeTest =  ___m_PlayerPrefab.transform.GetChild(7).gameObject;
+            var chat =  ___m_PlayerPrefab.transform.GetChild(8).gameObject;
+            var gameCanvas =  ___m_PlayerPrefab.transform.GetChild(9).gameObject;
+            var damageParticleObj = ___m_PlayerPrefab.GetComponentInChildren<BlockParticle>().transform.GetChild(0)
+                .GetComponent<ParticleSystem>();
+
+            Debug.Log("All objs found");
+
+            foreach (var hoard in Helper.Hoards)
+            {
+                var newCubeTest = Object.Instantiate(predictionSyncCubeTest, hoard.character.transform, 
+                    true);
+                Object.Instantiate(chat, hoard.character.transform, false);
+                Object.Instantiate(gameCanvas, hoard.character.transform, true);
+                Object.Instantiate(damageParticleObj, hoard.character.GetComponentInChildren<BlockParticle>().transform, 
+                    true);
+
+                Traverse.Create(hoard.character.FetchComponent<NetworkPlayer>())
+                    .Field("mHelpPredictionSphere")
+                    .SetValue(newCubeTest.transform);
+
+                hoard.character.GetComponent<Movement>().jumpClips =
+                    ___m_PlayerPrefab.GetComponent<Movement>().jumpClips;
+            }
+
+            ___m_PlayerPrefab = Helper.Hoards[0].character.gameObject;
+            Debug.Log("Changed player prefab!!");
+        }
         
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
