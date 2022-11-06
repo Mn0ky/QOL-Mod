@@ -58,6 +58,7 @@ Alternative chat commands are listed directly below.
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Usage:**		                               | ```/<command_name> [<additional parameter>]```                                                                                                                 |
 | /adv		                                     | Outputs whatever you set it to in the config.                                                                                                                  |
+| /fov                                       | Set the FOV for the game.                                                                                                                                      |
 | /gg		                                      | Enables automatic sending of "gg" upon death of mod user.                                                                                                      |
 | /help		                                    | Opens up the Steam overlay and takes you to this page.                                                                                                         |
 | /hp	```[<player_color>]```	                | Outputs the percent based health of the target color to chat. Leave as ``/hp`` to always get your own.                                                         |
@@ -75,10 +76,12 @@ Alternative chat commands are listed directly below.
 | /rich		                                    | Enables rich text for chat (**client-side only**).                                                                                                             |
 | /shrug ```[<message>]```		                 | Appends ¯\\\_☹\_/¯ to the end of the typed message (changeable in config).                                                                                     |
 | /stat ```[<player_color> <stat_type>]```		 | Gets the targeted stat of the targeted player. Open the stat menu to see a list of different stat names.                                                       |
+| /suicide                                   | Kills the user.                                                                                                                                                |
 | /translate		                               | Enables auto-translation for messages from others to English.                                                                                                  |
 | /uncensor		                                | Disables chat censorship.                                                                                                                                      |
 | /uwu		                                     | *uwuifies* any message you send.                                                                                                                               |
-| /ver		                                     | Outputs the mod version string.                                                                                                                                |
+| /ver		                                     | Outputs the mod version string.                                                                                                                                | /winnerhp                                    | Outputs the winner's hp at the end of every round.                                                                                                                                |
+| /winnerhp                                  | Outputs the winner's hp at the end of every round.                                                                                                             |                                                                                                                                                                |
 | /winstreak		                               | Enables winstreak mode.                                                                                                                                        |
 
 ## Stat Menu

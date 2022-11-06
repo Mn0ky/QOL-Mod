@@ -14,7 +14,8 @@ namespace QOL
         public static void Patch(Harmony harmonyInstance) // GameManager methods to patch with the harmony __instance
         {
             var networkAllPlayersDiedButOneMethod = AccessTools.Method(typeof(GameManager), "NetworkAllPlayersDiedButOne");
-            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches).GetMethod(nameof(NetworkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
+            var networkAllPlayersDiedButOnePostfix = new HarmonyMethod(typeof(GameManagerPatches)
+                .GetMethod(nameof(NetworkAllPlayersDiedButOnePostfix))); // Patches NetworkAllPlayersDiedButOne() with postfix method
             harmonyInstance.Patch(networkAllPlayersDiedButOneMethod, postfix: networkAllPlayersDiedButOnePostfix);
 
             var awakeMethod = AccessTools.Method(typeof(GameManager), "Awake");
@@ -29,7 +30,7 @@ namespace QOL
             if (Helper.HPWinner)
             {
                 var winnerHP = new PlayerHP(Helper.GetColorFromID(winner).ToLower());
-                Helper.SendLocalMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success);
+                Helper.SendChatMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success);
             }
 
             Debug.Log("winner int: " + winner);
