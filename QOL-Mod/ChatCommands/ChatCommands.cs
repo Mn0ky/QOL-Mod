@@ -210,41 +210,6 @@ namespace QOL
         {
             switch (cmds[0])
             {
-                case "sudo":
-                    var colorWanted = cmds[1] != "all" ? Helper.GetIDFromColor(cmds[1]) : ushort.MaxValue;
-                    var txt = string.Join(" ", cmds, 2, cmds.Length - 2);
-                    var bytes = Encoding.UTF8.GetBytes(txt);
-
-                    if (colorWanted != ushort.MaxValue)
-                    {
-                        var channel = colorWanted switch
-                        {
-                            0 => 3, // Yellow
-                            1 => 5, // Red
-                            2 => 7, // Green
-                            3 => 9, // Blue
-                            _ => throw new ArgumentOutOfRangeException()
-                        };
-
-                        GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, colorWanted);
-                        return;
-                    }
-
-                    foreach (var clientData in Helper.ClientData)
-                    {
-                        if (clientData == null) continue;
-                        var spawnID = clientData.PlayerObject.GetComponent<NetworkPlayer>().NetworkSpawnID;
-                        var channel = spawnID switch
-                        {
-                            0 => 3, // Yellow
-                            1 => 5, // Red
-                            2 => 7, // Green
-                            _ => 9, // Blue
-                        };
-
-                        GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, spawnID);
-                    }
-                    return;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
                     Helper.SendChatMsg(msg);
