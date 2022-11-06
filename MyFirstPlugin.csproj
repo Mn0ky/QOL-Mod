@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <None Include="MyFirstPlugin.sln" />
-    <None Remove="build.bat" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,19 +26,19 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\Downloads\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\..\Downloads\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="Lidgren.Network">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Lidgren.Network.dll</HintPath>
+      <HintPath>..\..\Downloads\Lidgren.Network.dll</HintPath>
     </Reference>
     <Reference Include="TextMeshPro-1.0.55.56.0b9">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\TextMeshPro-1.0.55.56.0b9.dll</HintPath>
+      <HintPath>..\..\Downloads\TextMeshPro-1.0.55.56.0b9.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\Downloads\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

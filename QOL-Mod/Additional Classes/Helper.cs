@@ -46,33 +46,24 @@ namespace QOL
         {
             if (MatchmakingHandler.Instance.IsHost)
             {
-                var changeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", 
-                    BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodInfo ChangeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", BindingFlags.NonPublic | BindingFlags.Instance);
 
                 if (open)
                 {
-                    changeLobbyTypeMethod!.Invoke(MatchmakingHandler.Instance,
-                        new object[]
-                        {
-                            ELobbyType.k_ELobbyTypePublic
-                        });
-                    SendChatMsg("Lobby made public!", ChatCommands.LogLevel.Success);
+                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePublic });
+                    SendLocalMsg("Lobby made public!", ChatCommands.LogLevel.Success);
                 }
 
                 else
                 {
-                    changeLobbyTypeMethod!.Invoke(MatchmakingHandler.Instance,
-                        new object[]
-                        {
-                            ELobbyType.k_ELobbyTypePrivate
-                        });
-                    SendChatMsg("Lobby made private!", ChatCommands.LogLevel.Success);
+                    ChangeLobbyTypeMethod.Invoke(MatchmakingHandler.Instance, new object[] { ELobbyType.k_ELobbyTypePrivate });
+                    SendLocalMsg("Lobby made private!", ChatCommands.LogLevel.Success);
                 }
 
                 return;
             }
 
-            SendChatMsg("Need to be host!", ChatCommands.LogLevel.Warning);
+            SendLocalMsg("Need to be host!", ChatCommands.LogLevel.Warning);
         }
 
         // Assigns some commonly accessed values as well as runs anything that needs to be everytime a lobby is joined
@@ -99,8 +90,6 @@ namespace QOL
 
             TMPText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
             TMPText.richText = Plugin.ConfigRichText.Value;
-            // Increase caret width so caret won't disappear at certain times
-            Traverse.Create(__instance).Field("chatField").GetValue<TMP_InputField>().caretWidth = 3;
 
             if (Plugin.ConfigFixCrownWinCount.Value)
             {
@@ -134,7 +123,7 @@ namespace QOL
 
             GameObject rbHand = new ("RainbowHandler");
             rbHand.AddComponent<RainbowManager>().enabled = false;
-            RainbowEnabled = false;
+            _rainbowEnabled = false;
 
             if (Plugin.ConfigAlwaysRainbow.Value) ToggleRainbow();
         }
@@ -153,16 +142,16 @@ namespace QOL
 
         public static void ToggleRainbow()
         {
-            if (!RainbowEnabled)
+            if (!_rainbowEnabled)
             {
                 Debug.Log("trying to start RainBowHandler");
                 UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = true;
-                RainbowEnabled = true;
+                _rainbowEnabled = true;
                 return;
             }
 
             UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = false;
-            RainbowEnabled = false;
+            _rainbowEnabled = false;
         }
 
         public static string GetTargetStatValue(CharacterStats stats, string targetStat)
@@ -174,25 +163,15 @@ namespace QOL
             return "No value";
         }
 
-        public static void SendChatMsg(string msg, ChatCommands.LogLevel logLevel = default, bool toggleState = true)
-        {
-            if (logLevel != default && !AllOutputPublic)
-            {
-                GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg, toggleState));
-                return;
-            }
+        public static void SendLocalMsg(string msg, ChatCommands.LogLevel logLevel) 
+            => GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg));
 
-            localNetworkPlayer.OnTalked(msg);
-        }
-
-        private static IEnumerator SendClientSideMsg(ChatCommands.LogLevel logLevel, string msg, bool toggleState)
+        private static IEnumerator SendClientSideMsg(ChatCommands.LogLevel logLevel, string msg)
         {
             var msgColor = logLevel switch
             {
                 ChatCommands.LogLevel.Warning => "<#FF7F50>",
-                // Enabled => green, disabled => gray
-                ChatCommands.LogLevel.Success => toggleState ? "<#006400>" : "<#56595c>",
-                _ => ""
+                _ => "<#006400>"
             };
 
             var origRichTextValue = TMPText.richText;
@@ -229,7 +208,8 @@ namespace QOL
         }
 
         public static void CreateSongAndAddToMusic(AudioClip audioClip)
-            => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(new MusicClip { clip = audioClip });
+            => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(
+                new MusicClip { clip = audioClip });
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;
@@ -246,7 +226,6 @@ namespace QOL
         public static bool WinStreakEnabled = Plugin.ConfigWinStreakLog.Value;
         public static bool ChatCensorshipBypass = Plugin.ConfigchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
         public static readonly Color CustomPlayerColor = Plugin.ConfigCustomColor.Value;
-        public static bool AllOutputPublic = Plugin.ConfigAllOutputPublic.Value;
         public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
         public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
         public static bool IsOwMode;
@@ -257,7 +236,7 @@ namespace QOL
         public static bool IsTrustedKicker;
         public static bool OnlyLower;
         public static bool HPWinner = Plugin.ConfigHPWinner.Value;
-        public static bool RainbowEnabled;
+        private static bool _rainbowEnabled;
         public static IEnumerator RoutineUsed;
 
         public static ConnectedClientData[] ClientData;
@@ -265,7 +244,5 @@ namespace QOL
 
         public static TextMeshPro TMPText;
         public static int WinStreak = 0;
-
-        public static HoardHandler[] Hoards = new HoardHandler[2];
     }
 }

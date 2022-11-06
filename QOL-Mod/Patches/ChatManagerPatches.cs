@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace QOL
             ILGenerator ilGen) 
         {
             var stopTypingMethod = AccessTools.Method(typeof(ChatManager), "StopTyping");
-            var checkForArrowKeysMethod = AccessTools.Method(typeof(ChatManagerPatches), nameof(CheckForArrowKeysAndAutoComplete)); 
+            var checkForArrowKeysMethod = AccessTools.Method(typeof(ChatManagerPatches), "CheckForArrowKeys"); 
             var instructionList = instructions.ToList(); // Creates list of IL instructions for Update() from enumerable
 
             for (var i = 0; i < instructionList.Count; i++)
@@ -182,82 +183,22 @@ namespace QOL
         
         // Checks if the up-arrow or down-arrow key is pressed, if so then
         // set the chatField.text to whichever message the user stops on
-        public static void CheckForArrowKeysAndAutoComplete(TMP_InputField chatField)
+        public static void CheckForArrowKeys(TMP_InputField chatField)
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) && _upArrowCounter < _backupTextList.Count)
             {
+                Debug.Log("UpArrow, current: " + _upArrowCounter);
                 chatField.text = _backupTextList[_upArrowCounter];
                 _upArrowCounter++;
+                Debug.Log("UpArrow, now: " + _upArrowCounter);
             }
 
             if (Input.GetKeyDown(KeyCode.DownArrow) && _upArrowCounter > 0)
             {
+                Debug.Log("DownArrow, current: " + _upArrowCounter);
                 _upArrowCounter--;
                 chatField.text = _backupTextList[_upArrowCounter];
-            }
-
-            var chatText = chatField.text;
-            var chatTextLen = chatText.Length;
-            var chatUnformattedTxt = chatField.textComponent.GetParsedText();
-            // Remove last char of non-richtext str since a random space is added from GetParsedText() 
-            chatUnformattedTxt = chatUnformattedTxt.Remove(chatUnformattedTxt.Length - 1);
-
-            if (chatTextLen > 0 && chatText[0] == '/')
-            {
-                var allCmdsMatched = ChatCommands.CmdList.FindAll(
-                    word => word.StartsWith(chatUnformattedTxt, StringComparison.OrdinalIgnoreCase));
-
-                if (allCmdsMatched.Count > 0)
-                {
-                    var cmdMatch = allCmdsMatched[0];
-                    
-                    if (chatField.richText && chatUnformattedTxt.Length == cmdMatch.Length)
-                    {
-                        
-                        // Check if cmd has been manually fully typed, if so remove the rich text
-                        var richTxtStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                        if (richTxtStartPos != -1 && chatText.Substring(0, richTxtStartPos).Length == cmdMatch.Length)
-                            chatField.text = cmdMatch;
-
-                        if (Input.GetKeyDown(KeyCode.Tab))
-                        {
-                            chatField.DeactivateInputField();
-                            chatField.text = cmdMatch;
-                            chatField.stringPosition = chatField.text.Length;
-                            chatField.ActivateInputField();
-                        }
-                        
-                        return;
-                    }
-                    
-                    chatField.richText = true;
-                    chatField.text += "<#000000BB><u>" + cmdMatch.Substring(chatTextLen);
-                }
-                else if (chatField.richText)
-                {
-                    var effectStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                    if (effectStartPos == -1)
-                    {
-                        // This will only occur if a cmd is fully typed and then more chars are added after
-                        chatField.richText = false;
-                        return; 
-                    }
-
-                    chatField.text = chatText.Remove(effectStartPos);
-                    chatField.richText = false;
-                }   
-            }
-            else if (chatField.richText)
-            {
-                var effectStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                if (effectStartPos == -1)
-                {
-                    // Occurs when a cmd is sent, richtext needs to be reset
-                    chatField.richText = false;
-                    return; 
-                }
-                chatField.text = chatText.Remove(effectStartPos);
-                chatField.richText = false;
+                Debug.Log("DownArrow, now: " + _upArrowCounter);
             }
         }
         
@@ -284,7 +225,7 @@ namespace QOL
                 yield return new WaitForSeconds(0.45f);
             }
         }
-
+        
         // UwUifies a message if possible, not perfect
         private static string UwUify(string targetText)
         {
@@ -298,21 +239,17 @@ namespace QOL
                     continue;
                 }
                 var c = newMessage[i];
-                var nextC = newMessage[i + 1];
                 switch (c)
                 {
                     case 'r' or 'l':
                         newMessage[i] = 'w';
                         break;
-                    case 't' when nextC == 'h':
+                    case 't' when newMessage[i + 1] == 'h':
                         newMessage[i] = 'd';
                         newMessage.Remove(i + 1, 1);
                         break;
-                    case 'n' when nextC != ' ' && nextC != 'g' && nextC != 't' && nextC != 'd':
-                        newMessage.Insert(i + 1, 'y');
-                        break;
                     default:
-                        if (Helper.IsVowel(c) && nextC == 't') newMessage.Insert(i + 1, 'w');
+                        if (Helper.IsVowel(c) && newMessage[i + 1] == 't') newMessage.Insert(i + 1, 'w');
                         break;
                 }
                 i++;
@@ -322,7 +259,7 @@ namespace QOL
         }
 
         private static int _upArrowCounter; // Holds how many times the up-arrow key is pressed while typing
-
+        
         // List to contain previous messages sent by us (up to 20)
         private static List<string> _backupTextList = new(21) 
         {
