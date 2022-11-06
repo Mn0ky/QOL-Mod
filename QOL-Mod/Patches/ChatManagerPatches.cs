@@ -216,7 +216,7 @@ namespace QOL
                         
                         // Check if cmd has been manually fully typed, if so remove the rich text
                         var richTxtStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                        if (richTxtStartPos != -1 && chatText.Substring(0, richTxtStartPos).Length == cmdMatch.Length)
+                        if (richTxtStartPos != -1 && chatText.Substring(0, richTxtStartPos) == cmdMatch)
                             chatField.text = cmdMatch;
 
                         if (Input.GetKeyDown(KeyCode.Tab))
