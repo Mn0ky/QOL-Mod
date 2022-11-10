@@ -1,17 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Steamworks;
-using SimpleJSON;
 using HarmonyLib;
 using TMPro;
-using BepInEx;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace QOL
 {
@@ -105,8 +102,11 @@ namespace QOL
             if (Plugin.ConfigFixCrownWinCount.Value)
             {
                 var counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
-                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true)) 
+                foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true))
+                {
                     crownCount.enableAutoSizing = true;
+                    crownCount.GetComponentInChildren<Image>().color = Plugin.ConfigCustomCrownColor.Value;
+                }
             }
 
             if (NameResize)

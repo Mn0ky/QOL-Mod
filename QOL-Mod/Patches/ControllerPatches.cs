@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace QOL
@@ -19,6 +20,10 @@ namespace QOL
             var onDeathMethod = AccessTools.Method(typeof(Controller), "OnDeath");
             var onDeathMethodMethodPostfix = new HarmonyMethod(typeof(ControllerPatches).GetMethod(nameof(OnDeathMethodMethodPostfix)));
             harmonyInstance.Patch(onDeathMethod, postfix: onDeathMethodMethodPostfix);
+            
+            var lateUpdateMethod = AccessTools.Method(typeof(Controller), "LateUpdate");
+            var lateUpdateMethodPrefix = new HarmonyMethod(typeof(ControllerPatches).GetMethod(nameof(LateUpdateMethodPrefix)));
+            harmonyInstance.Patch(lateUpdateMethod, prefix: lateUpdateMethodPrefix);
         }
 
         public static void OnTakeDamageMethodPostfix(Controller __instance) // Postfix method for OnTakeDamage()
@@ -32,7 +37,21 @@ namespace QOL
 
         public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
         {
-            if (Helper.AutoGG && __instance.HasControl) Helper.localNetworkPlayer.OnTalked("gg");
+                if (Helper.AutoGG && __instance.HasControl) Helper.localNetworkPlayer.OnTalked("gg");
+        }
+
+        public static void LateUpdateMethodPrefix(Controller __instance)
+        {
+            if (__instance.inactive || __instance.playerID != Helper.localNetworkPlayer.NetworkSpawnID || !GameManager.inFight)
+                return;
+
+            if (__instance.GetComponent<CharacterInformation>().isDead)
+            {
+                GameManagerPatches.TimeDead += Time.deltaTime;
+                return;
+            }
+
+            GameManagerPatches.TimeAlive += Time.deltaTime;
         }
     }
 }

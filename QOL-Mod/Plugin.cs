@@ -5,6 +5,7 @@ using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using SimpleJSON;
 using TMPro;
 using UnityEngine;
 
@@ -241,14 +242,14 @@ namespace QOL
             }
 
             // Loading highscore from txt
-            if (File.Exists(ScorePath))
+            if (File.Exists(StatsPath))
             {
-                GameManagerPatches.HighScore = int.Parse(File.ReadAllText(ScorePath));
+                GameManagerPatches.WinstreakHighScore = int.Parse(JSONNode.Parse(File.ReadAllText(StatsPath))["winstreakHighscore"]);
+                Debug.Log("Loading winstreak highscore of: " + GameManagerPatches.WinstreakHighScore);
                 return;
             }
-
-            File.WriteAllText(ScorePath, "0");
-            GameManagerPatches.HighScore = 0;
+            
+            GameManagerPatches.WinstreakHighScore = 0;
         }
 
         public static void InitModText()
@@ -306,6 +307,6 @@ namespace QOL
         public const string Guid = "monky.plugins.QOL";
         
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
-        public static readonly string ScorePath = Paths.PluginPath + "\\QOL-Mod\\WinstreakData.txt";
+        public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.txt";
     }
 }
