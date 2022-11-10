@@ -34,7 +34,8 @@ namespace QOL
             if (Helper.HPWinner)
             {
                 var winnerHP = new PlayerHP(Helper.GetColorFromID(winner).ToLower());
-                Helper.SendChatMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success);
+                Helper.SendChatMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success, true, 
+                    ChatCommands.CmdOutputVisibility["winnerhp"]);
             }
             
             var isUserWinner = winner == Helper.localNetworkPlayer.NetworkSpawnID;
@@ -86,7 +87,7 @@ namespace QOL
                 globalStats.Add("killDeathRatio", 0.0);
                 globalStats.Add("winLossRatio", 0.0);
 
-                File.WriteAllText(Plugin.StatsPath ,globalStats.ToString());
+                File.WriteAllText(Plugin.StatsPath,globalStats.ToString());
                 return;
             }
             
@@ -105,7 +106,7 @@ namespace QOL
             if (isUserWinner && Helper.WinStreak + 1 > WinstreakHighScore)
                 globalStatsJson["winstreakHighscore"] = Helper.WinStreak + 1;
 
-            globalStatsJson["roundsPlayed"] = 1 + globalStatsJson["roundsPlayed"].Value;
+            globalStatsJson["roundsPlayed"] = 1 + globalStatsJson["roundsPlayed"];
             
             var newAvgTimeAlive= (globalStatsJson["avgTimeAlive"] + (int)TimeAlive) / 2;
             var newAvgTimeDead= (globalStatsJson["avgTimeDead"] + (int)TimeDead) / 2;

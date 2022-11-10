@@ -236,20 +236,22 @@ namespace QOL
             if (!Directory.Exists(MusicPath))
             {
                 Directory.CreateDirectory(MusicPath);
-                File.WriteAllText(MusicPath + "README.txt", 
-                    "Only WAV and OGG" +
-                    " audio files are supported.\nFor MP3 and other types, please convert them first!");
+                File.WriteAllText(MusicPath + "README.txt", "Only WAV and OGG audio files are supported.\n" +
+                                                            "For MP3 and other types, please convert them first!");
             }
 
             // Loading highscore from txt
             if (File.Exists(StatsPath))
             {
-                GameManagerPatches.WinstreakHighScore = int.Parse(JSONNode.Parse(File.ReadAllText(StatsPath))["winstreakHighscore"]);
+                GameManagerPatches.WinstreakHighScore = JSONNode.Parse(File.ReadAllText(StatsPath))["winstreakHighscore"];
                 Debug.Log("Loading winstreak highscore of: " + GameManagerPatches.WinstreakHighScore);
-                return;
             }
-            
-            GameManagerPatches.WinstreakHighScore = 0;
+            else
+                GameManagerPatches.WinstreakHighScore = 0;
+
+            if (File.Exists(CmdVisibilityStatesPath))
+                foreach (var pair in JSONNode.Parse(File.ReadAllText(CmdVisibilityStatesPath)))
+                    ChatCommands.CmdOutputVisibility[pair.Key] = pair.Value;
         }
 
         public static void InitModText()
@@ -307,6 +309,7 @@ namespace QOL
         public const string Guid = "monky.plugins.QOL";
         
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
-        public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.txt";
+        public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.json";
+        public static readonly string CmdVisibilityStatesPath = Paths.PluginPath + "\\QOL-Mod\\CmdVisibilityStates.json";
     }
 }

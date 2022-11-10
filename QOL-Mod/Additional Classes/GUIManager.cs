@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Steamworks;
 using UnityEngine;
@@ -151,7 +150,8 @@ namespace QOL
             if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
-                Helper.SendChatMsg("Join link copied to clipboard!", ChatCommands.LogLevel.Success);
+                Helper.SendChatMsg("Join link copied to clipboard!", ChatCommands.LogLevel.Success, true, 
+                    ChatCommands.CmdOutputVisibility["invite"]);
 			}
 
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))

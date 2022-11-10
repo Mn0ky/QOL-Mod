@@ -53,9 +53,9 @@ namespace QOL
                         {
                             ELobbyType.k_ELobbyTypePublic
                         });
-                    SendChatMsg("Lobby made public!", ChatCommands.LogLevel.Success);
+                    
+                    SendChatMsg("Lobby made public!", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["public"]);
                 }
-
                 else
                 {
                     changeLobbyTypeMethod!.Invoke(MatchmakingHandler.Instance,
@@ -63,13 +63,14 @@ namespace QOL
                         {
                             ELobbyType.k_ELobbyTypePrivate
                         });
-                    SendChatMsg("Lobby made private!", ChatCommands.LogLevel.Success);
+                    
+                    SendChatMsg("Lobby made private!", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["private"]);
                 }
 
                 return;
             }
 
-            SendChatMsg("Need to be host!", ChatCommands.LogLevel.Warning);
+            SendChatMsg("Need to be host!", ChatCommands.LogLevel.Warning, true, false);
         }
 
         // Assigns some commonly accessed values as well as runs anything that needs to be everytime a lobby is joined
@@ -174,9 +175,9 @@ namespace QOL
             return "No value";
         }
 
-        public static void SendChatMsg(string msg, ChatCommands.LogLevel logLevel = default, bool toggleState = true)
+        public static void SendChatMsg(string msg, ChatCommands.LogLevel logLevel = default, bool toggleState = true, bool outputPublic = true)
         {
-            if (logLevel != default && !AllOutputPublic)
+            if (logLevel != default && !AllOutputPublic && !outputPublic)
             {
                 GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg, toggleState));
                 return;

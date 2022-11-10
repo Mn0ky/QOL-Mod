@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using HarmonyLib;
+using SimpleJson;
+using SimpleJSON;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -13,43 +17,39 @@ namespace QOL
         {
             switch (cmd)    
             {
-                case "logpublic":
-                    if (!Helper.AllOutputPublic)
-                    {
-                        Helper.SendChatMsg("Toggled AlwaysLogPublic.", LogLevel.Success, !Helper.AllOutputPublic);
-                        Helper.AllOutputPublic = !Helper.AllOutputPublic;
-                        return;
-                    }    
-                    Helper.AllOutputPublic = !Helper.AllOutputPublic;
-                    Helper.SendChatMsg("Toggled AlwaysLogPublic.", LogLevel.Success, Helper.AllOutputPublic);
+                case "dict":
+                {
+                    foreach (var pair in CmdOutputVisibility) 
+                        Debug.Log("key: " + pair.Key + " value: " + pair.Value);
                     return;
+                }
                 case "hp": // Outputs HP of ourselves to chat
                     var localColor = Helper.GetColorFromID(Helper.localNetworkPlayer.NetworkSpawnID);
                     Helper.SendChatMsg("My HP: " + new PlayerHP(localColor).HP);
                     return;
                 case "gg": // Enables or disables automatic "gg" upon death
                     Helper.AutoGG = !Helper.AutoGG;
-                    Helper.SendChatMsg("Toggled AutoGG.", LogLevel.Success, Helper.AutoGG);
+                    Helper.SendChatMsg("Toggled AutoGG.", LogLevel.Success, Helper.AutoGG, CmdOutputVisibility[cmd]);
                     return;
                 case "adv": // Outputs player-specified msg from config to chat, blank by default
                     Helper.SendChatMsg(Plugin.ConfigAdvCmd.Value);
                     return;
                 case "uncensor": // Enables/disables chat censorship
                     Helper.ChatCensorshipBypass = !Helper.ChatCensorshipBypass;
-                    Helper.SendChatMsg("Toggled ChatCensorship.", LogLevel.Success, Helper.ChatCensorshipBypass);
+                    Helper.SendChatMsg("Toggled ChatCensorship.", LogLevel.Success, Helper.ChatCensorshipBypass, CmdOutputVisibility[cmd]);
                     return;
                 case "ouch":
                     Helper.IsOwMode = !Helper.IsOwMode;
-                    Helper.SendChatMsg("Toggled OuchMode.", LogLevel.Success, Helper.IsOwMode);
+                    Helper.SendChatMsg("Toggled OuchMode.", LogLevel.Success, Helper.IsOwMode, CmdOutputVisibility[cmd]);
                     return;
                 case "winstreak": // Enables/disables winstreak system
                     Helper.ToggleWinstreak();
-                    Helper.SendChatMsg("Toggled Winstreak system.", LogLevel.Success, Helper.WinStreakEnabled);
+                    Helper.SendChatMsg("Toggled Winstreak system.", LogLevel.Success, Helper.WinStreakEnabled, CmdOutputVisibility[cmd]);
                     return;
                 case "rich": // Enables rich text for chat messages
                     var theText = Traverse.Create(Helper.LocalChat).Field("text").GetValue<TextMeshPro>();
                     theText.richText = !theText.richText;
-                    Helper.SendChatMsg("Toggled Richtext.", LogLevel.Success, theText.richText);
+                    Helper.SendChatMsg("Toggled Richtext.", LogLevel.Success, theText.richText, CmdOutputVisibility[cmd]);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
@@ -57,11 +57,12 @@ namespace QOL
                     return;
                 case "uwu": // Enables uwuifier for chat messages
                     Helper.UwuifyText = !Helper.UwuifyText;
-                    Helper.SendChatMsg("Toggled UwUifier.", LogLevel.Success, Helper.UwuifyText);
+                    Helper.SendChatMsg("Toggled UwUifier.", LogLevel.Success, Helper.UwuifyText, CmdOutputVisibility[cmd]);
                     return;
                 case "fov":
                     Debug.Log("camera fov: " + Camera.main!.fieldOfView);
                     Camera.main.fieldOfView = 200;
+                    Helper.SendChatMsg("Set FOV to: " + 200, LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 case "lobregen": // Outputs whether regen is enabled (true) or disabled (false) for the lobby to chat
                     Helper.SendChatMsg("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen));
@@ -74,51 +75,51 @@ namespace QOL
                     return;
                 case "invite": // Builds a "join game" link (same one you'd find on a steam profile) for lobby and copies it to clipboard
                     GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
-                    Helper.SendChatMsg("Join link copied to clipboard!", LogLevel.Success);
+                    Helper.SendChatMsg("Join link copied to clipboard!", LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 case "translate": // Enables/disables the auto-translate system for chat
                     Helper.IsTranslating = !Helper.IsTranslating;
-                    Helper.SendChatMsg("Toggled Auto-Translate.", LogLevel.Success, Helper.IsTranslating);
+                    Helper.SendChatMsg("Toggled Auto-Translate.", LogLevel.Success, Helper.IsTranslating, CmdOutputVisibility[cmd]);
                     return;
                 case "lobhp": // Outputs the HP setting for the lobby to chat
                     Helper.SendChatMsg("Lobby HP: " + OptionsHolder.HP);
                     return;
                 case "ping": // Outputs the ping for the specified player. In this case, it would send nothing since the local user's ping is not recorded
-                    Helper.SendChatMsg("Can't ping yourself!", LogLevel.Warning);
+                    Helper.SendChatMsg("Can't ping yourself!", LogLevel.Warning, true, CmdOutputVisibility[cmd]);
                     return;
                 case "rainbow": // Enables/disables the rainbow system, TODO: Work on improving and fixing this!
                     Helper.ToggleRainbow();
-                    Helper.SendChatMsg("Toggled PlayerRainbow.", LogLevel.Success, Helper.RainbowEnabled);
+                    Helper.SendChatMsg("Toggled PlayerRainbow.", LogLevel.Success, Helper.RainbowEnabled, CmdOutputVisibility[cmd]);
                     return;
                 case "id": // Outputs the specified user's SteamID
                     GUIUtility.systemCopyBuffer = SteamUser.GetSteamID().ToString();
-                    Helper.SendChatMsg("My SteamID copied to clipboard", LogLevel.Success);
+                    Helper.SendChatMsg("My SteamID copied to clipboard", LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 case "winnerhp": // Enables/Disables system for outputting the HP of the winner after each round to chat
                     Helper.HPWinner = !Helper.HPWinner;
-                    Helper.SendChatMsg("Toggled WinnerHP Announcer.", LogLevel.Success, Helper.HPWinner);
+                    Helper.SendChatMsg("Toggled WinnerHP Announcer.", LogLevel.Success, Helper.HPWinner, false);
                     return;
                 case "nuky": // Enables/disables Nuky chat mode
                     Helper.NukChat = !Helper.NukChat;
                     if (Helper.RoutineUsed != null) Helper.LocalChat.StopCoroutine(Helper.RoutineUsed);
-                    Helper.SendChatMsg("Toggled NukyChat.", LogLevel.Success, Helper.NukChat);
+                    Helper.SendChatMsg("Toggled NukyChat.", LogLevel.Success, Helper.NukChat, CmdOutputVisibility[cmd]);
                     return;
                 case "lowercase": // Enables/Disables chat messages always being sent in lowercase
                     Helper.OnlyLower = !Helper.OnlyLower;
-                    Helper.SendChatMsg("Toggled LowercaseOnly.", LogLevel.Success, Helper.OnlyLower);
+                    Helper.SendChatMsg("Toggled LowercaseOnly.", LogLevel.Success, Helper.OnlyLower, CmdOutputVisibility[cmd]);
                     return;
                 case "suicide": // Kills user
                     Helper.localNetworkPlayer.UnitWasDamaged(5, true, DamageType.LocalDamage, true);
-                    Helper.SendChatMsg("You are now dead.", LogLevel.Success);
+                    Helper.SendChatMsg("You are now dead.", LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 case "help": // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
                     SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
                     return;
                 case "ver": // Outputs mod version number to chat
-                    Helper.SendChatMsg(Plugin.VersionNumber, LogLevel.Success);
+                    Helper.SendChatMsg(Plugin.VersionNumber, LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 default: // Command is invalid or improperly specified
-                    Helper.SendChatMsg("Command not found.", LogLevel.Warning);
+                    Helper.SendChatMsg("Command not found.", LogLevel.Warning, true, false);
                     return;
             }
         }
@@ -129,13 +130,52 @@ namespace QOL
                 
             switch (cmds[0])
             {
+                case "logpublic":
+                    var targetCmdForPublic = cmds[1].Replace("\"", "").Replace("/", "");
+                    if (targetCmdForPublic == "all")
+                    {
+                        Helper.SendChatMsg("Toggled public logging for all commands.", LogLevel.Success, 
+                            true, CmdOutputVisibility[cmds[0]]);
+                        Helper.AllOutputPublic = true;
+                        SaveCmdVisibilityStates();
+                        return;
+                    }
+                    if (CmdList.Contains("/" + targetCmdForPublic))
+                    {
+                        CmdOutputVisibility[targetCmdForPublic] = true;
+                        Helper.SendChatMsg("Toggled public logging for " + targetCmdForPublic + ".", LogLevel.Success, 
+                            true, CmdOutputVisibility[cmds[0]]);
+                        SaveCmdVisibilityStates();
+                        return;
+                    }    
+                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, CmdOutputVisibility[cmds[0]]);
+                    return;
+                case "logprivate":
+                    var targetCmdForPrivate = cmds[1].Replace("\"", "").Replace("/", "");
+                    if (targetCmdForPrivate == "all")
+                    {
+                        Helper.SendChatMsg("Toggled private logging for all applicable commands.", LogLevel.Success, 
+                            true, CmdOutputVisibility[cmds[0]]);
+                        Helper.AllOutputPublic = false;
+                        SaveCmdVisibilityStates();
+                        return;
+                    }
+                    if (CmdList.Contains("/" + targetCmdForPrivate))
+                    {
+                        CmdOutputVisibility[targetCmdForPrivate] = false;
+                        Helper.SendChatMsg("If applicable, toggled private logging for " + targetCmdForPrivate + ".", LogLevel.Success, 
+                            true, CmdOutputVisibility[cmds[0]]);
+                        SaveCmdVisibilityStates();
+                        return;
+                    }    
+                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, CmdOutputVisibility[cmds[0]]);
+                    return;
                 case "friend":
                     var steamID = Helper.GetSteamID(Helper.GetIDFromColor(cmds[1]));
                     SteamFriends.ActivateGameOverlayToUser("friendadd", steamID);
                     return;
                 case "profile":
-                    SteamFriends.ActivateGameOverlayToUser("steamid", 
-                        Helper.GetSteamID(Helper.GetIDFromColor(cmds[1])));
+                    SteamFriends.ActivateGameOverlayToUser("steamid", Helper.GetSteamID(Helper.GetIDFromColor(cmds[1])));
                     return;
                 case "hp": // Outputs HP of targeted color to chat
                     var targetHP = new PlayerHP(cmds[1]);
@@ -145,11 +185,11 @@ namespace QOL
                     var targetFPS = int.Parse(cmds[1]);
                     if (targetFPS < 60)
                     {
-                        Helper.SendChatMsg("Target FPS cannot be below 60.", LogLevel.Warning);
+                        Helper.SendChatMsg("Target FPS cannot be below 60.", LogLevel.Warning, true, false);
                         return;
                     } 
                     Application.targetFrameRate = targetFPS;
-                    Helper.SendChatMsg("Target framerate is now: " + targetFPS, LogLevel.Success);
+                    Helper.SendChatMsg("Target framerate is now: " + targetFPS, LogLevel.Success, true, false);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
@@ -157,7 +197,8 @@ namespace QOL
                     return;
                 case "stat": // Outputs a stat of the local user (WeaponsThrown, Falls, BulletShot, and etc.)
                     var myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
-                    Helper.SendChatMsg("My " + cmds[1] + ": " + Helper.GetTargetStatValue(myStats, cmds[1]), LogLevel.Success);
+                    Helper.SendChatMsg("My " + cmds[1] + ": " + Helper.GetTargetStatValue(myStats, cmds[1]), LogLevel.Success, 
+                        true, CmdOutputVisibility[cmds[0]]);
                     return;
                 case "music": // Music commands
                     switch (cmds[1])
@@ -166,25 +207,26 @@ namespace QOL
                             Helper.IsSongLoop = false;
                             var nextSongMethod = AccessTools.Method(typeof(MusicHandler), "PlayNext");
                             nextSongMethod.Invoke(MusicHandler.Instance, null);
-                            Helper.SendChatMsg("Current song skipped.", LogLevel.Success);
+                            Helper.SendChatMsg("Current song skipped.", LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                             return;
                         case "loop": // Loops the current song
                             Helper.IsSongLoop = !Helper.IsSongLoop;
-                            Helper.SendChatMsg("Song looping toggled.", LogLevel.Success, Helper.IsSongLoop);
+                            Helper.SendChatMsg("Song looping toggled.", LogLevel.Success, Helper.IsSongLoop, CmdOutputVisibility[cmds[0]]);
                             return;
                         default:
-                            Helper.SendChatMsg("Please specify a parameter. Use <b>/help</b> to see them all.",
-                                LogLevel.Success);
+                            Helper.SendChatMsg("Please specify a parameter. Use /help to see them all.",
+                                LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                             return;
                     }
                 case "id": // Outputs the specified player's SteamID
                     PlayerSteamID targetSteamID = new (cmds[1]);
                     GUIUtility.systemCopyBuffer = targetSteamID.SteamID;
-                    Helper.SendChatMsg(targetSteamID.FullColor + "'s steamID copied to clipboard!", LogLevel.Success);
+                    Helper.SendChatMsg(targetSteamID.FullColor + "'s steamID copied to clipboard!", LogLevel.Success, 
+                        true, CmdOutputVisibility[cmds[0]]);
                     return;
                 case "ping": // Outputs the specified player's ping
                     PlayerPing targetPing = new (cmds[1]);
-                    Helper.SendChatMsg(targetPing.FullColor + targetPing.Ping, LogLevel.Success);
+                    Helper.SendChatMsg(targetPing.FullColor + targetPing.Ping, LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                     return;
                 case "mute": // Mutes the specified player (Only for the current lobby and only client-side)
                     targetID = Helper.GetIDFromColor(cmds[1]);
@@ -192,15 +234,15 @@ namespace QOL
                     if (!Helper.MutedPlayers.Contains(targetID))
                     {
                         Helper.MutedPlayers.Add(targetID);
-                        Helper.SendChatMsg("Muted: " + Helper.GetColorFromID(targetID), LogLevel.Success);
+                        Helper.SendChatMsg("Muted: " + Helper.GetColorFromID(targetID), LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                         return;
                     }
 
                     Helper.MutedPlayers.Remove(targetID);
-                    Helper.SendChatMsg("Unmuted: " + Helper.GetColorFromID(targetID), LogLevel.Success);
+                    Helper.SendChatMsg("Unmuted: " + Helper.GetColorFromID(targetID), LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                     return;
                 default: // Command is invalid or improperly specified
-                    Helper.SendChatMsg("Command not found.", LogLevel.Warning);
+                    Helper.SendChatMsg("Command not found.", LogLevel.Warning, true, false);
                     return;
             }
         }
@@ -217,12 +259,12 @@ namespace QOL
                     var targetStats = new PlayerStat(cmds[1]);
                     Helper.SendChatMsg(
                         targetStats.FullColor + ", " + cmds[2] + ": " +
-                        Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success);
+                        Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                     return;
                 case "resolution":
                     Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]),
                         Convert.ToBoolean(OptionsHolder.fullscreen));
-                    Helper.SendChatMsg("Set new resolution of: " + cmds[1] + "x" + cmds[2], LogLevel.Success);
+                    Helper.SendChatMsg("Set new resolution of: " + cmds[1] + "x" + cmds[2], LogLevel.Success, CmdOutputVisibility[cmds[0]]);
                     return;
                 case "music":
                     switch (cmds[1])
@@ -235,7 +277,7 @@ namespace QOL
                             {
                                 Helper.SendChatMsg(
                                     $"Invalid index: input must be between 0 and {musicHandler.myMusic.Length - 1}.",
-                                    LogLevel.Warning);
+                                    LogLevel.Warning, true, CmdOutputVisibility[cmds[0]]);
                                 return;
                             }
 
@@ -248,17 +290,30 @@ namespace QOL
 
                             Helper.SendChatMsg(
                                 $"Now playing song #{songIndex} out of {musicHandler.myMusic.Length - 1}.",
-                                LogLevel.Success);
+                                LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                             return;
                         default:
-                            Helper.SendChatMsg("Please specify a parameter. Use <b>/help</b> to see them all.",
-                                LogLevel.Success);
+                            Helper.SendChatMsg("Please specify a parameter. Use /help to see them all.",
+                                LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
                             return;
                     }
                 default:
-                    Helper.SendChatMsg("Command not found.", LogLevel.Warning);
+                    Helper.SendChatMsg("Command not found.", LogLevel.Warning, true, false);
                     return;
             }
+        }
+
+        private static void SaveCmdVisibilityStates()
+            => File.WriteAllText(Plugin.CmdVisibilityStatesPath, MarshalCmdVisibilityStates().ToString());
+
+        private static JsonObject MarshalCmdVisibilityStates()
+        {
+            var cmdStatesJson = new JsonObject();
+            
+            foreach (var pair in CmdOutputVisibility)
+                cmdStatesJson.Add(pair.Key, pair.Value);
+
+            return cmdStatesJson;
         }
 
         public enum LogLevel
@@ -280,6 +335,7 @@ namespace QOL
             "/invite",
             "/lobhp",
             "/lobregen",
+            "/logprivate",
             "/logpublic",
             "/lowercase",
             "/nuky",
@@ -306,5 +362,8 @@ namespace QOL
             "/winnerhp",
             "/winstreak",
         };
+
+        public static readonly Dictionary<string, bool> CmdOutputVisibility =
+            CmdList.ToDictionary(cmd => cmd.Remove(0, 1), _ => false);
     }
 }
