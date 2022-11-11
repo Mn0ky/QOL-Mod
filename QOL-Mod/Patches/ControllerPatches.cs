@@ -31,13 +31,14 @@ namespace QOL
             if (Helper.IsOwMode && __instance.HasControl)
             {
                 var randWord = Helper.OuchPhrases[Random.Range(0, Helper.OuchPhrases.Length)]; // The max is exclusive, hence no len(OuchPhrases) - 1
-                Helper.localNetworkPlayer.OnTalked(randWord);
+                Helper.SendChatMsg(randWord, ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["ouch"]);
             }
         }
 
         public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
         {
-                if (Helper.AutoGG && __instance.HasControl) Helper.localNetworkPlayer.OnTalked("gg");
+                if (Helper.AutoGG && __instance.HasControl)
+                    Helper.SendChatMsg("gg", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["gg"]);
         }
 
         public static void LateUpdateMethodPrefix(Controller __instance)

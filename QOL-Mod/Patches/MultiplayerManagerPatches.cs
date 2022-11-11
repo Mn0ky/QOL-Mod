@@ -47,7 +47,7 @@ namespace QOL
         // Guards against kick attempts made towards the user by skipping the method, if not Monky or Rexi
         public static bool OnKickedMethodPrefix() => Helper.IsTrustedKicker;
 
-        public static void OnPlayerSpawnedMethodPrefix(ref GameObject ___m_PlayerPrefab)
+        /*public static void OnPlayerSpawnedMethodPrefix(ref GameObject ___m_PlayerPrefab)
         {
             Debug.Log("RUNNING OnPlayerSpawned NOW!!!!!");
             
@@ -86,11 +86,11 @@ namespace QOL
 
             ___m_PlayerPrefab = Helper.Hoards[0].character.gameObject;
             Debug.Log("Changed player prefab!!");
-        }
+        }*/
         
         public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
         {
-            foreach (var player in UnityEngine.Object.FindObjectsOfType<NetworkPlayer>())
+            foreach (var player in Object.FindObjectsOfType<NetworkPlayer>())
             {
                 if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
                 {
@@ -166,14 +166,14 @@ namespace QOL
             ChangeWinTextColor(colorWanted, playerID);
 
             Traverse.Create(character.GetComponentInChildren<BlockAnimation>()).Field("startColor").SetValue(colorWanted);
-            var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>())
+            var playerNames = Traverse.Create(Object.FindObjectOfType<OnlinePlayerUI>())
                 .Field("mPlayerTexts").GetValue<TextMeshProUGUI[]>();
 
             playerNames[playerID].color = colorWanted;
         }
 
 
-        public static void InitGUI()
+        private static void InitGUI()
         {
             try
             {

@@ -29,27 +29,27 @@ namespace QOL
                     return;
                 case "gg": // Enables or disables automatic "gg" upon death
                     Helper.AutoGG = !Helper.AutoGG;
-                    Helper.SendChatMsg("Toggled AutoGG.", LogLevel.Success, Helper.AutoGG, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled AutoGG.", LogLevel.Success, Helper.AutoGG, false);
                     return;
                 case "adv": // Outputs player-specified msg from config to chat, blank by default
                     Helper.SendChatMsg(Plugin.ConfigAdvCmd.Value);
                     return;
                 case "uncensor": // Enables/disables chat censorship
                     Helper.ChatCensorshipBypass = !Helper.ChatCensorshipBypass;
-                    Helper.SendChatMsg("Toggled ChatCensorship.", LogLevel.Success, Helper.ChatCensorshipBypass, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled ChatCensorship.", LogLevel.Success, Helper.ChatCensorshipBypass, false);
                     return;
                 case "ouch":
                     Helper.IsOwMode = !Helper.IsOwMode;
-                    Helper.SendChatMsg("Toggled OuchMode.", LogLevel.Success, Helper.IsOwMode, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled OuchMode.", LogLevel.Success, Helper.IsOwMode, false);
                     return;
                 case "winstreak": // Enables/disables winstreak system
                     Helper.ToggleWinstreak();
-                    Helper.SendChatMsg("Toggled Winstreak system.", LogLevel.Success, Helper.WinStreakEnabled, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled Winstreak system.", LogLevel.Success, Helper.WinStreakEnabled, false);
                     return;
                 case "rich": // Enables rich text for chat messages
                     var theText = Traverse.Create(Helper.LocalChat).Field("text").GetValue<TextMeshPro>();
                     theText.richText = !theText.richText;
-                    Helper.SendChatMsg("Toggled Richtext.", LogLevel.Success, theText.richText, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled Richtext.", LogLevel.Success, theText.richText, false);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
@@ -57,12 +57,12 @@ namespace QOL
                     return;
                 case "uwu": // Enables uwuifier for chat messages
                     Helper.UwuifyText = !Helper.UwuifyText;
-                    Helper.SendChatMsg("Toggled UwUifier.", LogLevel.Success, Helper.UwuifyText, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled UwUifier.", LogLevel.Success, Helper.UwuifyText, false);
                     return;
                 case "fov":
                     Debug.Log("camera fov: " + Camera.main!.fieldOfView);
                     Camera.main.fieldOfView = 200;
-                    Helper.SendChatMsg("Set FOV to: " + 200, LogLevel.Success, true, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Set FOV to: " + 200, LogLevel.Success, true, false);
                     return;
                 case "lobregen": // Outputs whether regen is enabled (true) or disabled (false) for the lobby to chat
                     Helper.SendChatMsg("Lobby Regen: " + Convert.ToBoolean(OptionsHolder.regen));
@@ -79,7 +79,7 @@ namespace QOL
                     return;
                 case "translate": // Enables/disables the auto-translate system for chat
                     Helper.IsTranslating = !Helper.IsTranslating;
-                    Helper.SendChatMsg("Toggled Auto-Translate.", LogLevel.Success, Helper.IsTranslating, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled Auto-Translate.", LogLevel.Success, Helper.IsTranslating, false);
                     return;
                 case "lobhp": // Outputs the HP setting for the lobby to chat
                     Helper.SendChatMsg("Lobby HP: " + OptionsHolder.HP);
@@ -89,7 +89,7 @@ namespace QOL
                     return;
                 case "rainbow": // Enables/disables the rainbow system, TODO: Work on improving and fixing this!
                     Helper.ToggleRainbow();
-                    Helper.SendChatMsg("Toggled PlayerRainbow.", LogLevel.Success, Helper.RainbowEnabled, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled PlayerRainbow.", LogLevel.Success, Helper.RainbowEnabled, false);
                     return;
                 case "id": // Outputs the specified user's SteamID
                     GUIUtility.systemCopyBuffer = SteamUser.GetSteamID().ToString();
@@ -102,15 +102,15 @@ namespace QOL
                 case "nuky": // Enables/disables Nuky chat mode
                     Helper.NukChat = !Helper.NukChat;
                     if (Helper.RoutineUsed != null) Helper.LocalChat.StopCoroutine(Helper.RoutineUsed);
-                    Helper.SendChatMsg("Toggled NukyChat.", LogLevel.Success, Helper.NukChat, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled NukyChat.", LogLevel.Success, Helper.NukChat, false);
                     return;
                 case "lowercase": // Enables/Disables chat messages always being sent in lowercase
                     Helper.OnlyLower = !Helper.OnlyLower;
-                    Helper.SendChatMsg("Toggled LowercaseOnly.", LogLevel.Success, Helper.OnlyLower, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("Toggled LowercaseOnly.", LogLevel.Success, Helper.OnlyLower, false);
                     return;
                 case "suicide": // Kills user
                     Helper.localNetworkPlayer.UnitWasDamaged(5, true, DamageType.LocalDamage, true);
-                    Helper.SendChatMsg("You are now dead.", LogLevel.Success, true, CmdOutputVisibility[cmd]);
+                    Helper.SendChatMsg("I've perished.", LogLevel.Success, true, CmdOutputVisibility[cmd]);
                     return;
                 case "help": // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
                     SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
@@ -135,7 +135,7 @@ namespace QOL
                     if (targetCmdForPublic == "all")
                     {
                         Helper.SendChatMsg("Toggled public logging for all commands.", LogLevel.Success, 
-                            true, CmdOutputVisibility[cmds[0]]);
+                            true, false);
                         Helper.AllOutputPublic = true;
                         SaveCmdVisibilityStates();
                         return;
@@ -144,18 +144,18 @@ namespace QOL
                     {
                         CmdOutputVisibility[targetCmdForPublic] = true;
                         Helper.SendChatMsg("Toggled public logging for " + targetCmdForPublic + ".", LogLevel.Success, 
-                            true, CmdOutputVisibility[cmds[0]]);
+                            true, false);
                         SaveCmdVisibilityStates();
                         return;
                     }    
-                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, CmdOutputVisibility[cmds[0]]);
+                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, false);
                     return;
                 case "logprivate":
                     var targetCmdForPrivate = cmds[1].Replace("\"", "").Replace("/", "");
                     if (targetCmdForPrivate == "all")
                     {
                         Helper.SendChatMsg("Toggled private logging for all applicable commands.", LogLevel.Success, 
-                            true, CmdOutputVisibility[cmds[0]]);
+                            true, false);
                         Helper.AllOutputPublic = false;
                         SaveCmdVisibilityStates();
                         return;
@@ -164,11 +164,11 @@ namespace QOL
                     {
                         CmdOutputVisibility[targetCmdForPrivate] = false;
                         Helper.SendChatMsg("If applicable, toggled private logging for " + targetCmdForPrivate + ".", LogLevel.Success, 
-                            true, CmdOutputVisibility[cmds[0]]);
+                            true, false);
                         SaveCmdVisibilityStates();
                         return;
                     }    
-                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, CmdOutputVisibility[cmds[0]]);
+                    Helper.SendChatMsg("Specified command not found.", LogLevel.Warning, true, false);
                     return;
                 case "friend":
                     var steamID = Helper.GetSteamID(Helper.GetIDFromColor(cmds[1]));
@@ -189,7 +189,8 @@ namespace QOL
                         return;
                     } 
                     Application.targetFrameRate = targetFPS;
-                    Helper.SendChatMsg("Target framerate is now: " + targetFPS, LogLevel.Success, true, false);
+                    Helper.SendChatMsg("Target framerate is now: " + targetFPS, LogLevel.Success, true, 
+                        CmdOutputVisibility["fps"]);
                     return;
                 case "shrug": // Appends shrug emoticon to end of chat message
                     msg = msg.Replace("/shrug", "") + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";

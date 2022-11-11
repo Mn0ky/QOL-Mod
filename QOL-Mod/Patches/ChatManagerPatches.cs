@@ -57,37 +57,37 @@ namespace QOL
             Helper.InitValues(__instance, playerID);
         }
         
-        // TODO: Refactor to use InsertRange() and no index-specific instructions
         // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
         public static IEnumerable<CodeInstruction> UpdateMethodTranspiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator ilGen) 
         {
             var stopTypingMethod = AccessTools.Method(typeof(ChatManager), "StopTyping");
-            var checkForArrowKeysMethod = AccessTools.Method(typeof(ChatManagerPatches), nameof(CheckForArrowKeysAndAutoComplete)); 
+            var chatFieldInfo = AccessTools.Field(typeof(ChatManager), "chatField");
+            var getKeyDownMethod = AccessTools.Method(typeof(Input), nameof(Input.GetKeyDown), new[] {typeof(KeyCode)});
+            var checkForArrowKeysMethod = AccessTools.Method(typeof(ChatManagerPatches), nameof(CheckForArrowKeysAndAutoComplete));
             var instructionList = instructions.ToList(); // Creates list of IL instructions for Update() from enumerable
 
             for (var i = 0; i < instructionList.Count; i++)
             {
-                if (!instructionList[i].Calls(stopTypingMethod)) continue;
+                if (!instructionList[i].Calls(stopTypingMethod) || !instructionList[i - 3].Calls(getKeyDownMethod)) 
+                    continue;
                 
                 var jumpToCheckForArrowKeysLabel = ilGen.DefineLabel();
-
-                var instruction0 = instructionList[17];
+                    
+                var instruction0 = instructionList[i - 2];
                 instruction0.opcode = OpCodes.Brfalse_S;
                 instruction0.operand = jumpToCheckForArrowKeysLabel;
                 instruction0.labels.Clear();
-
-                var instruction1 = new CodeInstruction(OpCodes.Ldarg_0);
-                instruction1.labels.Add(jumpToCheckForArrowKeysLabel);
-                instructionList.Insert(20, instruction1);
                 
-                // Gets value of chatField field
-                var instruction2 = new CodeInstruction(OpCodes.Ldfld, instructionList[9].operand); 
-                instructionList.Insert(21, instruction2);
+                instructionList.InsertRange(i + 1, new[]
+                {
+                    new CodeInstruction(OpCodes.Ldarg_0).WithLabels(jumpToCheckForArrowKeysLabel),
+                    // Gets value of chatField field
+                    new CodeInstruction(OpCodes.Ldfld, chatFieldInfo),
+                    // Calls CheckForArrowKeys() with value of chatField
+                    new CodeInstruction(OpCodes.Call, checkForArrowKeysMethod)
+                });
                 
-                // Calls CheckForArrowKeys() with value of chatField
-                var instruction3 = new CodeInstruction(OpCodes.Call, checkForArrowKeysMethod);
-                instructionList.Insert(22, instruction3);
                 break;
             }
             

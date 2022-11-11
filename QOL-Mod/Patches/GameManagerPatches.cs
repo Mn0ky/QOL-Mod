@@ -10,6 +10,7 @@ using SimpleJson;
 using SimpleJSON;
 using Steamworks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace QOL
 {
