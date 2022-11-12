@@ -41,12 +41,13 @@ namespace QOL
                     Helper.SendChatMsg("gg", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["gg"]);
         }
 
-        public static void LateUpdateMethodPrefix(Controller __instance)
+        public static void LateUpdateMethodPrefix(Controller __instance, CharacterInformation ___info)
         {
-            if (__instance.inactive || __instance.playerID != Helper.localNetworkPlayer.NetworkSpawnID || !GameManager.inFight)
+            var localPlayerID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
+            if (__instance.inactive || __instance.playerID != localPlayerID || !GameManager.inFight)
                 return;
 
-            if (__instance.GetComponent<CharacterInformation>().isDead)
+            if (___info.isDead)
             {
                 GameManagerPatches.TimeDead += Time.deltaTime;
                 return;

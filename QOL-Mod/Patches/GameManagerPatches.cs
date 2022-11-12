@@ -81,6 +81,7 @@ namespace QOL
                     globalStats.Add(stat.Name, stat.GetValue(playerCurrentStats));
                 
                 globalStats.Add("winstreakHighscore", 0);
+                globalStats.Add("totalDamageTaken", 0);
                 globalStats.Add("roundsPlayed", 0);
                 globalStats.Add("avgTimeAlive", 0);
                 globalStats.Add("avgTimeDead", 0);
@@ -106,7 +107,22 @@ namespace QOL
 
             if (isUserWinner && Helper.WinStreak + 1 > WinstreakHighScore)
                 globalStatsJson["winstreakHighscore"] = Helper.WinStreak + 1;
-
+            
+            var damageTaken = (int) Traverse.Create(Helper.localNetworkPlayer.GetComponent<Controller>())
+                .Field("TransientMemory")
+                .GetValue<MemoryBucket>()
+                .Copy<float>("DamageTaken")
+                .GetValue(0f);
+            
+            // Added TryParse() protection in case sf's dmg calc gives an integer to too large (perhaps from a purposefully sent packet)
+            if (int.TryParse(globalStatsJson["totalDamageTaken"].Value, out var totalDamageTaken))
+            {
+                globalStatsJson["totalDamageTaken"] =  totalDamageTaken
+                    + damageTaken - RoundStatValues[13];
+                
+                RoundStatValues[13] = damageTaken;
+            }
+            
             globalStatsJson["roundsPlayed"] = 1 + globalStatsJson["roundsPlayed"];
             
             var newAvgTimeAlive= (globalStatsJson["avgTimeAlive"] + (int)TimeAlive) / 2;
@@ -156,7 +172,7 @@ namespace QOL
         public static List<int> WinstreakRanges1 = new (50);
         public static List<int> WinstreakRanges2 = new (50);
 
-        private static readonly int[] RoundStatValues = new int[13];
+        private static readonly int[] RoundStatValues = new int[14];
 
         public static int WinstreakHighScore;
         public static float TimeAlive;
