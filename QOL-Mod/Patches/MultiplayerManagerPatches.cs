@@ -107,6 +107,9 @@ namespace QOL
                             ? Plugin.DefaultColors[player.NetworkSpawnID]
                             : Helper.CustomPlayerColor,
                         character);
+                    
+                    Debug.Log("Checking for new mod version...");
+                    __instance.StartCoroutine(Helper.CheckForModUpdate());
                 }
             }
         }

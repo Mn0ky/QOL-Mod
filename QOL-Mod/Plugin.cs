@@ -8,6 +8,7 @@ using HarmonyLib;
 using SimpleJSON;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace QOL
 {
@@ -307,6 +308,7 @@ namespace QOL
 
         public const string VersionNumber = "1.16.0"; // Version number
         public const string Guid = "monky.plugins.QOL";
+        public static string NewUpdateVerCode = "";
         
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
         public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.json";

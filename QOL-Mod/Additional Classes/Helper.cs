@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
+using SimpleJSON;
 using TMPro;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -229,8 +230,38 @@ namespace QOL
             callback(audioClip);
         }
 
-        public static void CreateSongAndAddToMusic(AudioClip audioClip)
+        private static void CreateSongAndAddToMusic(AudioClip audioClip)
             => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(new MusicClip { clip = audioClip });
+        
+        public static IEnumerator CheckForModUpdate()
+        {
+            if (!string.IsNullOrEmpty(Plugin.NewUpdateVerCode))
+            {
+                SendChatMsg("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, ChatCommands.LogLevel.Warning, 
+                    true, false);
+                yield break;
+            }
+            
+            const string latestReleaseUri = "https://api.github.com/repos/Mn0ky/QOL-Mod/releases/latest";
+            using var webRequest = UnityWebRequest.Get(latestReleaseUri);
+            
+            yield return webRequest.Send();
+
+            if (webRequest.isError)
+            {
+                Debug.LogError(webRequest.error);
+                Debug.Log("Error occured during fetch for latest qol mod version!");
+                yield break;
+            }
+
+            string latestVer = JSONNode.Parse(webRequest.downloadHandler.text)["tag_name"];
+
+            if (latestVer.Remove(0, 1) != Plugin.VersionNumber)
+                Plugin.NewUpdateVerCode = latestVer;
+            
+            SendChatMsg("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, ChatCommands.LogLevel.Warning, 
+                true, false);
+        }
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
         public static bool IsVowel(char c) => (0x208222 >> (c & 0x1f) & 1) != 0;

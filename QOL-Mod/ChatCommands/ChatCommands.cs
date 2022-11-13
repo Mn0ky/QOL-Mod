@@ -257,10 +257,30 @@ namespace QOL
                     Helper.SendChatMsg(msg);
                     return;
                 case "stat": // Outputs a stat of the specified player (WeaponsThrown, Falls, BulletShot, and etc.)
+                    if (cmds[1] == "all")
+                    {
+                        var statMsg = GameManager.Instance.mMultiplayerManager.PlayerControllers
+                            .Where(player => player != null)
+                            .Aggregate("",
+                                (current,
+                                        player) => current +
+                                                   Helper.GetColorFromID((ushort)player.playerID) +
+                                                   ", " +
+                                                   cmds[2] +
+                                                   ": " +
+                                                   Helper.GetTargetStatValue(player.GetComponent<CharacterStats>(),
+                                                       cmds[2]) +
+                                                   "\n");
+
+                        Helper.SendChatMsg(statMsg, LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
+                        return;
+                    }    
+                    
                     var targetStats = new PlayerStat(cmds[1]);
                     Helper.SendChatMsg(
                         targetStats.FullColor + ", " + cmds[2] + ": " +
-                        Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success, true, CmdOutputVisibility[cmds[0]]);
+                        Helper.GetTargetStatValue(targetStats.Stats, cmds[2]), LogLevel.Success, true,
+                        CmdOutputVisibility[cmds[0]]);
                     return;
                 case "resolution":
                     Screen.SetResolution(int.Parse(cmds[1]), int.Parse(cmds[2]),
@@ -324,7 +344,8 @@ namespace QOL
             Warning
         }
 
-        public static readonly List<string> CmdList = new() {
+        public static readonly List<string> CmdList = new() 
+        {
             "/adv",
             "/fov",
             "/fps",
@@ -358,13 +379,14 @@ namespace QOL
             "/suicide",
             "/translate",
             "/uncensor",
-            "/uwu",
+            "/uwu", 
             "/ver",
             "/winnerhp",
-            "/winstreak",
+            "/winstreak"
         };
-
+        
+        // All cmd visibilities are private by default unless winnerhp
         public static readonly Dictionary<string, bool> CmdOutputVisibility =
-            CmdList.ToDictionary(cmd => cmd.Remove(0, 1), _ => false);
+            CmdList.ToDictionary(cmd => cmd.Remove(0, 1), cmd => cmd.Contains("winnerhp"));
     }
 }

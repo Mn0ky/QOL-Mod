@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using BepInEx;
 using HarmonyLib;
 using SimpleJson;
 using SimpleJSON;
-using Steamworks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -87,7 +82,7 @@ namespace QOL
                 globalStats.Add("avgTimeDead", 0);
                 globalStats.Add("avgRoundDuration", 0);
                 globalStats.Add("killDeathRatio", 0.0);
-                globalStats.Add("winLossRatio", 0.0);
+                globalStats.Add("win%", 0);
 
                 File.WriteAllText(Plugin.StatsPath,globalStats.ToString());
                 return;
@@ -115,14 +110,14 @@ namespace QOL
                 .GetValue(0f);
             
             // Added TryParse() protection in case sf's dmg calc gives an integer to too large (perhaps from a purposefully sent packet)
-            if (int.TryParse(globalStatsJson["totalDamageTaken"].Value, out var totalDamageTaken))
+            if (int.TryParse(globalStatsJson["totalDamageTaken"], out var totalDamageTaken))
             {
                 globalStatsJson["totalDamageTaken"] =  totalDamageTaken
                     + damageTaken - RoundStatValues[13];
                 
                 RoundStatValues[13] = damageTaken;
             }
-            
+  
             globalStatsJson["roundsPlayed"] = 1 + globalStatsJson["roundsPlayed"];
             
             var newAvgTimeAlive= (globalStatsJson["avgTimeAlive"] + (int)TimeAlive) / 2;
@@ -133,8 +128,10 @@ namespace QOL
             globalStatsJson["avgTimeDead"] = newAvgTimeDead;
             globalStatsJson["avgRoundDuration"] = (oldAvgRoundDuration + newAvgTimeAlive + newAvgTimeDead) / 2;
 
-            globalStatsJson["killDeathRatio"] = globalStatsJson["kills"] / (float) globalStatsJson["deaths"];
-            globalStatsJson["winLossRatio"] = globalStatsJson["wins"] / (float) globalStatsJson["deaths"];
+            globalStatsJson["killDeathRatio"] = Math.Round(globalStatsJson["kills"] / (float)globalStatsJson["deaths"], 2);
+            
+            int winTotal = globalStatsJson["wins"];
+            globalStatsJson["win%"] = Math.Round(winTotal / (float)(globalStatsJson["deaths"] + winTotal) * 100, 2) + "%";
 
             TimeDead = TimeAlive = 0;
             globalStatsJson.Inline = false; // Needs to be false for indentation to work
