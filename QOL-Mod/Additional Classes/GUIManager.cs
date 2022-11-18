@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using SimpleJSON;
 using Steamworks;
 using UnityEngine;
 
@@ -7,56 +9,55 @@ namespace QOL
 {
     public class GUIManager : MonoBehaviour
     {
-        private bool mShowMenu;
-        private bool mStatsShown;
-        public static float[] QOLMenuPos;
+        private bool _mShowGlobalStats;
+        private bool _mShowMenu;
+        private bool _mShowStatMenu;
+        private bool _mStatsShown;
+        
+        public static float[] QolMenuPos;
         public static float[] StatMenuPos;
 
-        private bool mShowStatMenu;
+        private Rect _menuRect = new(QolMenuPos[0], QolMenuPos[1], 350f, 375f);
+        private Rect _statMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
+        private Rect _globalStatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 650f, 350f);
 
-        private Rect MenuRect = new(QOLMenuPos[0], QOLMenuPos[1], 350f, 375f);
+        private readonly string[] _playerStats = new string[4];
 
-        private Rect StatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
+        private JSONNode _globalUserStats;
+        private string _playerNamesStr = "Players in Room: \n";
+        private string _lobbyHost;
 
-        private int WindowId = 100;
+        private KeyCode _qolMenuKey1;
+        private KeyCode _qolMenuKey2;
+        private bool _singleMenuKey;
 
-        private string[] playerStats = new string[4];
-
-        private string playerNamesStr = "Players in Room: \n";
-
-        private string theLobbyHost;
-
-        private KeyCode QOLMenuKey1;
-        private KeyCode QOLMenuKey2;
-        private bool singleMenuKey;
-
-        private KeyCode statWindowKey1;
-        private KeyCode statWindowKey2;
-        private bool singleStatKey;
+        private KeyCode _statWindowKey1;
+        private KeyCode _statWindowKey2;
+        private bool _singleStatKey;
 
         private void Start() => Debug.Log("Started GUI in GUIManager!");
         
         private void Awake()
         {
-            QOLMenuKey1 = Plugin.ConfigQolMenuKeybind.Value.MainKey;
-            QOLMenuKey2 = Plugin.ConfigQolMenuKeybind.Value.Modifiers.LastOrDefault();
-            if (QOLMenuKey2 == KeyCode.None) singleMenuKey = true;
+            _qolMenuKey1 = Plugin.ConfigQolMenuKeybind.Value.MainKey;
+            _qolMenuKey2 = Plugin.ConfigQolMenuKeybind.Value.Modifiers.LastOrDefault();
+            if (_qolMenuKey2 == KeyCode.None) _singleMenuKey = true;
 
-            statWindowKey1 = Plugin.ConfigStatMenuKeybind.Value.MainKey;
-            statWindowKey2 = Plugin.ConfigStatMenuKeybind.Value.Modifiers.LastOrDefault();
-            if (statWindowKey2 == KeyCode.None) singleStatKey = true;
+            _statWindowKey1 = Plugin.ConfigStatMenuKeybind.Value.MainKey;
+            _statWindowKey2 = Plugin.ConfigStatMenuKeybind.Value.Modifiers.LastOrDefault();
+            if (_statWindowKey2 == KeyCode.None) _singleStatKey = true;
         }
 
         private void Update()
         {
-            if (Input.GetKey(QOLMenuKey1) && Input.GetKeyDown(QOLMenuKey2) || Input.GetKeyDown(QOLMenuKey1) && singleMenuKey)
+            if (Input.GetKey(_qolMenuKey1) && Input.GetKeyDown(_qolMenuKey2) || Input.GetKeyDown(_qolMenuKey1) && _singleMenuKey)
             {
                 Debug.Log("Trying to open GUI menu!");
 
-                mShowMenu = !mShowMenu;
-                playerNamesStr = "";
+                _mShowMenu = !_mShowMenu;
+                _playerNamesStr = "";
 
-                foreach (NetworkPlayer player in FindObjectsOfType<NetworkPlayer>())
+                foreach (var player in FindObjectsOfType<NetworkPlayer>())
                 {
                     var str = string.Concat(
                         "[",
@@ -64,55 +65,59 @@ namespace QOL
                         "] ",
                         Helper.GetPlayerName(Helper.GetSteamID(player.NetworkSpawnID)));
                     
-                    playerNamesStr +=  "\n" + str;
+                    _playerNamesStr +=  "\n" + str;
                 }
 
-                theLobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
+                _lobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
             }
 
-            if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && singleStatKey)
+            if (Input.GetKey(_statWindowKey1) && Input.GetKeyDown(_statWindowKey2) || Input.GetKeyDown(_statWindowKey1) && _singleStatKey)
             {
-                mStatsShown = true;
-                mShowStatMenu = !mShowStatMenu;
+                _mStatsShown = true;
+                _mShowStatMenu = !_mShowStatMenu;
             }
 
-            if (mShowStatMenu && mStatsShown)
+            if (_mShowStatMenu && _mStatsShown)
             {
                 foreach (var stat in FindObjectsOfType<CharacterStats>())
                 {
                     switch (stat.GetComponentInParent<NetworkPlayer>().NetworkSpawnID)
                     {
                         case 0:
-                            playerStats[0] = stat.GetString();
-                            Debug.Log(playerStats[0]);
+                            _playerStats[0] = stat.GetString();
+                            Debug.Log(_playerStats[0]);
                             break;
                         case 1:
-                            playerStats[1] = stat.GetString();
-                            Debug.Log(playerStats[1]);
+                            _playerStats[1] = stat.GetString();
+                            Debug.Log(_playerStats[1]);
                             break;
                         case 2:
-                            playerStats[2] = stat.GetString();
-                            Debug.Log(playerStats[2]);
+                            _playerStats[2] = stat.GetString();
+                            Debug.Log(_playerStats[2]);
                             break;
                         default:
-                            playerStats[3] = stat.GetString();
-                            Debug.Log(playerStats[3]);
+                            _playerStats[3] = stat.GetString();
+                            Debug.Log(_playerStats[3]);
                             break;
                     }
                 }
 
                 Debug.Log("show stats being set to false via update");
-                mStatsShown = false;
+                _mStatsShown = false;
             }
 
         }
         public void OnGUI() 
         {
-            if (mShowMenu)
-                MenuRect = GUILayout.Window(WindowId, MenuRect, KickWindow,
+            if (_mShowMenu)
+                _menuRect = GUILayout.Window(100, _menuRect, KickWindow,
                     $"<color=red>Monky's QOL Menu</color>\t[v{Plugin.VersionNumber}]");
-            if (mShowStatMenu) StatMenuRect = GUILayout.Window(101, StatMenuRect, StatWindow, "Stat Menu");
+            if (_mShowStatMenu) 
+                _statMenuRect = GUILayout.Window(101, _statMenuRect, StatWindow, "Stat Menu");
+            if (_mShowGlobalStats)
+                _globalStatMenuRect = GUILayout.Window(102, _globalStatMenuRect, GlobalStatWindow, "Global Stats Menu");
         }
+        
 		private void KickWindow(int window)
         {
             var normAlignment = GUI.skin.label.alignment;
@@ -120,8 +125,8 @@ namespace QOL
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
             GUI.skin.label.alignment = normAlignment;
 
-			GUILayout.Label("Host: " + theLobbyHost);
-            GUILayout.Label(playerNamesStr);
+			GUILayout.Label("Host: " + _lobbyHost);
+            GUILayout.Label(_playerNamesStr);
 
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
             {
@@ -156,8 +161,8 @@ namespace QOL
 
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
             {
-                mShowStatMenu = !mShowStatMenu;
-                mStatsShown = true;
+                _mShowStatMenu = !_mShowStatMenu;
+                _mStatsShown = true;
             }
 
             if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
@@ -195,13 +200,23 @@ namespace QOL
             GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
 
             if (GUI.Button(new Rect(237.5f, 310f, 80f, 25f), "Close")) 
-                mShowStatMenu = !mShowStatMenu;
+                _mShowStatMenu = !_mShowStatMenu;
+            if (GUI.Button(new Rect(150f, 310f, 85f, 25f), "Global Stats"))
+            {
+                _mShowStatMenu = !_mShowStatMenu;
+                _globalStatMenuRect.x = _statMenuRect.x;
+                _globalStatMenuRect.y = _statMenuRect.y;
+                _mShowGlobalStats = true;
+                
+                _globalUserStats = Plugin.StatsFileExists ? JSONNode.Parse(File.ReadAllText(Plugin.StatsPath)) : null;
+            }
+
             GUI.skin.label.alignment = normAlignment;
 
             GUILayout.BeginHorizontal();
-            for (ushort i = 0; i < playerStats.Length; i++)
+            for (ushort i = 0; i < _playerStats.Length; i++)
             {
-                var stat = playerStats[i];
+                var stat = _playerStats[i];
                 var color = Helper.GetColorFromID(i);
 
                 GUILayout.BeginVertical();
@@ -211,6 +226,54 @@ namespace QOL
             }
             GUILayout.EndHorizontal();
 
+            GUI.DragWindow(new Rect(0, 0, 10000, 10000));
+        }
+        
+        private void GlobalStatWindow(int window)
+        {
+            var normAlignment = GUI.skin.label.alignment;
+            GUI.skin.label.alignment = TextAnchor.UpperCenter;
+            GUI.skin.button.alignment = TextAnchor.LowerCenter;
+            GUILayout.Space(20f);
+            GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
+
+            if (GUI.Button(new Rect(_globalStatMenuRect.width / 2f - 40, _globalStatMenuRect.height - 50, 80, 25), 
+                    "Close"))
+            {
+                _mShowGlobalStats = !_mShowGlobalStats;
+                _globalUserStats = null;
+            }
+
+            GUI.skin.label.alignment = normAlignment;
+
+            if (_globalUserStats != null)
+            {
+                const int maxStatsPerColumn = 6;
+                var currentStatsPerRow = 0;
+                
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(20f);
+                foreach (var stat in _globalUserStats)
+                {
+                    if (currentStatsPerRow == maxStatsPerColumn)
+                    {
+                        currentStatsPerRow = 0;
+                        GUILayout.EndVertical();
+                        GUILayout.Space(30f);
+                    }
+                    
+                    if (currentStatsPerRow == 0)
+                    {
+                        GUILayout.BeginVertical();
+                        GUILayout.Space(20);
+                    }
+
+                    GUILayout.Label(stat.Key + ": " + stat.Value);
+                    currentStatsPerRow++;
+                }
+                GUILayout.EndHorizontal();
+            }    
+            
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }
     }

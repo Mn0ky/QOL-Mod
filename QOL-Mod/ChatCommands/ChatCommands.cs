@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using SimpleJson;
-using SimpleJSON;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -17,12 +17,6 @@ namespace QOL
         {
             switch (cmd)    
             {
-                case "dict":
-                {
-                    foreach (var pair in CmdOutputVisibility) 
-                        Debug.Log("key: " + pair.Key + " value: " + pair.Value);
-                    return;
-                }
                 case "hp": // Outputs HP of ourselves to chat
                     var localColor = Helper.GetColorFromID(Helper.localNetworkPlayer.NetworkSpawnID);
                     Helper.SendChatMsg("My HP: " + new PlayerHP(localColor).HP);

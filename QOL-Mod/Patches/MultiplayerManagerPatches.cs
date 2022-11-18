@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HarmonyLib;
+using SimpleJSON;
 using UnityEngine;
 using TMPro;
 using Object = UnityEngine.Object;
@@ -40,10 +41,18 @@ namespace QOL
             harmonyInstance.Patch(onKickedMethod, prefix: onKickedMethodPrefix);
         }
 
-        public static void OnServerJoinedMethodPostfix() => InitGUI();
+        public static void OnServerJoinedMethodPostfix()
+        {
+            InitGUI();
+            GameManagerPatches.LobbiesJoined += 1;
+        }
 
-        public static void OnServerCreatedMethodPostfix() => InitGUI();
-        
+        public static void OnServerCreatedMethodPostfix()
+        {
+            InitGUI();
+            GameManagerPatches.LobbiesJoined += 1;
+        }
+
         // Guards against kick attempts made towards the user by skipping the method, if not Monky or Rexi
         public static bool OnKickedMethodPrefix() => Helper.IsTrustedKicker;
 
@@ -107,9 +116,6 @@ namespace QOL
                             ? Plugin.DefaultColors[player.NetworkSpawnID]
                             : Helper.CustomPlayerColor,
                         character);
-                    
-                    Debug.Log("Checking for new mod version...");
-                    __instance.StartCoroutine(Helper.CheckForModUpdate());
                 }
             }
         }

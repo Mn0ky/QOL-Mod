@@ -139,6 +139,13 @@ namespace QOL
             RainbowEnabled = false;
 
             if (Plugin.ConfigAlwaysRainbow.Value) ToggleRainbow();
+            
+            if (NotifyUpdateCount < 3)
+            {
+                Debug.Log("Checking for new mod version...");
+                __instance.StartCoroutine(CheckForModUpdate());
+                NotifyUpdateCount++;
+            }
         }
 
         public static void ToggleWinstreak()
@@ -232,8 +239,8 @@ namespace QOL
 
         private static void CreateSongAndAddToMusic(AudioClip audioClip)
             => MusicHandler.Instance.myMusic = MusicHandler.Instance.myMusic.AddToArray(new MusicClip { clip = audioClip });
-        
-        public static IEnumerator CheckForModUpdate()
+
+        private static IEnumerator CheckForModUpdate()
         {
             if (!string.IsNullOrEmpty(Plugin.NewUpdateVerCode))
             {
@@ -290,6 +297,7 @@ namespace QOL
         public static bool OnlyLower;
         public static bool HPWinner = Plugin.ConfigHPWinner.Value;
         public static bool RainbowEnabled;
+        private static int NotifyUpdateCount;
         public static IEnumerator RoutineUsed;
 
         public static ConnectedClientData[] ClientData;

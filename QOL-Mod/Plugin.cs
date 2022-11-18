@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using BepInEx;
@@ -8,7 +7,6 @@ using HarmonyLib;
 using SimpleJSON;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace QOL
 {
@@ -45,6 +43,8 @@ namespace QOL
                 BossTimerPatch.Patch(harmony);
                 Logger.LogInfo("Applying MusicHandlerPatch...");
                 MusicHandlerPatch.Patch(harmony);
+                Logger.LogInfo("Applying MovementPatch...");
+                MovementPatch.Patch(harmony);
             }
             catch (Exception ex)
             {
@@ -113,7 +113,7 @@ namespace QOL
                     "800X 100Y",
                     "Change the default opening position of the Stat menu?");
 
-                GUIManager.QOLMenuPos = MenuPosParser(ConfigQOLMenuPlacement.Value);
+                GUIManager.QolMenuPos = MenuPosParser(ConfigQOLMenuPlacement.Value);
                 GUIManager.StatMenuPos = MenuPosParser(ConfigStatMenuPlacement.Value);
 
                 ConfigWinStreakLog = Config.Bind("Winstreak Options",
@@ -242,7 +242,7 @@ namespace QOL
             }
 
             // Loading highscore from txt
-            if (File.Exists(StatsPath))
+            if (StatsFileExists)
             {
                 GameManagerPatches.WinstreakHighScore = JSONNode.Parse(File.ReadAllText(StatsPath))["winstreakHighscore"];
                 Debug.Log("Loading winstreak highscore of: " + GameManagerPatches.WinstreakHighScore);
@@ -261,7 +261,7 @@ namespace QOL
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
-            modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber + " </color><color=#00bbff><u>Exp.";
+            modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber;
             modTextTMP.fontSize = 25;
             modTextTMP.color = Color.red;
             modTextTMP.fontStyle = FontStyles.Bold;
@@ -313,5 +313,7 @@ namespace QOL
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
         public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.json";
         public static readonly string CmdVisibilityStatesPath = Paths.PluginPath + "\\QOL-Mod\\CmdVisibilityStates.json";
+
+        public static bool StatsFileExists = File.Exists(StatsPath);
     }
 }
