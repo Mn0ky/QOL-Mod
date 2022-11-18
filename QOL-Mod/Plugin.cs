@@ -306,7 +306,7 @@ namespace QOL
 
         public static Color[] DefaultColors = new Color[4];
 
-        public const string VersionNumber = "1.16.0"; // Version number
+        public const string VersionNumber = "1.16.1"; // Version number
         public const string Guid = "monky.plugins.QOL";
         public static string NewUpdateVerCode = "";
         

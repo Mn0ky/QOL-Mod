@@ -263,9 +263,9 @@ namespace QOL
 
             string latestVer = JSONNode.Parse(webRequest.downloadHandler.text)["tag_name"];
 
-            if (latestVer.Remove(0, 1) != Plugin.VersionNumber)
-                Plugin.NewUpdateVerCode = latestVer;
+            if (latestVer.Remove(0, 1) == Plugin.VersionNumber) yield break;
             
+            Plugin.NewUpdateVerCode = latestVer;
             SendChatMsg("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, ChatCommands.LogLevel.Warning, 
                 true, false);
         }

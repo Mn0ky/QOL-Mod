@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using HarmonyLib;
 using SimpleJson;
+using SimpleJSON;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -321,9 +322,9 @@ namespace QOL
         private static void SaveCmdVisibilityStates()
             => File.WriteAllText(Plugin.CmdVisibilityStatesPath, MarshalCmdVisibilityStates().ToString());
 
-        private static JsonObject MarshalCmdVisibilityStates()
+        private static JSONObject MarshalCmdVisibilityStates()
         {
-            var cmdStatesJson = new JsonObject();
+            var cmdStatesJson = new JSONObject();
             
             foreach (var pair in CmdOutputVisibility)
                 cmdStatesJson.Add(pair.Key, pair.Value);

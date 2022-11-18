@@ -74,9 +74,9 @@ namespace QOL
                 if (!Plugin.StatsFileExists)
                 {
                     Debug.Log("Stats file doesn't exist");
-                    var globalStats = new JsonObject();
+                    var globalStats = new JSONObject();
                     foreach (var stat in statFields) 
-                        globalStats.Add(stat.Name, stat.GetValue(playerCurrentStats));
+                        globalStats.Add(stat.Name, (int) stat.GetValue(playerCurrentStats));
                     
                     globalStats.Add("winstreakHighscore", 0);
                     globalStats.Add("totalDamageTaken", 0);
