@@ -131,32 +131,31 @@ namespace QOL
             if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
             {
                 var yellowHP = new PlayerHP("yellow");
-                Helper.localNetworkPlayer.OnTalked(yellowHP.FullColor + " HP: " + yellowHP.HP);
+                Helper.SendPublicOutput(yellowHP.FullColor + " HP: " + yellowHP.HP);
             }
 
             if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
             {
                 var blueHP = new PlayerHP("blue");
-                Helper.localNetworkPlayer.OnTalked(blueHP.FullColor + " HP: " + blueHP.HP);
+                Helper.SendPublicOutput(blueHP.FullColor + " HP: " + blueHP.HP);
             }
 
             if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
             {
                 var redHP = new PlayerHP("red");
-                Helper.localNetworkPlayer.OnTalked(redHP.FullColor + " HP: " + redHP.HP);
+                Helper.SendPublicOutput(redHP.FullColor + " HP: " + redHP.HP);
             }
 
             if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
             {
                 var greenHP = new PlayerHP("green");
-                Helper.localNetworkPlayer.OnTalked(greenHP.FullColor + " HP: " + greenHP.HP);
+                Helper.SendPublicOutput(greenHP.FullColor + " HP: " + greenHP.HP);
             }
 
             if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
 			{
                 GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
-                Helper.SendChatMsg("Join link copied to clipboard!", ChatCommands.LogLevel.Success, true, 
-                    ChatCommands.CmdOutputVisibility["invite"]);
+                ChatCommands.CmdDict["invite"].Execute();
 			}
 
             if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
@@ -166,28 +165,28 @@ namespace QOL
             }
 
             if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
-                Helper.localNetworkPlayer.OnTalked($" \u00af\\_{Plugin.ConfigEmoji.Value}_/\u00af");
+                Helper.SendPublicOutput($" \u00af\\_{Plugin.ConfigEmoji.Value}_/\u00af");
             
             if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
                 SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
             
             if (GUI.Button(new Rect(133f, 335f, 80f, 30f), "Private")) 
-                Helper.ToggleLobbyVisibility(false);
+                ChatCommands.CmdDict["private"].Execute();
             
             if (GUI.Button(new Rect(263f, 335f, 80f, 30f), "Public")) 
-                Helper.ToggleLobbyVisibility(true);
+                ChatCommands.CmdDict["public"].Execute();
 
-            Helper.AutoGG = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), 
-                Helper.AutoGG, "AutoGG");
+            ChatCommands.CmdDict["gg"].IsEnabled = GUI.Toggle(new Rect(6f, 188f, 100f, 30f), 
+                ChatCommands.CmdDict["gg"].IsEnabled, "AutoGG");
             
-            Helper.IsTranslating = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), 
-                Helper.IsTranslating, "AutoTranslations");
+            ChatCommands.CmdDict["translate"].IsEnabled = GUI.Toggle(new Rect(100f, 220f, 106f, 30f), 
+                ChatCommands.CmdDict["translate"].IsEnabled, "AutoTranslations");
             
             Helper.TMPText.richText = GUI.Toggle(new Rect(6f, 220f, 115f, 30f), 
                 Helper.TMPText.richText, "RichText");
             
-            Helper.ChatCensorshipBypass = GUI.Toggle(new Rect(100, 188f, 150f, 30f), 
-                Helper.ChatCensorshipBypass, "ChatCensorshipBypass");
+            ChatCommands.CmdDict["uncensor"].IsEnabled = GUI.Toggle(new Rect(100, 188f, 150f, 30f), 
+                ChatCommands.CmdDict["uncensor"].IsEnabled, "ChatCensorshipBypass");
 
             GUI.DragWindow(new Rect(0, 0, 10000, 10000));
         }

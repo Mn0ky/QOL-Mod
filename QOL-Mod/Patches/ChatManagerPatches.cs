@@ -110,9 +110,9 @@ namespace QOL
                 return false;
             }
 
-            if (Helper.UwuifyText && !string.IsNullOrEmpty(message) && Helper.localNetworkPlayer.HasLocalControl)
+            if (ChatCommands.CmdDict["uwu"].IsEnabled && !string.IsNullOrEmpty(message) && Helper.localNetworkPlayer.HasLocalControl)
             {
-                if (Helper.NukChat)
+                if (ChatCommands.CmdDict["nuky"].IsEnabled)
                 {
                     message = UwUify(message);
                     Helper.RoutineUsed = WaitCoroutine(message);
@@ -120,19 +120,21 @@ namespace QOL
                     return false;
                 }
 
-                Helper.localNetworkPlayer.OnTalked(UwUify(message));
+                Helper.SendPublicOutput(UwUify(message));
                 return false;
             }
 
-            if (Helper.NukChat)
+            if (ChatCommands.CmdDict["nuky"].IsEnabled)
             {
-                if (Helper.OnlyLower) message = message.ToLower();
+                if (ChatCommands.CmdDict["lowercase"].IsEnabled) 
+                    message = message.ToLower();
+                
                 Helper.RoutineUsed = WaitCoroutine(message);
                 __instance.StartCoroutine(Helper.RoutineUsed);
                 return false;
             }
 
-            if (Helper.OnlyLower)
+            if (ChatCommands.CmdDict["lowercase"].IsEnabled)
             {
                 Helper.localNetworkPlayer.OnTalked(message.ToLower());
                 return false;
@@ -143,7 +145,7 @@ namespace QOL
 
         public static bool ReplaceUnacceptableWordsMethodPrefix(ref string message, ref string __result) // Prefix method for patching the original (ReplaceUnacceptableWordsMethod)
         {
-            if (Helper.ChatCensorshipBypass)
+            if (ChatCommands.CmdDict["uncensor"].IsEnabled)
             {
                 Debug.Log("skipping censorship");
                 __result = message;
@@ -164,20 +166,17 @@ namespace QOL
         private static void Commands(string message)
         {
             Debug.Log("Made it to beginning of commands!");
-            var text = message.ToLower().TrimStart('/').Split(' ');
+            var args = message.ToLower().TrimStart('/').Split(' ');
+            var targetCmdName = args[0];
 
-            switch (text.Length)
+            if (!ChatCommands.CmdDict.ContainsKey(targetCmdName))
             {
-                case 1:
-                    ChatCommands.SingleArgument(text[0], message);
-                    return;
-                case 2:
-                    ChatCommands.DoubleArgument(text, message);
-                    return;
-                default:
-                    ChatCommands.TripleArgument(text, message);
-                    return;
+                Helper.SendModOutput("Specified command not found. See /help for complete list.", 
+                    Command.LogType.Warning, false);
+                return;
             }
+            
+            ChatCommands.CmdDict[targetCmdName].Execute(args);
         }
         
         // Checks if the up-arrow or down-arrow key is pressed, if so then
@@ -204,7 +203,7 @@ namespace QOL
 
             if (chatTextLen > 0 && chatText[0] == '/')
             {
-                var allCmdsMatched = ChatCommands.CmdList.FindAll(
+                var allCmdsMatched = ChatCommands.CmdNames.FindAll(
                     word => word.StartsWith(chatUnformattedTxt, StringComparison.OrdinalIgnoreCase));
 
                 if (allCmdsMatched.Count > 0)
@@ -280,7 +279,7 @@ namespace QOL
 
             foreach (var text in msgParts)
             {
-                Helper.localNetworkPlayer.OnTalked(text);
+                Helper.SendPublicOutput(text);
                 yield return new WaitForSeconds(0.45f);
             }
         }

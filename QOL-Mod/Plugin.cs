@@ -134,27 +134,26 @@ namespace QOL
                 foreach (var colorStr in ConfigWinStreakColors.Value.Split(' '))
                 {
                     ColorUtility.TryParseHtmlString('#' + colorStr, out var color);
-                    GameManagerPatches.WinstreakColors1.Add(color);
+                    GameManagerPatches.WinstreakColors.Add(color);
                 }
-                
-                GameManagerPatches.WinstreakColors2 = new List<Color>(GameManagerPatches.WinstreakColors1);
 
                 ConfigWinStreakRanges = Config.Bind("Winstreak Options",
                     "WinstreakRanges",
                     "0-1 1-2 2-3",
                     "Change the default ranges? Add more ranges, space separated, to support more colors. Once the last range is reached the corresponding color will be used for all subsequent wins until the streak is lost. Max 50.");
 
+                var colorIndex = 0;
                 foreach (var streakRange in ConfigWinStreakRanges.Value.Split(' '))
                 {
-                    Logger.LogInfo("range: " + streakRange);
                     var streakRangeNums = Array.ConvertAll(streakRange.Split('-'), int.Parse);
-                    Logger.LogInfo("nums: " + streakRangeNums[0] + " " + streakRangeNums[1]);
+                    var nTimes = streakRangeNums[1] - streakRangeNums[0];
+                    Logger.LogInfo("This streak color will appear: " + nTimes + " time(s)");
                     
-                    GameManagerPatches.WinstreakRanges1.Add(streakRangeNums[1] - streakRangeNums[0]);
+                    GameManagerPatches.WinstreakRanges[colorIndex] = (byte)nTimes;
+                    colorIndex++;
                 }
+                Array.Copy(GameManagerPatches.WinstreakRanges, 0, GameManagerPatches.WinstreakRangesDefault, 0, 50);
                 
-                GameManagerPatches.WinstreakRanges2 = new List<int>(GameManagerPatches.WinstreakRanges1);
-
                 ConfigAutoGG = Config.Bind("On-Startup Options", // The section under which the option is shown
                     "AutoGG",
                     false, // The key of the configuration option in the configuration file
@@ -251,8 +250,7 @@ namespace QOL
                 GameManagerPatches.WinstreakHighScore = 0;
 
             if (File.Exists(CmdVisibilityStatesPath))
-                foreach (var pair in JSONNode.Parse(File.ReadAllText(CmdVisibilityStatesPath)))
-                    ChatCommands.CmdOutputVisibility[pair.Key] = pair.Value;
+                ChatCommands.LoadCmdVisibilityStates();
         }
 
         public static void InitModText()
@@ -261,7 +259,8 @@ namespace QOL
             modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
-            modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber;
+            modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber 
+                              + " </color><color=#00bbff><u>Exp.";
             modTextTMP.fontSize = 25;
             modTextTMP.color = Color.red;
             modTextTMP.fontStyle = FontStyles.Bold;
@@ -306,7 +305,7 @@ namespace QOL
 
         public static Color[] DefaultColors = new Color[4];
 
-        public const string VersionNumber = "1.16.1"; // Version number
+        public const string VersionNumber = "1.17.0"; // Version number
         public const string Guid = "monky.plugins.QOL";
         public static string NewUpdateVerCode = "";
         

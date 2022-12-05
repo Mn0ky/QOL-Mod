@@ -20,7 +20,7 @@ namespace QOL
         {
             if (Helper.MutedPlayers.Contains(__instance.NetworkSpawnID)) return false;
 
-            if (!Helper.IsTranslating) return true;
+            if (!ChatCommands.CmdDict["translate"].IsEnabled) return true;
 
             TranslateMessage(data, __instance);
             return false;

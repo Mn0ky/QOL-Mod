@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using Steamworks;
 using HarmonyLib;
@@ -33,46 +32,22 @@ namespace QOL
 
         // Returns the targeted player based on the specified spawnID
         public static NetworkPlayer GetNetworkPlayer(ushort targetID) => ClientData[targetID].PlayerObject.GetComponent<NetworkPlayer>();
+        
+        public static string GetPlayerHP(ushort targetID) =>
+            GetNetworkPlayer(targetID)
+                .GetComponentInChildren<HealthHandler>()
+                .health + "%";
+        
+        public static string GetPlayerHP(string targetColor) =>
+            GetNetworkPlayer(GetIDFromColor(targetColor))
+                .GetComponentInChildren<HealthHandler>()
+                .health + "%";
 
         // Gets the steam profile name of the specified steamID
         public static string GetPlayerName(CSteamID passedClientID) => SteamFriends.GetFriendPersonaName(passedClientID);
 
         // Actually sticks the "join game" link together (url prefix + appID + LobbyID + SteamID)
         public static string GetJoinGameLink() => $"steam://joinlobby/674940/{lobbyID}/{localPlayerSteamID}";
-
-        public static void ToggleLobbyVisibility(bool open)
-        {
-            if (MatchmakingHandler.Instance.IsHost)
-            {
-                var changeLobbyTypeMethod = typeof(MatchmakingHandler).GetMethod("ChangeLobbyType", 
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                if (open)
-                {
-                    changeLobbyTypeMethod!.Invoke(MatchmakingHandler.Instance,
-                        new object[]
-                        {
-                            ELobbyType.k_ELobbyTypePublic
-                        });
-                    
-                    SendChatMsg("Lobby made public!", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["public"]);
-                }
-                else
-                {
-                    changeLobbyTypeMethod!.Invoke(MatchmakingHandler.Instance,
-                        new object[]
-                        {
-                            ELobbyType.k_ELobbyTypePrivate
-                        });
-                    
-                    SendChatMsg("Lobby made private!", ChatCommands.LogLevel.Success, true, ChatCommands.CmdOutputVisibility["private"]);
-                }
-
-                return;
-            }
-
-            SendChatMsg("Need to be host!", ChatCommands.LogLevel.Warning, true, false);
-        }
 
         // Assigns some commonly accessed values as well as runs anything that needs to be everytime a lobby is joined
         public static void InitValues(ChatManager __instance, ushort playerID)
@@ -136,42 +111,20 @@ namespace QOL
 
             GameObject rbHand = new ("RainbowHandler");
             rbHand.AddComponent<RainbowManager>().enabled = false;
-            RainbowEnabled = false;
 
-            if (Plugin.ConfigAlwaysRainbow.Value) ToggleRainbow();
-            
+            if (Plugin.ConfigAlwaysRainbow.Value)
+            {
+                var rbCmd = ChatCommands.CmdDict["rainbow"];
+                rbCmd.IsEnabled = true;
+                rbCmd.Execute();
+            }
+
             if (NotifyUpdateCount < 3)
             {
                 Debug.Log("Checking for new mod version...");
                 __instance.StartCoroutine(CheckForModUpdate());
                 NotifyUpdateCount++;
             }
-        }
-
-        public static void ToggleWinstreak()
-        {
-            if (!WinStreakEnabled)
-            {
-                WinStreakEnabled = true;
-                GameManager.Instance.winText.fontSize = Plugin.ConfigWinStreakFontsize.Value;
-                return;
-            }
-
-            WinStreakEnabled = false;
-        }
-
-        public static void ToggleRainbow()
-        {
-            if (!RainbowEnabled)
-            {
-                Debug.Log("trying to start RainBowHandler");
-                UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = true;
-                RainbowEnabled = true;
-                return;
-            }
-
-            UnityEngine.Object.FindObjectOfType<RainbowManager>().enabled = false;
-            RainbowEnabled = false;
         }
 
         public static string GetTargetStatValue(CharacterStats stats, string targetStat)
@@ -183,39 +136,27 @@ namespace QOL
             return "No value";
         }
 
-        public static void SendChatMsg(string msg, ChatCommands.LogLevel logLevel = default, bool toggleState = true, bool outputPublic = true)
+        public static void SendPublicOutput(string msg) => localNetworkPlayer.OnTalked(msg);
+        
+        public static void SendModOutput(string msg, Command.LogType logType, bool isPublic = true, bool toggleState = true)
         {
-            if (logLevel != default && !AllOutputPublic && !outputPublic)
+            Debug.Log("Sending mod output, cmd vis is:" + isPublic);
+            if (isPublic || AllOutputPublic)
             {
-                GameManager.Instance.StartCoroutine(SendClientSideMsg(logLevel, msg, toggleState));
+                SendPublicOutput(msg);
                 return;
             }
-
-            localNetworkPlayer.OnTalked(msg);
-        }
-
-        private static IEnumerator SendClientSideMsg(ChatCommands.LogLevel logLevel, string msg, bool toggleState)
-        {
-            var msgColor = logLevel switch
+            
+            var msgColor = logType switch
             {
-                ChatCommands.LogLevel.Warning => "<#FF7F50>",
+                Command.LogType.Warning => "<#FF7F50>",
                 // Enabled => green, disabled => gray
-                ChatCommands.LogLevel.Success => toggleState ? "<#006400>" : "<#56595c>",
+                Command.LogType.Success => toggleState ? "<#006400>" : "<#56595c>",
                 _ => ""
             };
-
-            var origRichTextValue = TMPText.richText;
-
-            var chatMsgDuration = 1.5f + msg.Length * 0.075f; // Time that chat msg will last till closing animation
-            var extraTime = Plugin.ConfigMsgDuration.Value;
-            if (extraTime > 0) chatMsgDuration += extraTime; // Taking into account any possible extra msg time specified in config
-
+            
             TMPText.richText = true;
             LocalChat.Talk(msgColor + msg);
-
-            // Add 3 grace seconds to original msg duration so rich text doesn't stop during closing animation
-            yield return new WaitForSeconds(chatMsgDuration + 3f); 
-            TMPText.richText = origRichTextValue;
         }
 
         // Adapted from: https://github.com/deadlyfingers/UnityWav#notes
@@ -244,8 +185,8 @@ namespace QOL
         {
             if (!string.IsNullOrEmpty(Plugin.NewUpdateVerCode))
             {
-                SendChatMsg("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, ChatCommands.LogLevel.Warning, 
-                    true, false);
+                SendModOutput("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, 
+                    Command.LogType.Warning, false);
                 yield break;
             }
             
@@ -266,8 +207,8 @@ namespace QOL
             if (latestVer.Remove(0, 1) == Plugin.VersionNumber) yield break;
             
             Plugin.NewUpdateVerCode = latestVer;
-            SendChatMsg("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, ChatCommands.LogLevel.Warning, 
-                true, false);
+            SendModOutput("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, 
+                Command.LogType.Warning, false);
         }
 
         // Fancy bit-manipulation of a char's ASCII values to check whether it's a vowel or not
@@ -279,24 +220,24 @@ namespace QOL
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
         public static List<ushort> MutedPlayers = new(4);
 
-        public static bool IsTranslating = Plugin.ConfigTranslation.Value; // True if auto-translations are enabled, false by default
-        public static bool AutoGG = Plugin.ConfigAutoGG.Value; // True if auto gg on death is enabled, false by default
-        public static bool UwuifyText; // True if uwufiy text is enabled, false by default
-        public static bool WinStreakEnabled = Plugin.ConfigWinStreakLog.Value;
-        public static bool ChatCensorshipBypass = Plugin.ConfigchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
+        //public static bool IsTranslating = Plugin.ConfigTranslation.Value; // True if auto-translations are enabled, false by default
+        //public static bool AutoGG = Plugin.ConfigAutoGG.Value; // True if auto gg on death is enabled, false by default
+        //public static bool UwuifyText; // True if uwufiy text is enabled, false by default
+        //public static bool WinStreakEnabled = Plugin.ConfigWinStreakLog.Value;
+        //public static bool ChatCensorshipBypass = Plugin.ConfigchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
         public static readonly Color CustomPlayerColor = Plugin.ConfigCustomColor.Value;
         public static bool AllOutputPublic = Plugin.ConfigAllOutputPublic.Value;
         public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
         public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
-        public static bool IsOwMode;
+        //public static bool IsOwMode;
         public static bool IsSongLoop;
         public static readonly string[] OuchPhrases = Plugin.ConfigOuchPhrases.Value.Split(' ');
         private static readonly bool NameResize = Plugin.ConfigNoResize.Value;
-        public static bool NukChat;
+        //public static bool NukChat;
         public static bool IsTrustedKicker;
-        public static bool OnlyLower;
-        public static bool HPWinner = Plugin.ConfigHPWinner.Value;
-        public static bool RainbowEnabled;
+        //public static bool OnlyLower;
+        //public static bool HPWinner = Plugin.ConfigHPWinner.Value;
+        //public static bool RainbowEnabled;
         private static int NotifyUpdateCount;
         public static IEnumerator RoutineUsed;
 

@@ -54,7 +54,8 @@ namespace QOL
             if (kickPacketSender.m_SteamID is not (76561198202108442 or 76561198870040513))
             {
                 Helper.IsTrustedKicker = false;
-                Helper.SendChatMsg("Blocked kick sent by: " + senderPlayerColor, ChatCommands.LogLevel.Warning);
+                Helper.SendModOutput("Blocked kick sent by: " + senderPlayerColor, Command.LogType.Warning, 
+                    false);
                 return;
             }   
 

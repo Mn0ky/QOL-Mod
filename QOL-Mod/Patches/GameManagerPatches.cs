@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
-using SimpleJson;
 using SimpleJSON;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace QOL
 {
@@ -27,11 +25,11 @@ namespace QOL
 
         public static void NetworkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
         {
-            if (Helper.HPWinner)
+            var winhpCmd = ChatCommands.CmdDict["winnerhp"];
+            if (winhpCmd.IsEnabled)
             {
                 var winnerHP = new PlayerHP(Helper.GetColorFromID(winner).ToLower());
-                Helper.SendChatMsg("Winner HP: " + winnerHP.HP, ChatCommands.LogLevel.Success, true, 
-                    ChatCommands.CmdOutputVisibility["winnerhp"]);
+                Helper.SendModOutput("Winner HP: " + winnerHP.HP, Command.LogType.Success, winhpCmd.IsPublic);
             }
             
             var isUserWinner = winner == Helper.localNetworkPlayer.NetworkSpawnID;
@@ -44,7 +42,7 @@ namespace QOL
                 var isStreakHigher = Helper.WinStreak > WinstreakHighScore;
                 WinstreakHighScore = isStreakHigher ? Helper.WinStreak : WinstreakHighScore;
 
-                if (!Helper.WinStreakEnabled) return;
+                if (!ChatCommands.CmdDict["winstreak"].IsEnabled) return;
 
                 __instance.winText.color = DetermineStreakColor();
                 
@@ -56,11 +54,10 @@ namespace QOL
                 __instance.winText.gameObject.SetActive(true);
                 return;
             }
-
+            
             Debug.Log("winstreak lost");
             __instance.winText.fontSize = 200;
-            WinstreakRanges1 = new List<int>(WinstreakRanges2);
-            WinstreakColors1 = new List<Color>(WinstreakColors2);
+            Array.Copy(WinstreakRangesDefault, 0, WinstreakRanges, 0, 50);
             Helper.WinStreak = 0;
         }
 
@@ -156,34 +153,25 @@ namespace QOL
 
         private static Color DetermineStreakColor()
         {
-            for (var i = 0; i < WinstreakRanges1.Count; i++)
+            for (var index = 0; index < WinstreakRanges.Length; index++)
             {
-                i = 0;
-                Debug.Log("streak range value: " + WinstreakRanges1[i]);
-                switch (WinstreakRanges1[i])
-                {
-                    case > 0:
-                        Debug.Log("Deducting!, ranges count: " + WinstreakRanges1.Count);
-                        WinstreakRanges1[i]--;
-                        return WinstreakColors1[i];
-                    case 0 when WinstreakRanges1.Count == 2:
-                        return WinstreakColors2[WinstreakColors2.Count - 1];
-                    default:
-                        WinstreakRanges1.RemoveAt(i);
-                        WinstreakColors1.RemoveAt(i);
-                        break;
-                }
+                if (index == WinstreakRanges.Length - 1)
+                    // We've gone through all the colors, just keep returning the last one
+                    return WinstreakColors[WinstreakColors.Count - 1]; 
+                
+                var colorCount = WinstreakRanges[index];
+                if (colorCount == 0) continue; // Color has been used the needed times, move on to the next one
+
+                WinstreakRanges[index] -= 1;
+                return WinstreakColors[index]; // return the target color
             }
 
-            Debug.Log("Something went wrong with streak!");
-            return Color.white;
+            return Color.white; // Something went wrong!
         }
 
-        public static List<Color> WinstreakColors1 = new (50);
-        public static List<Color> WinstreakColors2 = new (50);
-
-        public static List<int> WinstreakRanges1 = new (50);
-        public static List<int> WinstreakRanges2 = new (50);
+        public static List<Color> WinstreakColors = new(50);
+        public static byte[] WinstreakRanges = new byte[50];
+        public static byte[] WinstreakRangesDefault = new byte[50];
 
         private static readonly int[] RoundStatValues = new int[14];
 
