@@ -87,17 +87,24 @@ namespace QOL
             {
                 _currentLogType = LogType.Warning;
                 _currentOutputMsg = "Invalid # of arguments specified. See /help for more info.";
-                Helper.SendModOutput(_currentOutputMsg, _currentLogType, IsPublic, IsEnabled);
+                Helper.SendModOutput(_currentOutputMsg, _currentLogType, false);
                 
                 _currentLogType = LogType.Success;
                 return;
             }
             
             _runCmdAction(args, this);
+            
             if (string.IsNullOrEmpty(_currentOutputMsg)) // Some cmds may not have any output at all
                 return;
-                
-            Helper.SendModOutput(_currentOutputMsg, _currentLogType, !IsToggle && IsPublic, !IsToggle || IsEnabled);
+            
+            if (_currentLogType == LogType.Warning)
+            {
+                Helper.SendModOutput(_currentOutputMsg, LogType.Warning, false);
+                return;
+            }
+
+            Helper.SendModOutput(_currentOutputMsg, LogType.Success, !IsToggle && IsPublic, !IsToggle || IsEnabled);
             _currentLogType = LogType.Success;
         }
 

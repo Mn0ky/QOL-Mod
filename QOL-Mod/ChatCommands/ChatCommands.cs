@@ -48,7 +48,6 @@ namespace QOL
             new Command("/uncensor", UncensorCmd, 0, true).MarkAsToggle(),
             new Command("/uwu", UwuCmd, 0, true).MarkAsToggle(),
             new Command("/ver", VerCmd, 0, true),
-            // WinnerHpCmd not marked as toggle because we don't always want private output!
             new Command("/winnerhp", WinnerHpCmd, 0, false).MarkAsToggle(),
             new Command("/winstreak", WinstreakCmd, 0, true).MarkAsToggle()
         };
