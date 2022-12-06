@@ -249,8 +249,7 @@ namespace QOL
             else
                 GameManagerPatches.WinstreakHighScore = 0;
 
-            if (File.Exists(CmdVisibilityStatesPath))
-                ChatCommands.LoadCmdVisibilityStates();
+            ChatCommands.InitializeCmds();
         }
 
         public static void InitModText()
@@ -310,8 +309,11 @@ namespace QOL
         public static string NewUpdateVerCode = "";
         
         public static readonly string MusicPath = Paths.PluginPath + "\\QOL-Mod\\Music\\";
+        public static readonly string InternalsPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\";
+        
         public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.json";
-        public static readonly string CmdVisibilityStatesPath = Paths.PluginPath + "\\QOL-Mod\\CmdVisibilityStates.json";
+        public static readonly string CmdAliasesPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\CmdAliases.json";
+        public static readonly string CmdVisibilityStatesPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\CmdVisibilityStates.json";
 
         public static bool StatsFileExists = File.Exists(StatsPath);
     }

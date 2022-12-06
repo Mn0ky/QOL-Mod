@@ -140,7 +140,6 @@ namespace QOL
         
         public static void SendModOutput(string msg, Command.LogType logType, bool isPublic = true, bool toggleState = true)
         {
-            Debug.Log("Sending mod output, cmd vis is:" + isPublic);
             if (isPublic || AllOutputPublic)
             {
                 SendPublicOutput(msg);
@@ -219,25 +218,14 @@ namespace QOL
         public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
         public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
         public static List<ushort> MutedPlayers = new(4);
-
-        //public static bool IsTranslating = Plugin.ConfigTranslation.Value; // True if auto-translations are enabled, false by default
-        //public static bool AutoGG = Plugin.ConfigAutoGG.Value; // True if auto gg on death is enabled, false by default
-        //public static bool UwuifyText; // True if uwufiy text is enabled, false by default
-        //public static bool WinStreakEnabled = Plugin.ConfigWinStreakLog.Value;
-        //public static bool ChatCensorshipBypass = Plugin.ConfigchatCensorshipBypass.Value; // True if chat censoring is bypassed, false by default
         public static readonly Color CustomPlayerColor = Plugin.ConfigCustomColor.Value;
         public static bool AllOutputPublic = Plugin.ConfigAllOutputPublic.Value;
         public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
         public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
-        //public static bool IsOwMode;
         public static bool IsSongLoop;
         public static readonly string[] OuchPhrases = Plugin.ConfigOuchPhrases.Value.Split(' ');
         private static readonly bool NameResize = Plugin.ConfigNoResize.Value;
-        //public static bool NukChat;
         public static bool IsTrustedKicker;
-        //public static bool OnlyLower;
-        //public static bool HPWinner = Plugin.ConfigHPWinner.Value;
-        //public static bool RainbowEnabled;
         private static int NotifyUpdateCount;
         public static IEnumerator RoutineUsed;
 
@@ -247,6 +235,6 @@ namespace QOL
         public static TextMeshPro TMPText;
         public static int WinStreak = 0;
 
-        public static HoardHandler[] Hoards = new HoardHandler[2];
+        //public static HoardHandler[] Hoards = new HoardHandler[2];
     }
 }

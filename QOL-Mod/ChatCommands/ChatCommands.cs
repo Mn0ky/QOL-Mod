@@ -17,6 +17,7 @@ namespace QOL
         private static readonly List<Command> Cmds = new()
         {
             new Command("/adv", AdvCmd, 0, false).SetAlwaysPublic(),
+            new Command("/alias", AliasCmd, 1, true),
             new Command("/fov", FovCmd, 1, true),
             new Command("/fps", FpsCmd, 1, true),
             new Command("/friend", FriendCmd, 1, true),
@@ -52,12 +53,57 @@ namespace QOL
             new Command("/winstreak", WinstreakCmd, 0, true).MarkAsToggle()
         };
 
-        public static readonly Dictionary<string, Command> CmdDict = Cmds.ToDictionary(
-            cmd => cmd.Name.Substring(1), cmd => cmd); // Substring for removing the '/' char
+        public static Dictionary<string, Command> CmdDict {get; private set;}
+        public static Dictionary<string, Command> CmdAliasDict {get; private set;}
+        public static List<string> CmdAliases {get; private set;}
 
-        public static readonly List<string> CmdNames = Cmds.Select(cmd => cmd.Name).ToList();
+        public static void InitializeCmds()
+        {
+            // Substring for removing the '/' char
+            CmdDict = Cmds.ToDictionary(cmd => cmd.Name.Substring(1), cmd => cmd); 
+            
+            if (!Directory.Exists(Plugin.InternalsPath))
+                Directory.CreateDirectory(Plugin.InternalsPath);
+            
+            if (File.Exists(Plugin.CmdVisibilityStatesPath))
+                LoadCmdVisibilityStates();
+            
+            if (File.Exists(Plugin.CmdAliasesPath))
+                LoadCmdAliases();
+            
+            CmdAliases = Cmds.Select(cmd => cmd.Alias).ToList();
+            CmdAliasDict = Cmds.ToDictionary(cmd => cmd.Alias.Substring(1), cmd => cmd);
+        }
 
-        public static void LoadCmdVisibilityStates()
+        private static void LoadCmdAliases()
+        {
+            try
+            {
+                foreach (var pair in JSONNode.Parse(File.ReadAllText(Plugin.CmdAliasesPath)))
+                {
+                    Debug.Log("Setting saved alias of cmd: " + pair.Key);
+                    CmdDict[pair.Key].Alias = pair.Value;
+                }
+            }
+            catch (Exception)
+            {
+                Debug.LogError("Failed to change cmd alias, assuming cmd no longer exists!");
+                Debug.Log("Resetting cmd alias json to prevent corruption...");
+                SaveCmdAliases();
+            }
+        }
+        
+        private static void SaveCmdAliases()
+        {
+            var cmdAliasesJson = new JSONObject();
+            
+            foreach (var cmd in Cmds)
+                cmdAliasesJson.Add(cmd.Name.Substring(1), cmd.Alias);
+            
+            File.WriteAllText(Plugin.CmdAliasesPath, cmdAliasesJson.ToString());
+        }
+
+        private static void LoadCmdVisibilityStates()
         {
             try
             {
@@ -76,16 +122,13 @@ namespace QOL
         }
 
         private static void SaveCmdVisibilityStates()
-            => File.WriteAllText(Plugin.CmdVisibilityStatesPath, MarshalCmdVisibilityStates().ToString());
-        
-        private static JSONObject MarshalCmdVisibilityStates()
         {
             var cmdStatesJson = new JSONObject();
             
             foreach (var cmd in Cmds)
                 cmdStatesJson.Add(cmd.Name.Remove(0, 1), cmd.IsPublic);
-
-            return cmdStatesJson;
+            
+            File.WriteAllText(Plugin.CmdVisibilityStatesPath, cmdStatesJson.ToString());
         }
 
         // ****************************************************************************************************
@@ -95,6 +138,47 @@ namespace QOL
         // Outputs player-specified msg from config to chat, blank by default
         private static void AdvCmd(string[] args, Command cmd) 
             => cmd.SetOutputMsg(Plugin.ConfigAdvCmd.Value);
+
+        private static void AliasCmd(string[] args, Command cmd)
+        {
+            var resetAlias = args.Length == 2; // Should be true even if cmd has a space char after it 
+            var targetCmdName = args[1].Replace("\"", "").Replace("/", "");
+            Command targetCmd = null;
+
+            if (CmdDict.ContainsKey(targetCmdName))
+                targetCmd = CmdDict[targetCmdName];
+
+            if (targetCmd == null && CmdAliasDict.ContainsKey(targetCmdName)) 
+                targetCmd = CmdAliasDict[targetCmdName];
+
+            if (targetCmd == null)
+            {
+                cmd.SetOutputMsg("Specified command not found.");
+                cmd.SetLogType(Command.LogType.Warning);
+                return;
+            }
+
+            if (resetAlias)
+            {
+                cmd.SetOutputMsg("Removed alias " + targetCmd.Alias + " of " + targetCmd.Name + ".");
+                
+                CmdAliasDict.Remove(targetCmd.Alias);
+                CmdAliasDict[targetCmd.Name] = targetCmd;
+                targetCmd.Alias = targetCmd.Name;
+                
+                CmdAliases = Cmds.Select(command => command.Alias).ToList();
+                SaveCmdAliases();
+                return;
+            }
+
+            CmdAliasDict.Remove(targetCmd.Alias);
+            targetCmd.Alias = "/" + args[2].Replace("\"", "").Replace("/", "");
+            CmdAliasDict[targetCmd.Alias.Substring(1)] = targetCmd;
+
+            cmd.SetOutputMsg("Set alias of " + targetCmd.Name + " as " + targetCmd.Alias + ".");
+            CmdAliases = Cmds.Select(command => command.Alias).ToList();
+            SaveCmdAliases();
+        }
 
         private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead
         {
@@ -195,7 +279,7 @@ namespace QOL
             }
             
             targetCmd.IsPublic = false;
-            cmd.SetOutputMsg("If applicable, toggled private logging for " + targetCmdName + ".");
+            cmd.SetOutputMsg("If applicable, toggled private logging for " + targetCmd.Name + ".");
             SaveCmdVisibilityStates();
         }
 
@@ -214,7 +298,7 @@ namespace QOL
             if (targetCmd != null)
             {
                 targetCmd.IsPublic = true;
-                cmd.SetOutputMsg("If applicable, toggled public logging for " + targetCmdName + ".");
+                cmd.SetOutputMsg("If applicable, toggled public logging for " + targetCmd.Name + ".");
                 SaveCmdVisibilityStates();
                 return;
             }

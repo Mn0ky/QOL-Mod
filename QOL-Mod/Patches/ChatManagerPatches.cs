@@ -165,18 +165,18 @@ namespace QOL
 
         private static void Commands(string message)
         {
-            Debug.Log("Made it to beginning of commands!");
+            Debug.Log("User is trying to run a command...");
             var args = message.ToLower().TrimStart('/').Split(' ');
-            var targetCmdName = args[0];
+            var targetCommandTyped = args[0];
 
-            if (!ChatCommands.CmdDict.ContainsKey(targetCmdName))
+            if (!ChatCommands.CmdAliasDict.ContainsKey(targetCommandTyped)) // If command is not found
             {
                 Helper.SendModOutput("Specified command not found. See /help for complete list.", 
                     Command.LogType.Warning, false);
                 return;
             }
             
-            ChatCommands.CmdDict[targetCmdName].Execute(args);
+            ChatCommands.CmdAliasDict[targetCommandTyped].Execute(args);
         }
         
         // Checks if the up-arrow or down-arrow key is pressed, if so then
@@ -203,7 +203,7 @@ namespace QOL
 
             if (chatTextLen > 0 && chatText[0] == '/')
             {
-                var allCmdsMatched = ChatCommands.CmdNames.FindAll(
+                var allCmdsMatched = ChatCommands.CmdAliases.FindAll(
                     word => word.StartsWith(chatUnformattedTxt, StringComparison.OrdinalIgnoreCase));
 
                 if (allCmdsMatched.Count > 0)
