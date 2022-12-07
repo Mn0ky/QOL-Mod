@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace QOL
@@ -21,7 +22,7 @@ namespace QOL
         }
         
         public string Name { get; }
-        public string Alias { get; set; }
+        public List<string> Aliases { get; } = new();
         public bool IsToggle { get; private set; }
         public bool IsEnabled { get; set; }
 
@@ -40,7 +41,6 @@ namespace QOL
         public Command(string name, Action<string[], Command> cmdMethod, int minNumExpectedArgs, bool defaultPrivate)
         {
             Name = name;
-            Alias = Name;
             _runCmdAction = cmdMethod;
             _minExpectedArgs = minNumExpectedArgs;
             IsPublic = !defaultPrivate;

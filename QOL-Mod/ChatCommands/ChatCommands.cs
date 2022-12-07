@@ -54,13 +54,12 @@ namespace QOL
         };
 
         public static Dictionary<string, Command> CmdDict {get; private set;}
-        public static Dictionary<string, Command> CmdAliasDict {get; private set;}
-        public static List<string> CmdAliases {get; private set;}
+        public static List<string> CmdNames {get; private set;}
 
         public static void InitializeCmds()
         {
-            // Substring for removing the '/' char
-            CmdDict = Cmds.ToDictionary(cmd => cmd.Name.Substring(1), cmd => cmd); 
+            CmdNames = Cmds.Select(cmd => cmd.Name).ToList();
+            CmdDict = Cmds.ToDictionary(cmd => cmd.Name.Substring(1), cmd => cmd);
             
             if (!Directory.Exists(Plugin.InternalsPath))
                 Directory.CreateDirectory(Plugin.InternalsPath);
@@ -70,19 +69,28 @@ namespace QOL
             
             if (File.Exists(Plugin.CmdAliasesPath))
                 LoadCmdAliases();
-            
-            CmdAliases = Cmds.Select(cmd => cmd.Alias).ToList();
-            CmdAliasDict = Cmds.ToDictionary(cmd => cmd.Alias.Substring(1), cmd => cmd);
         }
 
         private static void LoadCmdAliases()
         {
             try
             {
+                Debug.Log("Setting saved aliases of cmds");
+                
                 foreach (var pair in JSONNode.Parse(File.ReadAllText(Plugin.CmdAliasesPath)))
+                    foreach (var alias in pair.Value.AsArray)
+                    {
+                        var cmd = CmdDict[pair.Key];
+                        cmd.Aliases.Add(alias.Value);
+                    }
+                
+                Debug.Log("Adding aliases of cmds to cmd dict and list");
+                
+                foreach (var cmd in Cmds)
                 {
-                    Debug.Log("Setting saved alias of cmd: " + pair.Key);
-                    CmdDict[pair.Key].Alias = pair.Value;
+                    CmdNames.AddRange(cmd.Aliases);
+                    foreach (var alias in cmd.Aliases) 
+                        CmdDict[alias.Substring(1)] = cmd;
                 }
             }
             catch (Exception)
@@ -98,8 +106,15 @@ namespace QOL
             var cmdAliasesJson = new JSONObject();
             
             foreach (var cmd in Cmds)
-                cmdAliasesJson.Add(cmd.Name.Substring(1), cmd.Alias);
-            
+            {
+                var aliasHolder = new JSONArray();
+
+                foreach (var alias in cmd.Aliases) 
+                    aliasHolder.Add(alias);
+
+                cmdAliasesJson.Add(cmd.Name.Substring(1), aliasHolder);
+            }
+
             File.WriteAllText(Plugin.CmdAliasesPath, cmdAliasesJson.ToString());
         }
 
@@ -148,35 +163,49 @@ namespace QOL
             if (CmdDict.ContainsKey(targetCmdName))
                 targetCmd = CmdDict[targetCmdName];
 
-            if (targetCmd == null && CmdAliasDict.ContainsKey(targetCmdName)) 
-                targetCmd = CmdAliasDict[targetCmdName];
-
             if (targetCmd == null)
             {
-                cmd.SetOutputMsg("Specified command not found.");
+                cmd.SetOutputMsg("Specified command or alias not found.");
                 cmd.SetLogType(Command.LogType.Warning);
                 return;
             }
 
             if (resetAlias)
             {
-                cmd.SetOutputMsg("Removed alias " + targetCmd.Alias + " of " + targetCmd.Name + ".");
+                cmd.SetOutputMsg("Removed aliases for " + targetCmd.Name + ".");
                 
-                CmdAliasDict.Remove(targetCmd.Alias);
-                CmdAliasDict[targetCmd.Name] = targetCmd;
-                targetCmd.Alias = targetCmd.Name;
+                foreach (var alias in targetCmd.Aliases)
+                {
+                    CmdDict.Remove(alias);
+                    CmdNames.Remove(alias);
+                }
                 
-                CmdAliases = Cmds.Select(command => command.Alias).ToList();
+                targetCmd.Aliases.Clear();
                 SaveCmdAliases();
                 return;
             }
+            
+            var newAlias = "/" + args[2].Replace("\"", "").Replace("/", "");
 
-            CmdAliasDict.Remove(targetCmd.Alias);
-            targetCmd.Alias = "/" + args[2].Replace("\"", "").Replace("/", "");
-            CmdAliasDict[targetCmd.Alias.Substring(1)] = targetCmd;
+            if (CmdNames.Contains(newAlias))
+            {
+                if (cmd.Name == newAlias)
+                {
+                    cmd.SetOutputMsg("Invalid alias: already exists as name of a command.");
+                    cmd.SetLogType(Command.LogType.Warning);
+                    return;
+                }
+                
+                cmd.SetOutputMsg("Invalid alias: already exists.");
+                cmd.SetLogType(Command.LogType.Warning);
+                return;
+            }
 
-            cmd.SetOutputMsg("Set alias of " + targetCmd.Name + " as " + targetCmd.Alias + ".");
-            CmdAliases = Cmds.Select(command => command.Alias).ToList();
+            CmdDict[newAlias.Substring(1)] = targetCmd;
+            targetCmd.Aliases.Add(newAlias);
+            CmdNames.Add(newAlias);
+
+            cmd.SetOutputMsg("Added alias " + newAlias + " for " + targetCmd.Name + ".");
             SaveCmdAliases();
         }
 
