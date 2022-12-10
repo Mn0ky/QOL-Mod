@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HarmonyLib;
-using SimpleJSON;
 using Steamworks;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 namespace QOL;
 

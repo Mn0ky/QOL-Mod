@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Assembly-CSharp.dll
+/Assembly-CSharp-firstpass.dll
+/Lidgren.Network.dll
+/TextMeshPro-1.0.55.56.0b9.dll
+/UnityEngine.UI.dll

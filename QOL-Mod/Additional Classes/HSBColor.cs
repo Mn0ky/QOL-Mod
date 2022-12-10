@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+namespace QOL;
+
 [System.Serializable]
 public struct HSBColor
 {

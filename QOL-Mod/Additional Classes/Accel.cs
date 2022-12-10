@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace QOL;
 
-class Accel : MonoBehaviour
+public class Accel : MonoBehaviour
 {
     private Rigidbody _whipTip;
     private float m_ElevationAngle = 45f;

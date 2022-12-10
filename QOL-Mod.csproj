@@ -6,11 +6,18 @@
     <Description>A mod that offers quality-of-life improvements and additions to Stick Fight: The Game.</Description>
     <Version>1.17.0</Version>
     <LangVersion>latest</LangVersion>
+    <RootNamespace>QOL</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="MyFirstPlugin.sln" />
+    <None Include="QOL-Mod.sln" />
     <None Remove="build.bat" />
+    <None Remove="Assembly-CSharp.dll" />
+    <None Remove="Assembly-CSharp-firstpass.dll" />
+    <None Remove="Lidgren.Network.dll" />
+    <None Remove="TextMeshPro-1.0.55.56.0b9.dll" />
+    <None Remove="UnityEngine.UI.dll" />
+    <None Remove="QOL-Mod.csproj.DotSettings" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,31 +33,19 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Lidgren.Network">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\Lidgren.Network.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Security">
-      <HintPath>Mono.Security.dll</HintPath>
+      <HintPath>Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="TextMeshPro-1.0.55.56.0b9">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\TextMeshPro-1.0.55.56.0b9.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Analytics">
-      <HintPath>UnityEngine.Analytics.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>UnityEngine.Networking.dll</HintPath>
+      <HintPath>TextMeshPro-1.0.55.56.0b9.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\Richie\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Lidgren.Network">
+      <HintPath>Lidgren.Network.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
