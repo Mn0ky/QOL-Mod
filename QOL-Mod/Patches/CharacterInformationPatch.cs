@@ -6,24 +6,23 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace QOL
-{
-    class CharacterInformationPatch
-    {
-        public static void Patch(Harmony harmonyInstance)
-        {
-            var startMethod = AccessTools.Method(typeof(CharacterInformation), "Start");
-            var startMethodPostfix = new HarmonyMethod(typeof(CharacterInformationPatch)
-                .GetMethod(nameof(StartMethodPostfix)));
-            harmonyInstance.Patch(startMethod, postfix: startMethodPostfix);
-        }
+namespace QOL;
 
-        public static void StartMethodPostfix(CharacterInformation __instance)
-        {
-            if (MatchmakingHandler.Instance.IsInsideLobby) return;
+class CharacterInformationPatch
+{
+    public static void Patch(Harmony harmonyInstance)
+    {
+        var startMethod = AccessTools.Method(typeof(CharacterInformation), "Start");
+        var startMethodPostfix = new HarmonyMethod(typeof(CharacterInformationPatch)
+            .GetMethod(nameof(StartMethodPostfix)));
+        harmonyInstance.Patch(startMethod, postfix: startMethodPostfix);
+    }
+
+    public static void StartMethodPostfix(CharacterInformation __instance)
+    {
+        if (MatchmakingHandler.Instance.IsInsideLobby) return;
             
-            var colorWanted = Helper.IsCustomPlayerColor ? Plugin.ConfigCustomColor.Value : Plugin.DefaultColors[0];
-            MultiplayerManagerPatches.ChangeAllCharacterColors(colorWanted, __instance.gameObject);
-        }
+        var colorWanted = Helper.IsCustomPlayerColor ? Plugin.ConfigCustomColor.Value : Plugin.DefaultColors[0];
+        MultiplayerManagerPatches.ChangeAllCharacterColors(colorWanted, __instance.gameObject);
     }
 }

@@ -96,12 +96,16 @@ namespace QOL
                 ConfigQolMenuKeybind = Config.Bind("Menu Options", // The section under which the option is shown
                     "QOLMenuKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1), // The key of the configuration option in the configuration file
-                    "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html"); // Description of the option to show in the config file
+                    "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. " +
+                    "All keycodes can be found at the bottom of the page here: " +
+                    "https://docs.unity3d.com/ScriptReference/KeyCode.html"); // Description of the option to show in the config file
 
                 ConfigStatMenuKeybind = Config.Bind("Menu Options",
                     "StatWindowKeybind",
                     new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
-                    "Change the keybind for opening the Stat Window? Only specify a single key or two keys. All keycodes can be found at the bottom of the page here: https://docs.unity3d.com/ScriptReference/KeyCode.html");
+                    "Change the keybind for opening the Stat Window? Only specify a single key or two keys. " +
+                    "All keycodes can be found at the bottom of the page here: " +
+                    "https://docs.unity3d.com/ScriptReference/KeyCode.html");
 
                 ConfigQOLMenuPlacement = Config.Bind("Menu Options",
                     "QOLMenuLocation",
@@ -129,7 +133,9 @@ namespace QOL
                 ConfigWinStreakColors = Config.Bind("Winstreak Options",
                     "WinstreakColors",
                     "FF0000 FFEB04 00FF00",
-                    "Change the default winstreak colors? HEX values only, space separated. Each color will show in the order of the ranges below. The number of colors should be equal to the number of ranges! Max 50.");
+                    "Change the default winstreak colors? HEX values only, space separated. " 
+                    + "Each color will show in the order of the ranges below. " + "The number of colors should be equal " +
+                    "to the number of ranges! Max 50.");
 
                 foreach (var colorStr in ConfigWinStreakColors.Value.Split(' '))
                 {
@@ -140,7 +146,9 @@ namespace QOL
                 ConfigWinStreakRanges = Config.Bind("Winstreak Options",
                     "WinstreakRanges",
                     "0-1 1-2 2-3",
-                    "Change the default ranges? Add more ranges, space separated, to support more colors. Once the last range is reached the corresponding color will be used for all subsequent wins until the streak is lost. Max 50.");
+                    "Change the default ranges? Add more ranges, space separated, to support more colors. " 
+                    + "Once the last range is reached the corresponding color will be used for all subsequent wins " +
+                    "until the streak is lost. Max 50.");
 
                 var colorIndex = 0;
                 foreach (var streakRange in ConfigWinStreakRanges.Value.Split(' '))
@@ -173,6 +181,21 @@ namespace QOL
                     "RichText",
                     true,
                     "Enable rich text for chat on startup?");
+                
+                ConfigTranslation = Config.Bind("On-Startup Options",
+                    "AutoTranslations",
+                    false,
+                    "Enable auto-translation for chat messages to English on startup?");
+                
+                ConfigHPWinner = Config.Bind("On-Startup Options",
+                    "AlwaysShowHPOfWinner",
+                    false,
+                    "Enable always show the HP for the winner of the round on-startup?");
+                
+                ConfigCmdPrefix = Config.Bind("Misc. Options",
+                    "CommandPrefix",
+                    "/", 
+                    "Change the default command prefix character? (Recommended: /, !, $, ., &, ?)");
 
                 ConfigAdvCmd = Config.Bind("Misc. Options",
                     "AdvertiseMsg",
@@ -183,11 +206,6 @@ namespace QOL
                     "MsgDuration",
                     0.0f,
                     "Extend the amount of seconds per chat message by a specified amount? (Decimals allowed)");
-
-                ConfigTranslation = Config.Bind("On-Startup Options",
-                    "AutoTranslations",
-                    false,
-                    "Enable auto-translation for chat messages to English on startup?");
 
                 ConfigNoResize = Config.Bind("Misc. Options",
                     "ResizeName",
@@ -208,11 +226,6 @@ namespace QOL
                     "OuchPhrases",
                     "ow owie ouch ouchie",
                     "Words to be used by OuchMode? Space seperated. (/ouch)");
-
-                ConfigHPWinner = Config.Bind("On-Startup Options",
-                    "AlwaysShowHPOfWinner",
-                    false,
-                    "Enable always show the HP for the winner of the round on-startup?");
 
                 ConfigEmoji = Config.Bind("Misc. Options",
                     "ShrugEmoji",
@@ -294,6 +307,7 @@ namespace QOL
         public static ConfigEntry<int> ConfigWinStreakFontsize;
         public static ConfigEntry<float> ConfigRainbowSpeed;
         public static ConfigEntry<float> ConfigMsgDuration;
+        public static ConfigEntry<string> ConfigCmdPrefix;
         public static ConfigEntry<string> ConfigAdvCmd;
         public static ConfigEntry<string> ConfigEmoji;
         public static ConfigEntry<string> ConfigQOLMenuPlacement;

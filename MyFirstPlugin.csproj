@@ -5,8 +5,7 @@
     <AssemblyName>QOL-Mod</AssemblyName>
     <Description>A mod that offers quality-of-life improvements and additions to Stick Fight: The Game.</Description>
     <Version>1.17.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
