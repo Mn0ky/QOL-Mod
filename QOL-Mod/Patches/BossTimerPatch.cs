@@ -15,14 +15,16 @@ class BossTimerPatch
     public static void StartMethodPostfix(BossTimer __instance)
     {
         var spawnID = __instance.transform.root.GetComponent<NetworkPlayer>().NetworkSpawnID;
+        var customPlayerColor = ConfigHandler.GetEntry<Color>("CustomColor");
 
-        if (Helper.IsCustomPlayerColor && spawnID == Helper.localNetworkPlayer.NetworkSpawnID)
+        if (customPlayerColor != ConfigHandler.GetEntry<Color>("CustomColor", true) &&
+            spawnID == Helper.localNetworkPlayer.NetworkSpawnID)
         {
-            ChangeBossUIColor(Helper.CustomPlayerColor, __instance.transform.root.gameObject);
+            ChangeBossUIColor(customPlayerColor, __instance.transform.root.gameObject);
             return;
         }
 
-        ChangeBossUIColor(Plugin.DefaultColors[spawnID], __instance.transform.root.gameObject);
+        ChangeBossUIColor(ConfigHandler.DefaultColors[spawnID], __instance.transform.root.gameObject);
     }
 
     private static void ChangeBossUIColor(Color colorWanted, GameObject character)

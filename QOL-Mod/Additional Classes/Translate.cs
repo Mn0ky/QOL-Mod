@@ -65,7 +65,7 @@ public class Translate : MonoBehaviour
 
 public class AuthTranslate : MonoBehaviour
 {
-    private static readonly string APIKey = Plugin.ConfigAuthKeyForTranslation.Value;
+    private static readonly string APIKey = ConfigHandler.GetEntry<string>("AutoAuthTranslationsAPIKey");
 
     public static IEnumerator TranslateText(string sourceLanguage, string targetLanguage, string sourceText,
         Action<string> result)

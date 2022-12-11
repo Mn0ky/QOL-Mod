@@ -73,21 +73,23 @@ public class Helper
         Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
         TMPText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
-        TMPText.richText = Plugin.ConfigRichText.Value;
+        TMPText.richText = ConfigHandler.GetEntry<bool>("RichText");
         // Increase caret width so caret won't disappear at certain times
         Traverse.Create(__instance).Field("chatField").GetValue<TMP_InputField>().caretWidth = 3;
 
-        if (Plugin.ConfigFixCrownWinCount.Value)
+        var customCrownColor = ConfigHandler.GetEntry<Color>("CustomCrownColor");
+        
+        if (ConfigHandler.GetEntry<bool>("FixCrownTxt"))
         {
             var counter = UnityEngine.Object.FindObjectOfType<WinCounterUI>();
             foreach (var crownCount in counter.GetComponentsInChildren<TextMeshProUGUI>(true))
             {
                 crownCount.enableAutoSizing = true;
-                crownCount.GetComponentInChildren<Image>().color = Plugin.ConfigCustomCrownColor.Value;
+                crownCount.GetComponentInChildren<Image>().color = customCrownColor;
             }
         }
 
-        if (NameResize)
+        if (ConfigHandler.GetEntry<bool>("ResizeName"))
         {
             var playerNames = Traverse.Create(UnityEngine.Object.FindObjectOfType<OnlinePlayerUI>())
                 .Field("mPlayerTexts")
@@ -102,29 +104,29 @@ public class Helper
             }
         }
 
-        if (Plugin.ConfigCustomCrownColor.Value != (Color) Plugin.ConfigCustomCrownColor.DefaultValue)
+        if (customCrownColor != ConfigHandler.GetEntry<Color>("CustomCrownColor", true))
         {
             var crown = UnityEngine.Object.FindObjectOfType<Crown>().gameObject;
                 
             foreach (var sprite in crown.GetComponentsInChildren<SpriteRenderer>(true)) 
-                sprite.color = Plugin.ConfigCustomCrownColor.Value;
+                sprite.color = customCrownColor;
         }
 
         GameObject rbHand = new ("RainbowHandler");
         rbHand.AddComponent<RainbowManager>().enabled = false;
 
-        if (Plugin.ConfigAlwaysRainbow.Value)
+        if (ConfigHandler.GetEntry<bool>("RainbowEnabled"))
         {
             var rbCmd = ChatCommands.CmdDict["rainbow"];
             rbCmd.IsEnabled = true;
             rbCmd.Execute();
         }
 
-        if (NotifyUpdateCount < 3)
+        if (_notifyUpdateCount < 3)
         {
             Debug.Log("Checking for new mod version...");
             __instance.StartCoroutine(CheckForModUpdate());
-            NotifyUpdateCount++;
+            _notifyUpdateCount++;
         }
     }
 
@@ -141,7 +143,7 @@ public class Helper
         
     public static void SendModOutput(string msg, Command.LogType logType, bool isPublic = true, bool toggleState = true)
     {
-        if (isPublic || AllOutputPublic)
+        if (isPublic || ConfigHandler.AllOutputPublic)
         {
             SendPublicOutput(msg);
             return;
@@ -219,15 +221,13 @@ public class Helper
     public static readonly CSteamID localPlayerSteamID = SteamUser.GetSteamID(); // The steamID of the local user (ours)
     public static NetworkPlayer localNetworkPlayer; // The networkPlayer of the local user (ours)
     public static List<ushort> MutedPlayers = new(4);
-    public static readonly Color CustomPlayerColor = Plugin.ConfigCustomColor.Value;
-    public static bool AllOutputPublic = Plugin.ConfigAllOutputPublic.Value;
-    public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
-    public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
-    public static bool IsSongLoop;
-    public static readonly string[] OuchPhrases = Plugin.ConfigOuchPhrases.Value.Split(' ');
-    private static readonly bool NameResize = Plugin.ConfigNoResize.Value;
-    public static bool IsTrustedKicker;
-    private static int NotifyUpdateCount;
+    //public static readonly bool IsCustomPlayerColor = Plugin.ConfigCustomColor.Value != new Color(1, 1, 1);
+    //public static readonly bool IsCustomName = !string.IsNullOrEmpty(Plugin.ConfigCustomName.Value);
+    public static bool SongLoop;
+    //public static readonly string[] OuchPhrases = Plugin.ConfigOuchPhrases.Value.Split(' ');
+    //private static readonly bool NameResize = Plugin.ConfigNoResize.Value;
+    public static bool TrustedKicker;
+    private static int _notifyUpdateCount;
     public static IEnumerator RoutineUsed;
 
     public static ConnectedClientData[] ClientData;

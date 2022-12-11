@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using BepInEx.Configuration;
 using Steamworks;
 using UnityEngine;
 
@@ -37,12 +38,12 @@ public class GUIManager : MonoBehaviour
         
     private void Awake()
     {
-        _qolMenuKey1 = Plugin.ConfigQolMenuKeybind.Value.MainKey;
-        _qolMenuKey2 = Plugin.ConfigQolMenuKeybind.Value.Modifiers.LastOrDefault();
+        _qolMenuKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").MainKey;
+        _qolMenuKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").Modifiers.LastOrDefault();
         if (_qolMenuKey2 == KeyCode.None) _singleMenuKey = true;
 
-        _statWindowKey1 = Plugin.ConfigStatMenuKeybind.Value.MainKey;
-        _statWindowKey2 = Plugin.ConfigStatMenuKeybind.Value.Modifiers.LastOrDefault();
+        _statWindowKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").MainKey;
+        _statWindowKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").Modifiers.LastOrDefault();
         if (_statWindowKey2 == KeyCode.None) _singleStatKey = true;
     }
 
@@ -163,7 +164,7 @@ public class GUIManager : MonoBehaviour
         }
 
         if (GUI.Button(new Rect(263f, 265f, 80f, 30f), "Shrug"))
-            Helper.SendPublicOutput($" \u00af\\_{Plugin.ConfigEmoji.Value}_/\u00af");
+            Helper.SendPublicOutput($" \u00af\\_{ConfigHandler.GetEntry<string>("ShrugEmoji")}_/\u00af");
             
         if (GUI.Button(new Rect(2f, 265f, 80f, 30f), "Help"))
             SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");

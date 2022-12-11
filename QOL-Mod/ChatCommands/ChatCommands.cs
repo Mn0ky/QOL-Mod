@@ -16,6 +16,7 @@ public static class ChatCommands
     {
         new Command("adv", AdvCmd, 0, false).SetAlwaysPublic(),
         new Command("alias", AliasCmd, 1, true),
+        new Command("config", ConfigCmd, 1, true),
         new Command("fov", FovCmd, 1, true),
         new Command("fps", FpsCmd, 1, true),
         new Command("friend", FriendCmd, 1, true),
@@ -150,7 +151,7 @@ public static class ChatCommands
         
     // Outputs player-specified msg from config to chat, blank by default
     private static void AdvCmd(string[] args, Command cmd) 
-        => cmd.SetOutputMsg(Plugin.ConfigAdvCmd.Value);
+        => cmd.SetOutputMsg(ConfigHandler.GetEntry<string>("AdvertiseMsg"));
 
     private static void AliasCmd(string[] args, Command cmd)
     {
@@ -207,7 +208,30 @@ public static class ChatCommands
         SaveCmdAliases();
     }
 
-    private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead
+    private static void ConfigCmd(string[] args, Command cmd)
+    {
+        var entryKey = args[1];
+        var newEntryValue = args.Length == 2 ? null : args[2];
+
+        if (!ConfigHandler.EntryExists(entryKey))
+        {
+            cmd.SetOutputMsg("Invalid key. Try fixing any spelling mistakes.");
+            cmd.SetLogType(Command.LogType.Warning);
+            return;
+        }
+
+        if (newEntryValue == null)
+        {
+            ConfigHandler.ResetEntry(entryKey);
+            cmd.SetOutputMsg("Config option has been reset to default.");
+            return;
+        }
+        
+        ConfigHandler.ModifyEntry(entryKey, newEntryValue);
+        cmd.SetOutputMsg("Config option has been updated.");
+    }
+
+    private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead to provide better error handling
     {
         var newFov = int.Parse(args[1]);
         Camera.main!.fieldOfView = newFov;
@@ -292,7 +316,6 @@ public static class ChatCommands
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled private logging for all applicable commands.");
-            Helper.AllOutputPublic = false;
             SaveCmdVisibilityStates();
             return;
         }
@@ -316,7 +339,7 @@ public static class ChatCommands
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled public logging for all applicable commands.");
-            Helper.AllOutputPublic = true;
+            ConfigHandler.AllOutputPublic = true;
             SaveCmdVisibilityStates();
             return;
         }
@@ -373,13 +396,13 @@ public static class ChatCommands
         switch (args[1])
         {
             case "skip": // Skips to the next song or if all have been played, a random one
-                Helper.IsSongLoop = false;
+                Helper.SongLoop = false;
                 var nextSongMethod = AccessTools.Method(typeof(MusicHandler), "PlayNext");
                 nextSongMethod.Invoke(MusicHandler.Instance, null);
                 cmd.SetOutputMsg("Current song skipped.");
                 return;
             case "loop": // Loops the current song
-                Helper.IsSongLoop = !Helper.IsSongLoop;
+                Helper.SongLoop = !Helper.SongLoop;
                 cmd.SetOutputMsg("Song looping toggled.");
                 return;
             case "play": // Plays song that corresponds to the specified index (0 to # of songs - 1)
@@ -494,7 +517,9 @@ public static class ChatCommands
     // Appends shrug emoticon to the end of the msg just sent
     private static void ShrugCmd(string[] args, Command cmd)
     {
-        var msg = string.Join(" ", args, 1, args.Length - 1) + " \u00af\\_" + Plugin.ConfigEmoji.Value + "_/\u00af";
+        var msg = string.Join(" ", args, 1, args.Length - 1) + " \u00af\\_" +
+                  ConfigHandler.GetEntry<string>("ShrugEmoji") + "_/\u00af";
+        
         cmd.SetOutputMsg(msg);
     }
         
@@ -580,7 +605,7 @@ public static class ChatCommands
         if (cmd.IsEnabled)
         {
             cmd.IsEnabled = true;
-            GameManager.Instance.winText.fontSize = Plugin.ConfigWinStreakFontsize.Value;
+            GameManager.Instance.winText.fontSize = ConfigHandler.GetEntry<int>("WinstreakFontsize");
         }
             
         cmd.SetOutputMsg("Toggled Winstreak system.");

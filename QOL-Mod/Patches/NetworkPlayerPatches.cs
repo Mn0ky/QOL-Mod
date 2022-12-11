@@ -32,7 +32,8 @@ class NetworkPlayerPatch
         var textToTranslate = Encoding.UTF8.GetString(data);
         Debug.Log("Got message: " + textToTranslate);
 
-        var usingKey = !string.IsNullOrEmpty(Plugin.ConfigAuthKeyForTranslation.Value);
+        var authKey = ConfigHandler.GetEntry<string>("AutoAuthTranslationsAPIKey");
+        var usingKey = !string.IsNullOrEmpty(authKey);
 
         var mHasLocalControl = Traverse.Create(__instance).Field("mHasLocalControl").GetValue<bool>();
         var mLocalChatManager = AccessTools.StaticFieldRefAccess<ChatManager>(typeof(NetworkPlayer), 

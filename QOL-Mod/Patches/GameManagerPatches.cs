@@ -45,7 +45,7 @@ class GameManagerPatches
 
             __instance.winText.color = DetermineStreakColor();
                 
-            __instance.winText.fontSize = Plugin.ConfigWinStreakFontsize.Value;
+            __instance.winText.fontSize = ConfigHandler.GetEntry<int>("WinStreakFontsize");
             __instance.winText.text = isStreakHigher ? 
                 $"New Highscore: {Helper.WinStreak}" 
                 : $"Winstreak Of {Helper.WinStreak}";

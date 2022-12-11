@@ -158,7 +158,7 @@ public class ChatManagerPatches
     // Method which increases duration of a chat message by set amount in config
     public static void TalkMethodPostfix(ref float ___disableChatIn)
     {
-        var extraTime = Plugin.ConfigMsgDuration.Value;
+        var extraTime = ConfigHandler.GetEntry<float>("MsgDuration");
         if (extraTime > 0) ___disableChatIn += extraTime;
     }
 

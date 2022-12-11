@@ -51,7 +51,7 @@ class MultiplayerManagerPatches
     }
 
     // Guards against kick attempts made towards the user by skipping the method, if not Monky or Rexi
-    public static bool OnKickedMethodPrefix() => Helper.IsTrustedKicker;
+    public static bool OnKickedMethodPrefix() => Helper.TrustedKicker;
 
     /*public static void OnPlayerSpawnedMethodPrefix(ref GameObject ___m_PlayerPrefab)
     {
@@ -96,22 +96,24 @@ class MultiplayerManagerPatches
         
     public static void OnPlayerSpawnedMethodPostfix(MultiplayerManager __instance)
     {
+        var customPlayerColor = ConfigHandler.GetEntry<Color>("CustomColor");
+        
         foreach (var player in Object.FindObjectsOfType<NetworkPlayer>())
         {
             if (player.NetworkSpawnID != __instance.LocalPlayerIndex)
             {
                 var otherCharacter = player.transform.root.gameObject;
-                var otherColor = Plugin.DefaultColors[player.NetworkSpawnID];
+                var otherColor = ConfigHandler.DefaultColors[player.NetworkSpawnID];
 
                 ChangeAllCharacterColors(otherColor, otherCharacter);
             }
             else
             {
                 var character = player.transform.root.gameObject;
-
-                ChangeAllCharacterColors(!Helper.IsCustomPlayerColor
-                        ? Plugin.DefaultColors[player.NetworkSpawnID]
-                        : Helper.CustomPlayerColor,
+                
+                ChangeAllCharacterColors(!ConfigHandler.IsCustomPlayerColor
+                        ? ConfigHandler.DefaultColors[player.NetworkSpawnID]
+                        : customPlayerColor,
                     character);
             }
         }
@@ -143,9 +145,11 @@ class MultiplayerManagerPatches
             "footParticle (1)"
         };
 
+        var applyParticleColor = ConfigHandler.GetEntry<bool>("CustomColorOnParticle");
+        
         foreach (var partSys in character.GetComponentsInChildren<ParticleSystem>())
         {
-            if (unchangedEffects.Contains(partSys.name) && !Plugin.ConfigCustomColorOnParticle.Value) 
+            if (unchangedEffects.Contains(partSys.name) && !applyParticleColor) 
                 continue;
                 
             var main = partSys.main;

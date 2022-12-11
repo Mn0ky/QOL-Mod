@@ -23,11 +23,13 @@ class ControllerPatches
 
     public static void OnTakeDamageMethodPostfix(Controller __instance) // Postfix method for OnTakeDamage()
     {
-        if (ChatCommands.CmdDict["ow"].IsEnabled && __instance.HasControl)
-        {
-            var randWord = Helper.OuchPhrases[Random.Range(0, Helper.OuchPhrases.Length)]; // The max is exclusive, hence no len(OuchPhrases) - 1
-            Helper.SendPublicOutput(randWord);
-        }
+        if (!ChatCommands.CmdDict["ow"].IsEnabled || !__instance.HasControl) return;
+        
+        // The max is exclusive, hence no len(OuchPhrases) - 1
+        var ouchPhrases = ConfigHandler.OuchPhrases;
+        var randWord = ouchPhrases[Random.Range(0, ouchPhrases.Length)];
+        
+        Helper.SendPublicOutput(randWord);
     }
 
     public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()

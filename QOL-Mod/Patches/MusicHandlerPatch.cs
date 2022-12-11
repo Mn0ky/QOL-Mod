@@ -14,7 +14,7 @@ class MusicHandlerPatch
 
     public static bool PlayNextMethodPrefix(ref AudioSource ___au)
     {
-        if (!Helper.IsSongLoop) return true;
+        if (!Helper.SongLoop) return true;
             
         ___au.Play();
         return false;

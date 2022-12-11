@@ -25,8 +25,8 @@ public class Command
     public List<string> Aliases { get; } = new();
     public bool IsToggle { get; private set; }
     public bool IsEnabled { get; set; }
-    public static readonly char CmdPrefix = Plugin.ConfigCmdPrefix.Value.Length == 1
-        ? Plugin.ConfigCmdPrefix.Value[0]
+    public static readonly char CmdPrefix = ConfigHandler.GetEntry<string>("CommandPrefix").Length == 1
+        ? ConfigHandler.GetEntry<string>("CommandPrefix")[0]
         : '/'; // If more than 1 char was entered, use the default cmd prefix
 
     private readonly Action<string[], Command> _runCmdAction; // Use Action as method will never return anything
@@ -97,9 +97,20 @@ public class Command
             _currentLogType = LogType.Success;
             return;
         }
-            
-        _runCmdAction(args, this);
-            
+
+        try
+        {
+            _runCmdAction(args, this);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception occured when running command: " + e);
+
+            _currentOutputMsg = "Something went wrong! DM Monky#4600 if bug.";
+            Helper.SendModOutput(_currentOutputMsg, LogType.Warning, false);
+            throw;
+        }
+
         if (string.IsNullOrEmpty(_currentOutputMsg)) // Some cmds may not have any output at all
             return;
             

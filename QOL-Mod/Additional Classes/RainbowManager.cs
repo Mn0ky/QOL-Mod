@@ -4,11 +4,11 @@ namespace QOL;
 
 class RainbowManager : MonoBehaviour
 {
-    private readonly float _speed = Plugin.ConfigRainbowSpeed.Value;
+    private float _speed = ConfigHandler.GetEntry<float>("RainbowSpeed");
     private SpriteRenderer[] _rend1;
     private LineRenderer[] _rend2;
 
-    void Start()
+    private void Start()
     {
         Debug.Log("starting rainbow");
         var character = Helper.localNetworkPlayer.transform.root.gameObject;
@@ -20,7 +20,7 @@ class RainbowManager : MonoBehaviour
         foreach (var t in _rend2) t.sharedMaterial.color = Color.white;
     }
 
-    void Update()
+    private void Update()
     {
         // From: https://forum.unity.com/threads/solved-rainbow-hue-shift-over-time-c-script.351751/#post-2277135
         var rbColor = HSBColor.ToColor(new HSBColor(Mathf.PingPong(Time.time * _speed, 1), 1, 1));
@@ -30,21 +30,22 @@ class RainbowManager : MonoBehaviour
         foreach (var lineRenderer in _rend2) lineRenderer.sharedMaterial.color = rbColor;
     }
 
-    void OnDisable()
+    public void OnDisable()
     {
         Debug.Log("rainbow disabled");
         var player = Helper.localNetworkPlayer.transform.root.gameObject;
-
-        if (Helper.IsCustomPlayerColor)
+        var customUserColor = ConfigHandler.GetEntry<Color>("CustomColor");
+        
+        if (customUserColor != ConfigHandler.GetEntry<Color>("CustomColor", true))
         {
-            ResetPlayerColor(Helper.CustomPlayerColor, player);
+            ResetPlayerColor(customUserColor, player);
             return;
         }
 
-        ResetPlayerColor(Plugin.DefaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
+        ResetPlayerColor(ConfigHandler.DefaultColors[Helper.localNetworkPlayer.NetworkSpawnID], player);
     }
 
-    void ResetPlayerColor(Color color, GameObject playerObj)
+    private static void ResetPlayerColor(Color color, GameObject playerObj)
     {
         MultiplayerManagerPatches.ChangeLineRendColor(color, playerObj);
         MultiplayerManagerPatches.ChangeSpriteRendColor(color, playerObj);

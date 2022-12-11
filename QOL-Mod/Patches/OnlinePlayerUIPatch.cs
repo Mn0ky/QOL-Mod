@@ -34,8 +34,8 @@ class OnlinePlayerUIPatch
 
             else
             {
-                if (Helper.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) 
-                    ___mPlayerTexts[i].text = Plugin.ConfigCustomName.Value;
+                if (ConfigHandler.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) 
+                    ___mPlayerTexts[i].text = ConfigHandler.CustomName;
                     
                 else ___mPlayerTexts[i].text = client.PlayerName;
 
@@ -68,8 +68,8 @@ class OnlinePlayerUIPatch
                 
             else
             {
-                if (Helper.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) 
-                    ___mPlayerTexts[i].text = Plugin.ConfigCustomName.Value;
+                if (ConfigHandler.IsCustomName && i == Helper.localNetworkPlayer.NetworkSpawnID) 
+                    ___mPlayerTexts[i].text = ConfigHandler.CustomName;
 
                 else ___mPlayerTexts[i].text = client.PlayerName + client.Ping;
 
