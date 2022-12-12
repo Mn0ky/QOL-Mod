@@ -33,7 +33,7 @@ public static class ChatCommands
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
         new Command("mute", MuteCmd, 1, true),
         new Command("music", MusicCmd, 2, true),
-        new Command("ouch", OuchCmd, 0, true).MarkAsToggle(),
+        new Command("ow", OuchCmd, 0, true).MarkAsToggle(),
         new Command("ping", PingCmd, 1, true),
         new Command("private", PrivateCmd, 0, true),
         new Command("profile", ProfileCmd, 1, true),
@@ -156,7 +156,7 @@ public static class ChatCommands
     private static void AliasCmd(string[] args, Command cmd)
     {
         var resetAlias = args.Length == 2; // Should be true even if cmd has a space char after it 
-        var targetCmdName = args[1].Replace("\"", "").ReplaceChar(Command.CmdPrefix, "");
+        var targetCmdName = args[1].Replace("\"", "").ReplaceCharWithStr(Command.CmdPrefix, "");
         Command targetCmd = null;
 
         if (CmdDict.ContainsKey(targetCmdName))
@@ -184,7 +184,7 @@ public static class ChatCommands
             return;
         }
             
-        var newAlias = Command.CmdPrefix + args[2].Replace("\"", "").ReplaceChar(Command.CmdPrefix, "");
+        var newAlias = Command.CmdPrefix + args[2].Replace("\"", "").ReplaceCharWithStr(Command.CmdPrefix, "");
 
         if (CmdNames.Contains(newAlias))
         {
@@ -434,6 +434,7 @@ public static class ChatCommands
     {
         cmd.Toggle();
         cmd.SetOutputMsg("Toggled OuchMode.");
+        foreach (var phrase in ConfigHandler.OuchPhrases) Debug.Log("Ouch phrase: " + phrase);
     }
         
     // Outputs the specified player's ping

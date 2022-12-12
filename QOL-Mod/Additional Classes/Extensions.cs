@@ -2,7 +2,7 @@
 
 public static class Extensions
 {
-    public static string ReplaceChar(this string origStr, char replaceableChar, string replacedWith) 
+    public static string ReplaceCharWithStr(this string origStr, char replaceableChar, string replacedWith) 
         => origStr.Replace(replaceableChar.ToString(), replacedWith);
 
     public static bool StartsWithChar(this string str, char charToFind)

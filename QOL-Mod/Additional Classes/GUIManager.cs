@@ -151,11 +151,8 @@ public class GUIManager : MonoBehaviour
             Helper.SendPublicOutput(Helper.GetColorFromID(0) + " HP: " + yellowHp);
         }
 
-        if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link"))
-        {
-            GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
+        if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link")) 
             ChatCommands.CmdDict["invite"].Execute();
-        }
 
         if (GUI.Button(new Rect(133f, 265f, 80f, 30f), "Stat Menu"))
         {
