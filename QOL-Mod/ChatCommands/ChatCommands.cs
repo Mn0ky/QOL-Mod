@@ -76,12 +76,12 @@ public static class ChatCommands
             Debug.Log("Setting saved aliases of cmds");
                 
             foreach (var pair in JSONNode.Parse(File.ReadAllText(Plugin.CmdAliasesPath)))
-            foreach (var alias in pair.Value.AsArray)
-            {
-                var cmd = CmdDict[pair.Key];
-                var aliasStr = ((string)alias.Value).Substring(1); // substring so no prefix
-                cmd.Aliases.Add(Command.CmdPrefix + aliasStr);
-            }
+                foreach (var alias in pair.Value.AsArray)
+                {
+                    var cmd = CmdDict[pair.Key];
+                    var aliasStr = ((string)alias.Value).Substring(1); // substring so no prefix
+                    cmd.Aliases.Add(Command.CmdPrefix + aliasStr);
+                }
                 
             Debug.Log("Adding aliases of cmds to cmd dict and list");
                 
@@ -212,6 +212,10 @@ public static class ChatCommands
     {
         var entryKey = args[1];
         var newEntryValue = args.Length == 2 ? null : args[2];
+        var parsedNewEntryValue = args.Length < 3 ? null 
+            : string.Join(" ", args, 2, args.Length - 2).ReplaceCharWithStr('"', "");
+        
+        if (parsedNewEntryValue != null) newEntryValue = parsedNewEntryValue;
 
         if (!ConfigHandler.EntryExists(entryKey))
         {

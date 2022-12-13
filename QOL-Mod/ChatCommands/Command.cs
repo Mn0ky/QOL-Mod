@@ -25,9 +25,11 @@ public class Command
     public List<string> Aliases { get; } = new();
     public bool IsToggle { get; private set; }
     public bool IsEnabled { get; set; }
-    public static readonly char CmdPrefix = ConfigHandler.GetEntry<string>("CommandPrefix").Length == 1
+    //public static string PreviousMsg { get; set; } 
+    
+    public static char CmdPrefix = ConfigHandler.GetEntry<string>("CommandPrefix").Length == 1
         ? ConfigHandler.GetEntry<string>("CommandPrefix")[0]
-        : '/'; // If more than 1 char was entered, use the default cmd prefix
+        : '/';
 
     private readonly Action<string[], Command> _runCmdAction; // Use Action as method will never return anything
     private readonly int _minExpectedArgs; // Minimal # of args required for cmd to function

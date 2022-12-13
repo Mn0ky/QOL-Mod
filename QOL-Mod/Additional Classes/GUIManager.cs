@@ -1,13 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace QOL;
 
 public class GUIManager : MonoBehaviour
 {
+    public static GUIManager Instance { get; private set; }
+    
     private bool _mShowGlobalStats;
     private bool _mShowMenu;
     private bool _mShowStatMenu;
@@ -16,9 +20,9 @@ public class GUIManager : MonoBehaviour
     public static float[] QolMenuPos;
     public static float[] StatMenuPos;
 
-    private Rect _menuRect = new(QolMenuPos[0], QolMenuPos[1], 350f, 375f);
-    private Rect _statMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
-    private Rect _globalStatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 650f, 350f);
+    public Rect menuRect = new(QolMenuPos[0], QolMenuPos[1], 350f, 375f);
+    public Rect statMenuRect = new(StatMenuPos[0], StatMenuPos[1], 510f, 350f);
+    public Rect globalStatMenuRect = new(StatMenuPos[0], StatMenuPos[1], 650f, 350f);
 
     private readonly string[] _playerStats = new string[4];
 
@@ -34,8 +38,12 @@ public class GUIManager : MonoBehaviour
     private KeyCode _statWindowKey2;
     private bool _singleStatKey;
 
-    private void Start() => Debug.Log("Started GUI in GUIManager!");
-        
+    private void Start()
+    {
+        Debug.Log("Started GUI in GUIManager!");
+        Instance = this;
+    }
+
     private void Awake()
     {
         _qolMenuKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").MainKey;
@@ -109,12 +117,12 @@ public class GUIManager : MonoBehaviour
     public void OnGUI() 
     {
         if (_mShowMenu)
-            _menuRect = GUILayout.Window(100, _menuRect, KickWindow,
+            menuRect = GUILayout.Window(100, menuRect, KickWindow,
                 $"<color=red>Monky's QOL Menu</color>\t[v{Plugin.VersionNumber}]");
         if (_mShowStatMenu) 
-            _statMenuRect = GUILayout.Window(101, _statMenuRect, StatWindow, "Stat Menu");
+            statMenuRect = GUILayout.Window(101, statMenuRect, StatWindow, "Stat Menu");
         if (_mShowGlobalStats)
-            _globalStatMenuRect = GUILayout.Window(102, _globalStatMenuRect, GlobalStatWindow, "Global Stats Menu");
+            globalStatMenuRect = GUILayout.Window(102, globalStatMenuRect, GlobalStatWindow, "Global Stats Menu");
     }
         
     private void KickWindow(int window)
@@ -199,8 +207,8 @@ public class GUIManager : MonoBehaviour
         if (GUI.Button(new Rect(150f, 310f, 85f, 25f), "Global Stats"))
         {
             _mShowStatMenu = !_mShowStatMenu;
-            _globalStatMenuRect.x = _statMenuRect.x;
-            _globalStatMenuRect.y = _statMenuRect.y;
+            globalStatMenuRect.x = statMenuRect.x;
+            globalStatMenuRect.y = statMenuRect.y;
             _mShowGlobalStats = true;
                 
             _globalUserStats = Plugin.StatsFileExists ? JSONNode.Parse(File.ReadAllText(Plugin.StatsPath)) : null;
@@ -232,7 +240,7 @@ public class GUIManager : MonoBehaviour
         GUILayout.Space(20f);
         GUILayout.Label("<color=#228f69>(Click To Drag)</color>");
 
-        if (GUI.Button(new Rect(_globalStatMenuRect.width / 2f - 40, _globalStatMenuRect.height - 50, 80, 25), 
+        if (GUI.Button(new Rect(globalStatMenuRect.width / 2f - 40, globalStatMenuRect.height - 50, 80, 25), 
                 "Close"))
         {
             _mShowGlobalStats = !_mShowGlobalStats;
