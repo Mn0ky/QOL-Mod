@@ -103,7 +103,7 @@ public class ChatManagerPatches
     {
         if (_backupTextList[0] != message && message.Length <= 350) SaveForUpArrow(message);
 
-        if (message.StartsWithChar(Command.CmdPrefix))
+        if (message.StartsWith(Command.CmdPrefix))
         {
             FindAndRunCommand(message);
             return false;
@@ -194,30 +194,34 @@ public class ChatManagerPatches
             chatField.text = _backupTextList[_upArrowCounter];
         }
 
-        var chatText = chatField.text;
-        var chatTextLen = chatText.Length;
-        var chatUnformattedTxt = chatField.textComponent.GetParsedText();
+        var txt = chatField.text;
+        var txtLen = txt.Length;
+        var parsedTxt = chatField.textComponent.GetParsedText();
         // Remove last char of non-richtext str since a random space is added from GetParsedText() 
-        chatUnformattedTxt = chatUnformattedTxt.Remove(chatUnformattedTxt.Length - 1);
+        parsedTxt = parsedTxt.Remove(parsedTxt.Length - 1);
 
-        if (chatTextLen > 0 && chatText[0] == Command.CmdPrefix)
+        if (txtLen > 0 && txt[0] == Command.CmdPrefix)
         {
             // Credit for this easy way of getting the closest matching string from a list
             //https://forum.unity.com/threads/auto-complete-text-field.142181/#post-1741569
-            var allCmdsMatched = ChatCommands.CmdNames.FindAll(
-                word => word.StartsWith(chatUnformattedTxt, StringComparison.OrdinalIgnoreCase));
+            var cmdsMatched = ChatCommands.CmdNames.FindAll(
+                word => word.StartsWith(parsedTxt, StringComparison.InvariantCultureIgnoreCase));
 
-            if (allCmdsMatched.Count > 0)
+            if (cmdsMatched.Count > 0)
             {
-                var cmdMatch = allCmdsMatched[0];
-                    
-                if (chatField.richText && chatUnformattedTxt.Length == cmdMatch.Length)
+                var cmdMatch = cmdsMatched[0];
+                var cmdMatchLen = cmdMatch.Length;
+
+                if (chatField.richText && parsedTxt.Length == cmdMatchLen)
                 {
-                        
-                    // Check if cmd has been manually fully typed, if so remove the rich text
-                    var richTxtStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                    if (richTxtStartPos != -1 && chatText.Substring(0, richTxtStartPos) == cmdMatch)
+                    // Check if cmd has been manually fully typed, if so remove its rich text
+                    var richTxtStartPos = txt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
+                    if (richTxtStartPos != -1 && txt.Substring(0, richTxtStartPos) == cmdMatch)
+                    {
+                        Debug.Log("setting chaText to cmdMatch");
                         chatField.text = cmdMatch;
+                        return;
+                    }
 
                     if (Input.GetKeyDown(KeyCode.Tab))
                     {
@@ -226,37 +230,111 @@ public class ChatManagerPatches
                         chatField.stringPosition = chatField.text.Length;
                         chatField.ActivateInputField();
                     }
-                        
+                    
                     return;
                 }
-                    
+                
+                Debug.Log("Setting chattext to cmd substr");
                 chatField.richText = true;
-                chatField.text += "<#000000BB><u>" + cmdMatch.Substring(chatTextLen);
+                chatField.text += "<#000000BB><u>" + cmdMatch.Substring(txtLen);
             }
             else if (chatField.richText)
             {
-                var effectStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
-                if (effectStartPos == -1)
+                var cmdsDetected = ChatCommands.CmdNames.FindAll(word =>
+                    parsedTxt.StartsWith(word, StringComparison.InvariantCultureIgnoreCase));
+                
+                if (cmdsDetected.Count == 0)
                 {
-                    // This will only occur if a cmd is fully typed and then more chars are added after
-                    chatField.richText = false;
-                    return; 
-                }
+                    var effectStartPos = txt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
+                    if (effectStartPos == -1)
+                    {
+                        // This will only occur if a cmd is fully typed and then more chars are added after
+                        chatField.richText = false;
+                        return;
+                    }
 
-                chatField.text = chatText.Remove(effectStartPos);
-                chatField.richText = false;
-            }   
+                    chatField.text = txt.Remove(effectStartPos);
+                    chatField.richText = false;
+                    return;
+                }
+                
+                var cmdMatch = cmdsDetected[0];
+                var targetCmd = ChatCommands.CmdDict[cmdMatch.Substring(1)];
+                var targetCmdParams = targetCmd.AutoParams;
+                var cmdAndParam = parsedTxt.Split(' ');
+                
+                if (targetCmdParams == null) return;
+                if (cmdAndParam.Length <= 1 || cmdAndParam[0].Length != cmdMatch.Length) return;
+                
+                // Focusing on auto-completing the parameter now
+                Debug.Log("Focusing on auto-completing the parameter now");
+                var paramTxt = cmdAndParam![1];
+                var paramTxtLen = paramTxt.Length;
+                var paramsMatched = targetCmdParams.FindAll(
+                        word => word.StartsWith(paramTxt, StringComparison.InvariantCultureIgnoreCase));
+
+                if (paramsMatched.Count > 0)
+                {
+                    Debug.Log("Got a param match!");
+                
+                    var paramMatch = paramsMatched[0];
+                    var paramMatchLen = paramMatch.Length;
+                            
+                    if (chatField.richText && paramTxtLen == paramMatchLen)
+                    {
+                        Debug.Log("paramTxt length == paraMatch length!!");
+                        var paramRichTxtStartPos = paramTxt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
+                        if (paramRichTxtStartPos != -1 && paramTxt.Substring(0, paramRichTxtStartPos) == paramMatch)
+                        {
+                            // "<#000000BB><u>".Length - 1 == 13
+                            Debug.Log("Removing rich txt cause fully typed : " + chatField.text);
+                            chatField.text = chatField.text.Remove(txtLen - paramMatchLen - 13, 14);
+                            return;
+                        }
+                                
+                        if (Input.GetKeyDown(KeyCode.Tab))
+                        {
+                            chatField.DeactivateInputField();
+                            chatField.text += paramMatch;
+                            chatField.stringPosition = chatField.text.Length;
+                            chatField.ActivateInputField();
+                        }
+                                
+                        return;
+                    }
+                
+                    var tempStr = "<#000000BB><u>" + paramMatch.Substring(paramTxtLen);
+                    Debug.Log("Adding param to chatfield!!! : " + tempStr);
+                    chatField.text += tempStr;
+                    chatField.richText = true;
+                }
+                else if (chatField.richText)
+                {
+                    var effectStartPos = txt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
+                    
+                    if (effectStartPos == -1)
+                    {
+                        // Occurs when a cmd is sent, richtext needs to be reset
+                        chatField.richText = false;
+                        return; 
+                    }
+                    
+                    Debug.Log("Removing rich txt... : " + txt);
+                    chatField.text = txt.Remove(effectStartPos);
+                    chatField.richText = false;
+                }
+            }
         }
         else if (chatField.richText)
         {
-            var effectStartPos = chatText.IndexOf("<#000000BB>", StringComparison.Ordinal);
+            var effectStartPos = txt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
             if (effectStartPos == -1)
             {
                 // Occurs when a cmd is sent, richtext needs to be reset
                 chatField.richText = false;
                 return; 
             }
-            chatField.text = chatText.Remove(effectStartPos);
+            chatField.text = txt.Remove(effectStartPos);
             chatField.richText = false;
         }
     }

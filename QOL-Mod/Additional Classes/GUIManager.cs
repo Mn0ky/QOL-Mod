@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using Steamworks;
@@ -30,13 +29,13 @@ public class GUIManager : MonoBehaviour
     private string _playerNamesStr = "Players in Room: \n";
     private string _lobbyHost;
 
-    private KeyCode _qolMenuKey1;
-    private KeyCode _qolMenuKey2;
-    private bool _singleMenuKey;
+    public KeyCode qolMenuKey1;
+    public KeyCode qolMenuKey2;
+    public bool singleMenuKey;
 
-    private KeyCode _statWindowKey1;
-    private KeyCode _statWindowKey2;
-    private bool _singleStatKey;
+    public KeyCode statWindowKey1;
+    public KeyCode statWindowKey2;
+    public bool singleStatKey;
 
     private void Start()
     {
@@ -46,18 +45,18 @@ public class GUIManager : MonoBehaviour
 
     private void Awake()
     {
-        _qolMenuKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").MainKey;
-        _qolMenuKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").Modifiers.LastOrDefault();
-        if (_qolMenuKey2 == KeyCode.None) _singleMenuKey = true;
+        qolMenuKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").MainKey;
+        qolMenuKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("QOLMenuKeybind").Modifiers.LastOrDefault();
+        if (qolMenuKey2 == KeyCode.None) singleMenuKey = true;
 
-        _statWindowKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").MainKey;
-        _statWindowKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").Modifiers.LastOrDefault();
-        if (_statWindowKey2 == KeyCode.None) _singleStatKey = true;
+        statWindowKey1 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").MainKey;
+        statWindowKey2 = ConfigHandler.GetEntry<KeyboardShortcut>("StatWindowKeybind").Modifiers.LastOrDefault();
+        if (statWindowKey2 == KeyCode.None) singleStatKey = true;
     }
 
     private void Update()
     {
-        if (Input.GetKey(_qolMenuKey1) && Input.GetKeyDown(_qolMenuKey2) || Input.GetKeyDown(_qolMenuKey1) && _singleMenuKey)
+        if (Input.GetKey(qolMenuKey1) && Input.GetKeyDown(qolMenuKey2) || Input.GetKeyDown(qolMenuKey1) && singleMenuKey)
         {
             Debug.Log("Trying to open GUI menu!");
 
@@ -78,7 +77,7 @@ public class GUIManager : MonoBehaviour
             _lobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
         }
 
-        if (Input.GetKey(_statWindowKey1) && Input.GetKeyDown(_statWindowKey2) || Input.GetKeyDown(_statWindowKey1) && _singleStatKey)
+        if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && singleStatKey)
         {
             _mStatsShown = true;
             _mShowStatMenu = !_mShowStatMenu;

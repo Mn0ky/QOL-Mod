@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Configuration;
 using TMPro;
 using UnityEngine;
@@ -110,19 +111,47 @@ public static class ConfigHandler
                 crownCount.GetComponentInChildren<Image>().color = customCrownColor;
         };
 
-        EntriesDict["QOLMenuKeybind"] = config.Bind("Menu Options", 
+        var qolMenuKeybindEntry = config.Bind("Menu Options", 
             "QOLMenuKeybind",
             new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1),
             "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. " +
             "All keycodes can be found at the bottom of the page here: " +
             "https://docs.unity3d.com/ScriptReference/KeyCode.html");
 
-        EntriesDict["StatWindowKeybind"] = config.Bind("Menu Options",
+        var qolMenuKeybindEntryKey = qolMenuKeybindEntry.Definition.Key;
+        EntriesDict[qolMenuKeybindEntryKey] = qolMenuKeybindEntry;
+
+        qolMenuKeybindEntry.SettingChanged += (_, _) =>
+        {
+            var shortcut = qolMenuKeybindEntry.Value;
+            var guiManager = GUIManager.Instance;
+            
+            guiManager.qolMenuKey1 = shortcut.MainKey;
+            guiManager.qolMenuKey2 = shortcut.Modifiers.LastOrDefault();
+            
+            guiManager.singleMenuKey = guiManager.qolMenuKey2 == KeyCode.None;
+        };
+
+        var statWindowKeybindEntry = config.Bind("Menu Options",
             "StatWindowKeybind",
             new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
             "Change the keybind for opening the Stat Window? Only specify a single key or two keys. " +
             "All keycodes can be found at the bottom of the page here: " +
             "https://docs.unity3d.com/ScriptReference/KeyCode.html");
+
+        var statWindowKeybindEntryKey = statWindowKeybindEntry.Definition.Key;
+        EntriesDict[statWindowKeybindEntryKey] = statWindowKeybindEntry;
+        
+        statWindowKeybindEntry.SettingChanged += (_, _) =>
+        {
+            var shortcut = statWindowKeybindEntry.Value;
+            var guiManager = GUIManager.Instance;
+            
+            guiManager.statWindowKey1 = shortcut.MainKey;
+            guiManager.statWindowKey2 = shortcut.Modifiers.LastOrDefault();
+
+            guiManager.singleStatKey = guiManager.statWindowKey2 == KeyCode.None;
+        };
 
         var qolMenuCoordsEntry = config.Bind("Menu Options",
             "QOLMenuCoords",
@@ -329,6 +358,9 @@ public static class ConfigHandler
     public static bool EntryExists(string entryKey)
         => EntriesDict.ContainsKey(entryKey);
 
+    public static string[] GetConfigKeys() => EntriesDict.Keys.ToArray();
+
+
     private static float[] MenuPosParser(string menuPos) 
         => Array.ConvertAll(menuPos.ToLower()
                 .Replace("x", "")
@@ -377,7 +409,7 @@ public static class ConfigHandler
                 
         for (var index = 0; index < spacedColors.Length; index++)
         {
-            ColorUtility.TryParseHtmlString(spacedColors[index].Insert(0, "#"), out var convColor);
+            ColorUtility.TryParseHtmlString("#" + spacedColors[index], out var convColor);
             DefaultColors[index] = convColor;
         }
     }

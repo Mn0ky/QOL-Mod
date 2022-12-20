@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using Steamworks;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace QOL;
 
@@ -15,28 +17,28 @@ public static class ChatCommands
     private static readonly List<Command> Cmds = new()
     {
         new Command("adv", AdvCmd, 0, false).SetAlwaysPublic(),
-        new Command("alias", AliasCmd, 1, true),
-        new Command("config", ConfigCmd, 1, true),
+        new Command("alias", AliasCmd, 1, true, CmdNames),
+        new Command("config", ConfigCmd, 1, true, ConfigHandler.GetConfigKeys().ToList()),
         new Command("fov", FovCmd, 1, true),
         new Command("fps", FpsCmd, 1, true),
-        new Command("friend", FriendCmd, 1, true),
+        new Command("friend", FriendCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("gg", GgCmd, 0, true).MarkAsToggle(),
         new Command("help", HelpCmd, 0, true),
-        new Command("hp", HpCmd, 1, false).SetAlwaysPublic(),
-        new Command("id", IdCmd, 1, true),
+        new Command("hp", HpCmd, 1, false, PlayerUtils.PlayerColorsParams).SetAlwaysPublic(),
+        new Command("id", IdCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("invite", InviteCmd, 0, true),
         new Command("lobhp", LobHpCmd, 0, false).SetAlwaysPublic(),
         new Command("lobregen", LobRegenCmd, 0, false).SetAlwaysPublic(),
-        new Command("logprivate", LogPrivateCmd, 1, true),
-        new Command("logpublic", LogPublicCmd, 1, true),
+        new Command("logprivate", LogPrivateCmd, 1, true, CmdNames),
+        new Command("logpublic", LogPublicCmd, 1, true, CmdNames),
         new Command("lowercase", LowercaseCmd, 0, true).MarkAsToggle(),
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
-        new Command("mute", MuteCmd, 1, true),
-        new Command("music", MusicCmd, 2, true),
-        new Command("ow", OuchCmd, 0, true).MarkAsToggle(),
-        new Command("ping", PingCmd, 1, true),
+        new Command("mute", MuteCmd, 1, true, PlayerUtils.PlayerColorsParams),
+        new Command("music", MusicCmd, 2, true, new List<string>(3) {"loop", "play", "skip"}),
+        new Command("ouch", OuchCmd, 0, true).MarkAsToggle(),
+        new Command("ping", PingCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("private", PrivateCmd, 0, true),
-        new Command("profile", ProfileCmd, 1, true),
+        new Command("profile", ProfileCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("public", PublicCmd, 0, true),
         new Command("rainbow", RainbowCmd, 0, true).MarkAsToggle(),
         new Command("resolution", ResolutionCmd, 2, true),
@@ -91,6 +93,8 @@ public static class ChatCommands
                 foreach (var alias in cmd.Aliases) 
                     CmdDict[alias.Substring(1)] = cmd;
             }
+            
+            CmdNames.Sort();
         }
         catch (Exception)
         {
@@ -156,7 +160,7 @@ public static class ChatCommands
     private static void AliasCmd(string[] args, Command cmd)
     {
         var resetAlias = args.Length == 2; // Should be true even if cmd has a space char after it 
-        var targetCmdName = args[1].Replace("\"", "").ReplaceCharWithStr(Command.CmdPrefix, "");
+        var targetCmdName = args[1].Replace("\"", "").Replace(Command.CmdPrefix, "");
         Command targetCmd = null;
 
         if (CmdDict.ContainsKey(targetCmdName))
@@ -178,13 +182,14 @@ public static class ChatCommands
                 CmdDict.Remove(alias);
                 CmdNames.Remove(alias);
             }
-                
+
             targetCmd.Aliases.Clear();
+            CmdNames.Sort();
             SaveCmdAliases();
             return;
         }
             
-        var newAlias = Command.CmdPrefix + args[2].Replace("\"", "").ReplaceCharWithStr(Command.CmdPrefix, "");
+        var newAlias = Command.CmdPrefix + args[2].Replace("\"", "").Replace(Command.CmdPrefix, "");
 
         if (CmdNames.Contains(newAlias))
         {
@@ -199,21 +204,22 @@ public static class ChatCommands
             cmd.SetLogType(Command.LogType.Warning);
             return;
         }
-
+        
         CmdDict[newAlias.Substring(1)] = targetCmd;
         targetCmd.Aliases.Add(newAlias);
         CmdNames.Add(newAlias);
 
         cmd.SetOutputMsg("Added alias " + newAlias + " for " + targetCmd.Name + ".");
+        CmdNames.Sort();
         SaveCmdAliases();
     }
 
     private static void ConfigCmd(string[] args, Command cmd)
     {
-        var entryKey = args[1];
+        var entryKey = args[1].Replace('"', "");
         var newEntryValue = args.Length == 2 ? null : args[2];
         var parsedNewEntryValue = args.Length < 3 ? null 
-            : string.Join(" ", args, 2, args.Length - 2).ReplaceCharWithStr('"', "");
+            : string.Join(" ", args, 2, args.Length - 2).Replace('"', "");
         
         if (parsedNewEntryValue != null) newEntryValue = parsedNewEntryValue;
 
@@ -270,6 +276,21 @@ public static class ChatCommands
         cmd.Toggle();
         cmd.SetOutputMsg("Toggled AutoGG.");
     }
+
+    private static void GunCmd(string[] args, Command cmd)
+    {
+        if (args[1] == "-1")
+        {
+            AccessTools.Method(typeof(GameManager), "SpawnRandomWeapon")
+                .Invoke(GameManager.Instance, null);
+                        
+            return;
+        }
+        
+        var weaponWanted = byte.Parse(args[1]);
+        Helper.localNetworkPlayer.gameObject.GetComponent<Fighting>().NetworkPickUpWeapon(weaponWanted);
+        cmd.SetOutputMsg("Gave gun #" + weaponWanted);
+    }
         
     // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
     private static void HelpCmd(string[] args, Command cmd) 
@@ -304,7 +325,7 @@ public static class ChatCommands
         GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
         cmd.SetOutputMsg("Join link copied to clipboard!");
     }
-        
+
     // Outputs the HP setting for the lobby to chat
     private static void LobHpCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg("Lobby HP: " + OptionsHolder.HP);
@@ -438,15 +459,22 @@ public static class ChatCommands
     {
         cmd.Toggle();
         cmd.SetOutputMsg("Toggled OuchMode.");
-        foreach (var phrase in ConfigHandler.OuchPhrases) Debug.Log("Ouch phrase: " + phrase);
     }
         
     // Outputs the specified player's ping
     private static void PingCmd(string[] args, Command cmd)
     {
         var targetID = Helper.GetIDFromColor(args[1]);
-        var targetPing = Helper.ClientData[targetID].Ping;
         
+        if (targetID == Helper.localNetworkPlayer.NetworkSpawnID)
+        {
+            cmd.SetOutputMsg("Can't ping yourself");
+            cmd.SetLogType(Command.LogType.Warning);
+            return;
+        }
+        
+        var targetPing = Helper.ClientData[targetID].Ping;
+
         cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + targetPing);
     }
         
@@ -488,7 +516,7 @@ public static class ChatCommands
             ELobbyType.k_ELobbyTypePublic
         });
 
-        cmd.SetOutputMsg("Lobby made private!");
+        cmd.SetOutputMsg("Lobby made public!");
     }
 
     // Enables/disables the rainbow system
@@ -564,6 +592,43 @@ public static class ChatCommands
         
         cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + args[2] + ": " + Helper.GetTargetStatValue(targetStats, args[2]));
     }
+
+    private static void SudoCmd(string[] args, Command cmd)
+    {
+        var colorWanted = args[1] != "all" ? Helper.GetIDFromColor(args[1]) : ushort.MaxValue;
+        var txt = string.Join(" ", args, 2, args.Length - 2);
+        var bytes = Encoding.UTF8.GetBytes(txt);
+
+        if (colorWanted != ushort.MaxValue)
+        {
+            var channel = colorWanted switch
+            {
+                0 => 3, // Yellow
+                1 => 5, // Red
+                2 => 7, // Green
+                3 => 9, // Blue
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, colorWanted);
+            return;
+        }
+
+        foreach (var clientData in Helper.ClientData)
+        {
+            if (clientData == null) continue;
+            var spawnID = clientData.PlayerObject.GetComponent<NetworkPlayer>().NetworkSpawnID;
+            var channel = spawnID switch
+            {
+                0 => 3, // Yellow
+                1 => 5, // Red
+                2 => 7, // Green
+                _ => 9, // Blue
+            };
+
+            GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, spawnID);
+        }
+    }
         
     // Kills user
     private static void SuicideCmd(string[] args, Command cmd)
@@ -595,6 +660,23 @@ public static class ChatCommands
         
     // Outputs the mod version number to chat
     private static void VerCmd(string[] args, Command cmd) => cmd.SetOutputMsg("QOL Mod: " + Plugin.VersionNumber);
+    
+    private static void WinCmd(string[] args, Command cmd)
+    {
+        var mapIndex = int.Parse(args[2]);
+        mapIndex = mapIndex == -1 ? Random.Range(1, 125) : mapIndex;
+        var sendPacketToAllMethod = AccessTools.Method(typeof(MultiplayerManager), "SendMessageToAllClients");
+
+        sendPacketToAllMethod.Invoke(GameManager.Instance.mMultiplayerManager, new object[]
+        {
+            new byte[] {(byte) Helper.GetIDFromColor(args[1]), 0}.Concat(BitConverter.GetBytes(mapIndex)).ToArray(),
+            P2PPackageHandler.MsgType.MapChange,
+            false,
+            0UL,
+            EP2PSend.k_EP2PSendReliable,
+            0
+        });
+    }
         
     // Enables/Disables system for outputting the HP of the winner after each round to chat
     private static void WinnerHpCmd(string[] args, Command cmd)

@@ -23,7 +23,7 @@ class ControllerPatches
 
     public static void OnTakeDamageMethodPostfix(Controller __instance) // Postfix method for OnTakeDamage()
     {
-        if (!ChatCommands.CmdDict["ow"].IsEnabled || !__instance.HasControl) return;
+        if (!ChatCommands.CmdDict["ouch"].IsEnabled || !__instance.HasControl) return;
         
         // The max is exclusive, hence no len(OuchPhrases) - 1
         var ouchPhrases = ConfigHandler.OuchPhrases;

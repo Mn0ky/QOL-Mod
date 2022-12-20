@@ -159,8 +159,9 @@ class MultiplayerManagerPatches
 
     public static void ChangeWinTextColor(Color colorWanted, int playerID)
     {
-        var winTexts = Traverse.Create(UnityEngine.Object.FindObjectOfType<WinCounterUI>())
-            .Field("mPlayerWinTexts").GetValue<TextMeshProUGUI[]>();
+        var winTexts = Traverse.Create(Object.FindObjectOfType<WinCounterUI>()).Field("mPlayerWinTexts")
+            .GetValue<TextMeshProUGUI[]>();
+        
         winTexts[playerID].color = colorWanted;
     }
 

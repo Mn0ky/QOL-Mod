@@ -23,10 +23,11 @@ public class Command
         
     public string Name { get; }
     public List<string> Aliases { get; } = new();
+    // TODO: Implement auto-suggested parameters property
+    public List<string> AutoParams { get; }
     public bool IsToggle { get; private set; }
     public bool IsEnabled { get; set; }
-    //public static string PreviousMsg { get; set; } 
-    
+
     public static char CmdPrefix = ConfigHandler.GetEntry<string>("CommandPrefix").Length == 1
         ? ConfigHandler.GetEntry<string>("CommandPrefix")[0]
         : '/';
@@ -40,14 +41,13 @@ public class Command
     private string _currentOutputMsg;
     private LogType _currentLogType; // Any mod msg will be of type "success" by default
 
-    // TODO: Implement auto-suggested parameters property
-    // public String[] AutoParams = new String[] {"placeholder"};
-
-    public Command(string name, Action<string[], Command> cmdMethod, int minNumExpectedArgs, bool defaultPrivate)
+    public Command(string name, Action<string[], Command> cmdMethod, int minNumExpectedArgs, bool defaultPrivate, 
+        List<string> autoParameters = null)
     {
         Name = CmdPrefix + name;
         _runCmdAction = cmdMethod;
         _minExpectedArgs = minNumExpectedArgs;
+        AutoParams = autoParameters;
         IsPublic = !defaultPrivate;
     }
         
