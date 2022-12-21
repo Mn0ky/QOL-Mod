@@ -277,21 +277,6 @@ public static class ChatCommands
         cmd.SetOutputMsg("Toggled AutoGG.");
     }
 
-    private static void GunCmd(string[] args, Command cmd)
-    {
-        if (args[1] == "-1")
-        {
-            AccessTools.Method(typeof(GameManager), "SpawnRandomWeapon")
-                .Invoke(GameManager.Instance, null);
-                        
-            return;
-        }
-        
-        var weaponWanted = byte.Parse(args[1]);
-        Helper.localNetworkPlayer.gameObject.GetComponent<Fighting>().NetworkPickUpWeapon(weaponWanted);
-        cmd.SetOutputMsg("Gave gun #" + weaponWanted);
-    }
-        
     // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
     private static void HelpCmd(string[] args, Command cmd) 
         => SteamFriends.ActivateGameOverlayToWebPage("https://github.com/Mn0ky/QOL-Mod#chat-commands");
@@ -593,43 +578,6 @@ public static class ChatCommands
         cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + args[2] + ": " + Helper.GetTargetStatValue(targetStats, args[2]));
     }
 
-    private static void SudoCmd(string[] args, Command cmd)
-    {
-        var colorWanted = args[1] != "all" ? Helper.GetIDFromColor(args[1]) : ushort.MaxValue;
-        var txt = string.Join(" ", args, 2, args.Length - 2);
-        var bytes = Encoding.UTF8.GetBytes(txt);
-
-        if (colorWanted != ushort.MaxValue)
-        {
-            var channel = colorWanted switch
-            {
-                0 => 3, // Yellow
-                1 => 5, // Red
-                2 => 7, // Green
-                3 => 9, // Blue
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, colorWanted);
-            return;
-        }
-
-        foreach (var clientData in Helper.ClientData)
-        {
-            if (clientData == null) continue;
-            var spawnID = clientData.PlayerObject.GetComponent<NetworkPlayer>().NetworkSpawnID;
-            var channel = spawnID switch
-            {
-                0 => 3, // Yellow
-                1 => 5, // Red
-                2 => 7, // Green
-                _ => 9, // Blue
-            };
-
-            GameManager.Instance.mMultiplayerManager.OnPlayerTalked(bytes, channel, spawnID);
-        }
-    }
-        
     // Kills user
     private static void SuicideCmd(string[] args, Command cmd)
     {
@@ -660,24 +608,7 @@ public static class ChatCommands
         
     // Outputs the mod version number to chat
     private static void VerCmd(string[] args, Command cmd) => cmd.SetOutputMsg("QOL Mod: " + Plugin.VersionNumber);
-    
-    private static void WinCmd(string[] args, Command cmd)
-    {
-        var mapIndex = int.Parse(args[2]);
-        mapIndex = mapIndex == -1 ? Random.Range(1, 125) : mapIndex;
-        var sendPacketToAllMethod = AccessTools.Method(typeof(MultiplayerManager), "SendMessageToAllClients");
 
-        sendPacketToAllMethod.Invoke(GameManager.Instance.mMultiplayerManager, new object[]
-        {
-            new byte[] {(byte) Helper.GetIDFromColor(args[1]), 0}.Concat(BitConverter.GetBytes(mapIndex)).ToArray(),
-            P2PPackageHandler.MsgType.MapChange,
-            false,
-            0UL,
-            EP2PSend.k_EP2PSendReliable,
-            0
-        });
-    }
-        
     // Enables/Disables system for outputting the HP of the winner after each round to chat
     private static void WinnerHpCmd(string[] args, Command cmd)
     {

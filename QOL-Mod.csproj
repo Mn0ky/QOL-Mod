@@ -18,6 +18,15 @@
     <None Remove="TextMeshPro-1.0.55.56.0b9.dll" />
     <None Remove="UnityEngine.UI.dll" />
     <None Remove="QOL-Mod.csproj.DotSettings" />
+    <None Remove="Mono.Security.dll" />
+    <None Remove="mscorlib.dll" />
+    <None Remove="System.dll" />
+    <None Remove="System.Core.dll" />
+    <None Remove="System.Xml.dll" />
+    <None Remove="UnityEngine.dll" />
+    <None Remove="UnityEngine.Analytics.dll" />
+    <None Remove="UnityEngine.dll.mdb" />
+    <None Remove="UnityEngine.Networking.dll" />
   </ItemGroup>
 
   <ItemGroup>
