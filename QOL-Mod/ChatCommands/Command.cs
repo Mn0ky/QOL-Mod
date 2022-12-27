@@ -87,10 +87,10 @@ public class Command
     public void SetLogType(LogType type) => _currentLogType = type;
     public void Toggle() => IsEnabled = !IsEnabled;
 
-    public void Execute(string[] args = null)
+    public void Execute(params string[] args)
     {
         // Minus 1 from args count so the inputted cmd isn't counted as an arg
-        if ((args != null && args.Length - 1 < _minExpectedArgs) || (args == null && _minExpectedArgs > 0))
+        if (args.Length < _minExpectedArgs)
         {
             _currentLogType = LogType.Warning;
             _currentOutputMsg = "Invalid # of arguments specified. See /help for more info.";

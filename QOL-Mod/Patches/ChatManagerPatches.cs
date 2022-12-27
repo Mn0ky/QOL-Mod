@@ -174,8 +174,8 @@ public class ChatManagerPatches
                 Command.LogType.Warning, false);
             return;
         }
-            
-        ChatCommands.CmdDict[targetCommandTyped].Execute(args);
+        
+        ChatCommands.CmdDict[targetCommandTyped].Execute(args.Skip(1).ToArray());
     }
         
     // Checks if the up-arrow or down-arrow key is pressed, if so then
@@ -234,7 +234,7 @@ public class ChatManagerPatches
                     return;
                 }
                 
-                Debug.Log("Setting chattext to cmd substr");
+                Debug.Log("Setting chattext to cmd substr: " + chatField.text);
                 chatField.richText = true;
                 chatField.text += "<#000000BB><u>" + cmdMatch.Substring(txtLen);
             }
@@ -267,7 +267,7 @@ public class ChatManagerPatches
                 if (cmdAndParam.Length <= 1 || cmdAndParam[0].Length != cmdMatch.Length) return;
                 
                 // Focusing on auto-completing the parameter now
-                Debug.Log("Focusing on auto-completing the parameter now");
+                Debug.Log("Focusing on auto-completing the parameter now: " + parsedTxt);
                 var paramTxt = cmdAndParam![1];
                 var paramTxtLen = paramTxt.Length;
                 var paramsMatched = targetCmdParams.FindAll(
@@ -293,9 +293,19 @@ public class ChatManagerPatches
                         }
                                 
                         if (Input.GetKeyDown(KeyCode.Tab))
-                        {
+                        {   // Auto-completes the suggested parameter. Input field is made immutable so str pos is set correctly
                             chatField.DeactivateInputField();
-                            chatField.text += paramMatch;
+
+                            if (paramMatchLen > 1)
+                            {   // Change player color to 1 letter variant to encourage shorthand alternative
+                                var colorIndex = PlayerUtils.PlayerColorsParams.IndexOf(paramMatch);
+                                
+                                if (colorIndex != -1) 
+                                    paramMatch = PlayerUtils.PlayerColorsParams[colorIndex - 1];
+                            }
+                            
+                            // string.Remove() so we don't rely on the update loop to remove the rich txt leftovers
+                            chatField.text = txt.Remove(txtLen - paramMatchLen - 14) + paramMatch;
                             chatField.stringPosition = chatField.text.Length;
                             chatField.ActivateInputField();
                         }
@@ -304,7 +314,7 @@ public class ChatManagerPatches
                     }
                 
                     var tempStr = "<#000000BB><u>" + paramMatch.Substring(paramTxtLen);
-                    Debug.Log("Adding param to chatfield!!! : " + tempStr);
+                    Debug.Log("Adding param to chatfield!!! : " + tempStr + " | paramTxt: " + paramTxt);
                     chatField.text += tempStr;
                     chatField.richText = true;
                 }
@@ -314,7 +324,7 @@ public class ChatManagerPatches
                     
                     if (effectStartPos == -1)
                     {
-                        // Occurs when a cmd is sent, richtext needs to be reset
+                        // Occurs when a cmd is sent, rich txt needs to be reset
                         chatField.richText = false;
                         return; 
                     }

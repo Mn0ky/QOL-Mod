@@ -135,28 +135,16 @@ public class GUIManager : MonoBehaviour
         GUILayout.Label(_playerNamesStr);
 
         if (GUI.Button(new Rect(2f, 300f, 80f, 30f), "<color=yellow>HP Yellow</color>"))
-        {
-            var yellowHp = Helper.GetPlayerHp(0);
-            Helper.SendPublicOutput(Helper.GetColorFromID(0) + " HP: " + yellowHp);
-        }
+            ChatCommands.CmdDict["hp"].Execute("y");
 
         if (GUI.Button(new Rect(89f, 300f, 80f, 30f), "<color=blue>HP Blue</color>"))
-        {
-            var yellowHp = Helper.GetPlayerHp(1);
-            Helper.SendPublicOutput(Helper.GetColorFromID(0) + " HP: " + yellowHp);
-        }
+            ChatCommands.CmdDict["hp"].Execute("b");
 
         if (GUI.Button(new Rect(176f, 300f, 80f, 30f), "<color=red>HP Red</color>"))
-        {
-            var yellowHp = Helper.GetPlayerHp(2);
-            Helper.SendPublicOutput(Helper.GetColorFromID(0) + " HP: " + yellowHp);
-        }
+            ChatCommands.CmdDict["hp"].Execute("r");
 
         if (GUI.Button(new Rect(263f, 300f, 80f, 30f), "<color=green>HP Green</color>"))
-        {
-            var yellowHp = Helper.GetPlayerHp(3);
-            Helper.SendPublicOutput(Helper.GetColorFromID(0) + " HP: " + yellowHp);
-        }
+            ChatCommands.CmdDict["hp"].Execute("g");
 
         if (GUI.Button(new Rect(3f, 335f, 80f, 30f), "Lobby Link")) 
             ChatCommands.CmdDict["invite"].Execute();

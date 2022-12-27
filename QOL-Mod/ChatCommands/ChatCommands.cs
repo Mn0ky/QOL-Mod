@@ -24,7 +24,7 @@ public static class ChatCommands
         new Command("friend", FriendCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("gg", GgCmd, 0, true).MarkAsToggle(),
         new Command("help", HelpCmd, 0, true),
-        new Command("hp", HpCmd, 1, false, PlayerUtils.PlayerColorsParams).SetAlwaysPublic(),
+        new Command("hp", HpCmd, 0, false, PlayerUtils.PlayerColorsParams).SetAlwaysPublic(),
         new Command("id", IdCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("invite", InviteCmd, 0, true),
         new Command("lobhp", LobHpCmd, 0, false).SetAlwaysPublic(),
@@ -34,7 +34,7 @@ public static class ChatCommands
         new Command("lowercase", LowercaseCmd, 0, true).MarkAsToggle(),
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
         new Command("mute", MuteCmd, 1, true, PlayerUtils.PlayerColorsParams),
-        new Command("music", MusicCmd, 2, true, new List<string>(3) {"loop", "play", "skip"}),
+        new Command("music", MusicCmd, 1, true, new List<string>(3) {"loop", "play", "skip"}),
         new Command("ouch", OuchCmd, 0, true).MarkAsToggle(),
         new Command("ping", PingCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("private", PrivateCmd, 0, true),
@@ -159,8 +159,8 @@ public static class ChatCommands
 
     private static void AliasCmd(string[] args, Command cmd)
     {
-        var resetAlias = args.Length == 2; // Should be true even if cmd has a space char after it 
-        var targetCmdName = args[1].Replace("\"", "").Replace(Command.CmdPrefix, "");
+        var resetAlias = args.Length == 1; // Should be true even if cmd has a space char after it 
+        var targetCmdName = args[0].Replace("\"", "").Replace(Command.CmdPrefix, "");
         Command targetCmd = null;
 
         if (CmdDict.ContainsKey(targetCmdName))
@@ -189,7 +189,7 @@ public static class ChatCommands
             return;
         }
             
-        var newAlias = Command.CmdPrefix + args[2].Replace("\"", "").Replace(Command.CmdPrefix, "");
+        var newAlias = Command.CmdPrefix + args[1].Replace("\"", "").Replace(Command.CmdPrefix, "");
 
         if (CmdNames.Contains(newAlias))
         {
@@ -216,8 +216,8 @@ public static class ChatCommands
 
     private static void ConfigCmd(string[] args, Command cmd)
     {
-        var entryKey = args[1].Replace('"', "");
-        var newEntryValue = args.Length == 2 ? null : args[2];
+        var entryKey = args[0].Replace('"', "");
+        var newEntryValue = args.Length == 1 ? null : args[1];
         var parsedNewEntryValue = args.Length < 3 ? null 
             : string.Join(" ", args, 2, args.Length - 2).Replace('"', "");
         
