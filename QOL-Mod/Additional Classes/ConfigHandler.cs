@@ -59,8 +59,8 @@ public static class ConfigHandler
             0.05f,
             "Change the speed of the color shifting in rainbow mode (/rainbow)?");
 
-        EntriesDict["RainbowEnabled"] = config.Bind("Player Color Options",
-            "RainbowEnabled",
+        EntriesDict["RainbowStartup"] = config.Bind("Player Color Options",
+            "RainbowStartup",
             false,
             "Start with rainbow mode enabled?");
 
@@ -194,8 +194,8 @@ public static class ConfigHandler
         GUIManager.QolMenuPos = MenuPosParser(qolMenuCoordsEntry.Value);
         GUIManager.StatMenuPos = MenuPosParser(statMenuCoordsEntry.Value);
 
-        EntriesDict["AlwaysTrackWinstreak"] = config.Bind("Winstreak Options",
-            "AlwaysTrackWinstreak",
+        EntriesDict["WinstreakStartup"] = config.Bind("Winstreak Options",
+            "WinstreakStartup",
             false,
             "Always keep track of your winstreak instead of only when enabled?");
 
@@ -230,8 +230,8 @@ public static class ConfigHandler
         winstreakRangesEntry.SettingChanged += (_, _) => UpdateWinstreakRanges(winstreakRangesEntryKey);
         UpdateWinstreakRanges(winstreakRangesEntryKey);
 
-        EntriesDict["AutoGG"] = config.Bind("On-Startup Options", // The section under which the option is shown
-            "AutoGG",
+        EntriesDict["GGStartup"] = config.Bind("On-Startup Options", // The section under which the option is shown
+            "GGStartup",
             false, // The key of the configuration option in the configuration file
             "Enable AutoGG on startup?"); // Description of the option to show in the config file
             
@@ -240,23 +240,23 @@ public static class ConfigHandler
             false,
             "Enable AlwaysPublicOutput on start-up, where all mod logs in chat are no longer client-side?");
 
-        EntriesDict["ChatCensorshipBypass"] = config.Bind("On-Startup Options",
-            "ChatCensorshipBypass",
+        EntriesDict["UncensorStartup"] = config.Bind("On-Startup Options",
+            "UncensorStartup",
             false,
             "Disable chat censorship on startup?");
 
-        EntriesDict["RichText"] = config.Bind("On-Startup Options",
-            "RichText",
+        EntriesDict["RichtextStartup"] = config.Bind("On-Startup Options",
+            "RichtextStartup",
             true,
             "Enable rich text for chat on startup?");
             
-        EntriesDict["AutoTranslations"] = config.Bind("On-Startup Options",
-            "AutoTranslations",
+        EntriesDict["TranslateStartup"] = config.Bind("On-Startup Options",
+            "TranslateStartup",
             false,
             "Enable auto-translation for chat messages to English on startup?");
             
-        EntriesDict["AlwaysShowHPOfWinner"] = config.Bind("On-Startup Options",
-            "AlwaysShowHPOfWinner",
+        EntriesDict["WinnerHPStartup"] = config.Bind("On-Startup Options",
+            "WinnerHPStartup",
             false,
             "Enable always show the HP for the winner of the round on-startup?");
             
@@ -345,7 +345,7 @@ public static class ConfigHandler
 
     public static T GetEntry<T>(string entryKey, bool defaultValue = false) 
         => defaultValue ? (T)EntriesDict[entryKey].DefaultValue : (T)EntriesDict[entryKey].BoxedValue;
-    
+
     public static void ModifyEntry(string entryKey, string value) 
         => EntriesDict[entryKey].SetSerializedValue(value);
 

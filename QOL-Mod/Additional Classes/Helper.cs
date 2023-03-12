@@ -73,7 +73,7 @@ public class Helper
         Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
         TMPText = Traverse.Create(__instance).Field("text").GetValue<TextMeshPro>();
-        TMPText.richText = ConfigHandler.GetEntry<bool>("RichText");
+        TMPText.richText = ChatCommands.CmdDict["rich"].IsEnabled;
         // Increase caret width so caret won't disappear at certain times
         Traverse.Create(__instance).Field("chatField").GetValue<TMP_InputField>().caretWidth = 3;
 
@@ -114,13 +114,8 @@ public class Helper
 
         GameObject rbHand = new ("RainbowHandler");
         rbHand.AddComponent<RainbowManager>().enabled = false;
-
-        if (ConfigHandler.GetEntry<bool>("RainbowEnabled"))
-        {
-            var rbCmd = ChatCommands.CmdDict["rainbow"];
-            rbCmd.IsEnabled = true;
-            rbCmd.Execute();
-        }
+        var rbCmd = ChatCommands.CmdDict["rainbow"];
+        if (rbCmd.IsEnabled) rbCmd.Execute();
 
         if (_notifyUpdateCount < 3)
         {

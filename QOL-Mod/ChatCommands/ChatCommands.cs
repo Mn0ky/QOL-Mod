@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using BepInEx.Configuration;
 using HarmonyLib;
-using InControl;
+using MonoMod.Utils;
 using Steamworks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -76,6 +77,15 @@ public static class ChatCommands
         Traverse.Create(CmdDict["alias"]).Field(autoParamsBackingField).SetValue(CmdNames); 
         Traverse.Create(CmdDict["logprivate"]).Field(autoParamsBackingField).SetValue(CmdNames);
         Traverse.Create(CmdDict["logpublic"]).Field(autoParamsBackingField).SetValue(CmdNames);
+        
+        // On-startup options need to map their values to respective cmds
+        CmdDict["gg"].IsEnabled = ConfigHandler.GetEntry<bool>("ggstartup");
+        CmdDict["uncensor"].IsEnabled = ConfigHandler.GetEntry<bool>("uncensorstartup");
+        CmdDict["rich"].IsEnabled = ConfigHandler.GetEntry<bool>("richtextstartup");
+        CmdDict["translate"].IsEnabled = ConfigHandler.GetEntry<bool>("translatestartup");
+        CmdDict["winnerhp"].IsEnabled = ConfigHandler.GetEntry<bool>("winnerhpstartup");
+        CmdDict["winstreak"].IsEnabled = ConfigHandler.GetEntry<bool>("winstreakstartup");
+        CmdDict["rainbow"].IsEnabled = ConfigHandler.GetEntry<bool>("rainbowstartup");
     }
 
     private static void LoadCmdAliases()
@@ -85,13 +95,22 @@ public static class ChatCommands
             Debug.Log("Setting saved aliases of cmds");
                 
             foreach (var pair in JSONNode.Parse(File.ReadAllText(Plugin.CmdAliasesPath)))
+            {
                 foreach (var alias in pair.Value.AsArray)
                 {
-                    var cmd = CmdDict[pair.Key];
+                    var cmdName = pair.Key;
+                    if (!CmdDict.ContainsKey(cmdName))
+                    {
+                        Debug.LogWarning("Command: " + cmdName + " DNE!! Assuming it no longer exists and skipping...");
+                        continue;
+                    }
+                    
+                    var cmd = CmdDict[cmdName];
                     var aliasStr = ((string)alias.Value).Substring(1); // substring so no prefix
                     cmd.Aliases.Add(Command.CmdPrefix + aliasStr);
                 }
-                
+            }
+
             Debug.Log("Adding aliases of cmds to cmd dict and list");
                 
             foreach (var cmd in Cmds)
@@ -103,9 +122,9 @@ public static class ChatCommands
             
             CmdNames.Sort();
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Debug.LogError("Failed to change cmd alias, assuming cmd no longer exists!");
+            Debug.LogError("Failed to change cmd alias, something went wrong: " + e);
             Debug.Log("Resetting cmd alias json to prevent corruption...");
             SaveCmdAliases();
         }
@@ -134,13 +153,20 @@ public static class ChatCommands
         {
             foreach (var pair in JSONNode.Parse(File.ReadAllText(Plugin.CmdVisibilityStatesPath)))
             {
-                Debug.Log("Setting saved visibility of cmd: " + pair.Key);
-                CmdDict[pair.Key].IsPublic = pair.Value;
+                var cmdName = pair.Key;
+                if (!CmdDict.ContainsKey(cmdName))
+                {
+                    Debug.LogWarning("Command: " + cmdName + " DNE!! Assuming it no longer exists and skipping...");
+                    continue;
+                }    
+                
+                Debug.Log("Setting saved visibility of cmd: " + cmdName);
+                CmdDict[cmdName].IsPublic = pair.Value;
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Debug.LogError("Failed to change cmd state, assuming cmd no longer exists!");
+            Debug.LogError("Failed to change cmd state, something went wrong: " + e);
             Debug.Log("Resetting cmd visibility states json to prevent corruption...");
             SaveCmdVisibilityStates();
         }
@@ -338,8 +364,7 @@ public static class ChatCommands
 
     private static void LogPrivateCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[0].Replace("\"", "").Replace("/", "");
-            
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "").TrimStart(Command.CmdPrefix);
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled private logging for all applicable commands.");
@@ -347,22 +372,31 @@ public static class ChatCommands
             return;
         }
 
-        var targetCmd = CmdDict.ContainsKey(targetCmdName) ? CmdDict[targetCmdName] : null;
-        if (targetCmd == null)
+        if (!CmdDict.ContainsKey(targetCmdName))
         {
+            Debug.Log("targetCmdName: " + targetCmdName);
             cmd.SetOutputMsg("Specified command not found.");
             cmd.SetLogType(Command.LogType.Warning);
             return;
         }
-            
+
+        var targetCmd = CmdDict[targetCmdName];
+        
+        if (targetCmd.AlwaysPublic)
+        {
+            cmd.SetOutputMsg(targetCmd.Name + " is restricted to public logging only.");
+            cmd.SetLogType(Command.LogType.Warning);
+            return;
+        }
+        
         targetCmd.IsPublic = false;
-        cmd.SetOutputMsg("If applicable, toggled private logging for " + targetCmd.Name + ".");
+        cmd.SetOutputMsg("Toggled private logging for " + targetCmd.Name + ".");
         SaveCmdVisibilityStates();
     }
 
     private static void LogPublicCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[0].Replace("\"", "").Replace("/", "");
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "").TrimStart(Command.CmdPrefix);;
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled public logging for all applicable commands.");
@@ -371,17 +405,25 @@ public static class ChatCommands
             return;
         }
 
-        var targetCmd = CmdDict[targetCmdName];
-        if (targetCmd != null)
+        if (!CmdDict.ContainsKey(targetCmdName))
         {
-            targetCmd.IsPublic = true;
-            cmd.SetOutputMsg("If applicable, toggled public logging for " + targetCmd.Name + ".");
-            SaveCmdVisibilityStates();
+            cmd.SetOutputMsg("Specified command not found.");
+            cmd.SetLogType(Command.LogType.Warning);
             return;
         }
-            
-        cmd.SetOutputMsg("Specified command not found.");
-        cmd.SetLogType(Command.LogType.Warning);
+
+        var targetCmd = CmdDict[targetCmdName];
+
+        if (targetCmd.AlwaysPrivate)
+        {
+            cmd.SetOutputMsg(targetCmd.Name + " is restricted to private logging only.");
+            cmd.SetLogType(Command.LogType.Warning);
+            return;
+        }
+        
+        targetCmd.IsPublic = true;
+        cmd.SetOutputMsg("Toggled public logging for " + targetCmd.Name + ".");
+        SaveCmdVisibilityStates();
     }
         
     // Enables/Disables chat messages always being sent in lowercase

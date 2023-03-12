@@ -11,7 +11,7 @@ public class Command
         get => _isPublic;
         set
         {
-            if (_alwaysPublic || _alwaysPrivate)
+            if (AlwaysPublic || AlwaysPrivate)
             {
                 Debug.LogWarning("Cannot modify cmd visibility once it has been set always public/private!");
                 return;
@@ -35,11 +35,11 @@ public class Command
     private readonly Action<string[], Command> _runCmdAction; // Use Action as method will never return anything
     private readonly int _minExpectedArgs; // Minimal # of args required for cmd to function
     private bool _isPublic;
-    private bool _alwaysPublic;
-    private bool _alwaysPrivate;
+    public bool AlwaysPublic;
+    public bool AlwaysPrivate;
 
-    private string _currentOutputMsg;
-    private LogType _currentLogType; // Any mod msg will be of type "success" by default
+    private static string _currentOutputMsg;
+    private static LogType _currentLogType; // Any mod msg will be of type "success" by default
 
     public Command(string name, Action<string[], Command> cmdMethod, int minNumExpectedArgs, bool defaultPrivate, 
         List<string> autoParameters = null)
@@ -54,25 +54,25 @@ public class Command
     // Private as there has been no cases where this type of visibility was necessary and the cmd was not a toggle
     private void SetAlwaysPrivate() 
     {
-        if (_alwaysPublic)
+        if (AlwaysPublic)
         {
             Debug.LogWarning("Cmd is already always public, cannot modify this!");
             return;
         }
 
-        _alwaysPrivate = true;
+        AlwaysPrivate = true;
         IsPublic = false;
     }
         
     public Command SetAlwaysPublic()
     {
-        if (_alwaysPrivate)
+        if (AlwaysPrivate)
         {
             Debug.LogWarning("Cmd is already always private, cannot modify this!");
             return this;
         }
 
-        _alwaysPublic = true;
+        AlwaysPublic = true;
         IsPublic = true;
         return this;
     }
@@ -96,6 +96,7 @@ public class Command
             Helper.SendModOutput(_currentOutputMsg, _currentLogType, false);
                 
             _currentLogType = LogType.Success;
+            _currentOutputMsg = ""; // In case next cmd has no output 
             return;
         }
 
@@ -109,6 +110,7 @@ public class Command
 
             _currentOutputMsg = "Something went wrong! DM Monky#4600 if bug.";
             Helper.SendModOutput(_currentOutputMsg, LogType.Warning, false);
+            _currentOutputMsg = "";
             throw;
         }
 
@@ -119,11 +121,13 @@ public class Command
         {
             Helper.SendModOutput(_currentOutputMsg, LogType.Warning, false);
             _currentLogType = LogType.Success;
+            _currentOutputMsg = "";
             return;
         }
 
         Helper.SendModOutput(_currentOutputMsg, LogType.Success, !IsToggle && IsPublic, !IsToggle || IsEnabled);
         _currentLogType = LogType.Success;
+        _currentOutputMsg = "";
     }
 
     public enum LogType
