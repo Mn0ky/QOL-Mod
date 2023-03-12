@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using InControl;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -69,6 +70,12 @@ public static class ChatCommands
             
         if (File.Exists(Plugin.CmdAliasesPath))
             LoadCmdAliases();
+        
+        // Reflection hackery so that auto-params for the alias and log cmds work
+        const string autoParamsBackingField = $"<{nameof(Command.AutoParams)}>k__BackingField";
+        Traverse.Create(CmdDict["alias"]).Field(autoParamsBackingField).SetValue(CmdNames); 
+        Traverse.Create(CmdDict["logprivate"]).Field(autoParamsBackingField).SetValue(CmdNames);
+        Traverse.Create(CmdDict["logpublic"]).Field(autoParamsBackingField).SetValue(CmdNames);
     }
 
     private static void LoadCmdAliases()
@@ -217,11 +224,13 @@ public static class ChatCommands
     private static void ConfigCmd(string[] args, Command cmd)
     {
         var entryKey = args[0].Replace('"', "");
-        var newEntryValue = args.Length == 1 ? null : args[1];
-        var parsedNewEntryValue = args.Length < 3 ? null 
-            : string.Join(" ", args, 2, args.Length - 2).Replace('"', "");
-        
-        if (parsedNewEntryValue != null) newEntryValue = parsedNewEntryValue;
+
+        var newEntryValue = args.Length switch
+        {
+            > 2 => string.Join(" ", args, 1, args.Length - 1).Replace('"', ""),
+            > 1 => args[1].Replace('"', ""),
+            _ => ""
+        };
 
         if (!ConfigHandler.EntryExists(entryKey))
         {
@@ -230,7 +239,7 @@ public static class ChatCommands
             return;
         }
 
-        if (newEntryValue == null)
+        if (string.IsNullOrEmpty(newEntryValue))
         {
             ConfigHandler.ResetEntry(entryKey);
             cmd.SetOutputMsg("Config option has been reset to default.");
@@ -243,7 +252,7 @@ public static class ChatCommands
 
     private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead to provide better error handling
     {
-        var newFov = int.Parse(args[1]);
+        var newFov = int.Parse(args[0]);
         Camera.main!.fieldOfView = newFov;
             
         cmd.SetOutputMsg("Set FOV to: " + newFov);
@@ -251,7 +260,7 @@ public static class ChatCommands
 
     private static void FpsCmd(string[] args, Command cmd)
     {
-        var targetFPS = int.Parse(args[1]);
+        var targetFPS = int.Parse(args[0]);
             
         if (targetFPS < 60)
         {
@@ -266,7 +275,7 @@ public static class ChatCommands
 
     private static void FriendCmd(string[] args, Command cmd)
     {
-        var steamID = Helper.GetSteamID(Helper.GetIDFromColor(args[1]));
+        var steamID = Helper.GetSteamID(Helper.GetIDFromColor(args[0]));
         SteamFriends.ActivateGameOverlayToUser("friendadd", steamID);
     }
         
@@ -284,21 +293,29 @@ public static class ChatCommands
     // Outputs HP of targeted color to chat
     private static void HpCmd(string[] args, Command cmd)
     {
-        if (args.Length == 1)
+        if (args.Length == 0)
         {
             cmd.SetOutputMsg("My HP: " + Helper.GetPlayerHp(Helper.localNetworkPlayer.NetworkSpawnID));
             return;
         }
 
         // Assuming user wants another player's hp
-        var targetID = Helper.GetIDFromColor(args[1]);
+        var targetID = Helper.GetIDFromColor(args[0]);
+
+        if (GameManager.Instance.mMultiplayerManager.ConnectedClients[targetID] == null)
+        {
+            cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + " is not in the lobby.");
+            cmd.SetLogType(Command.LogType.Warning);
+            return;
+        }    
+        
         cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + " HP: " + Helper.GetPlayerHp(targetID));
     }
         
     // Outputs the specified player's SteamID
     private static void IdCmd(string[] args, Command cmd)
     {
-        var targetColor = Helper.GetIDFromColor(args[1]);
+        var targetColor = Helper.GetIDFromColor(args[0]);
         GUIUtility.systemCopyBuffer = Helper.GetSteamID(targetColor).m_SteamID.ToString();
 
         cmd.SetOutputMsg(Helper.GetColorFromID(targetColor) + "'s steamID copied to clipboard!");
@@ -321,7 +338,7 @@ public static class ChatCommands
 
     private static void LogPrivateCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[1].Replace("\"", "").Replace("/", "");
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "");
             
         if (targetCmdName == "all")
         {
@@ -345,7 +362,7 @@ public static class ChatCommands
 
     private static void LogPublicCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[1].Replace("\"", "").Replace("/", "");
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "");
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled public logging for all applicable commands.");
@@ -385,7 +402,7 @@ public static class ChatCommands
     // Mutes the specified player (Only for the current lobby and only client-side)
     private static void MuteCmd(string[] args, Command cmd) 
     {
-        var targetID = Helper.GetIDFromColor(args[1]);
+        var targetID = Helper.GetIDFromColor(args[0]);
 
         if (!Helper.MutedPlayers.Contains(targetID))
         {
@@ -403,7 +420,7 @@ public static class ChatCommands
     // Music commands
     private static void MusicCmd(string[] args, Command cmd)
     {
-        switch (args[1])
+        switch (args[0])
         {
             case "skip": // Skips to the next song or if all have been played, a random one
                 Helper.SongLoop = false;
@@ -416,7 +433,7 @@ public static class ChatCommands
                 cmd.SetOutputMsg("Song looping toggled.");
                 return;
             case "play": // Plays song that corresponds to the specified index (0 to # of songs - 1)
-                var songIndex = int.Parse(args[2]);
+                var songIndex = int.Parse(args[1]);
                 var musicHandler = MusicHandler.Instance;
 
                 if (songIndex > musicHandler.myMusic.Length - 1 || songIndex < 0)
@@ -449,7 +466,7 @@ public static class ChatCommands
     // Outputs the specified player's ping
     private static void PingCmd(string[] args, Command cmd)
     {
-        var targetID = Helper.GetIDFromColor(args[1]);
+        var targetID = Helper.GetIDFromColor(args[0]);
         
         if (targetID == Helper.localNetworkPlayer.NetworkSpawnID)
         {
@@ -483,7 +500,7 @@ public static class ChatCommands
     }
 
     private static void ProfileCmd(string[] args, Command cmd) 
-        => SteamFriends.ActivateGameOverlayToUser("steamid", Helper.GetSteamID(Helper.GetIDFromColor(args[1])));
+        => SteamFriends.ActivateGameOverlayToUser("steamid", Helper.GetSteamID(Helper.GetIDFromColor(args[0])));
         
     // Publicizes the lobby (any player can join through quick match)
     private static void PublicCmd(string[] args, Command cmd)
@@ -515,8 +532,8 @@ public static class ChatCommands
 
     private static void ResolutionCmd(string[] args, Command cmd)
     {
-        var width = int.Parse(args[1]);
-        var height = int.Parse(args[2]);
+        var width = int.Parse(args[0]);
+        var height = int.Parse(args[1]);
 
         Screen.SetResolution(width, height, Convert.ToBoolean(OptionsHolder.fullscreen));
         cmd.SetOutputMsg("Set new resolution of: " + width + "x" + height);
@@ -535,27 +552,27 @@ public static class ChatCommands
     // Appends shrug emoticon to the end of the msg just sent
     private static void ShrugCmd(string[] args, Command cmd)
     {
-        var msg = string.Join(" ", args, 1, args.Length - 1) + " \u00af\\_" +
+        var msg = string.Join(" ", args, 0, args.Length) + " \u00af\\_" +
                   ConfigHandler.GetEntry<string>("ShrugEmoji") + "_/\u00af";
         
         cmd.SetOutputMsg(msg);
     }
-        
+
     // Outputs a stat of the target user (WeaponsThrown, Falls, BulletShot, and etc.)
     private static void StatCmd(string[] args, Command cmd)
     {
-        if (args.Length == 2)
+        if (args.Length == 1)
         {
-            var targetStat = args[1];
+            var targetStat = args[0];
             var myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
 
             cmd.SetOutputMsg("My " + targetStat + ": " + Helper.GetTargetStatValue(myStats, targetStat));
             return;
         }
 
-        if (args[1] == "all")
+        if (args[0] == "all")
         {
-            var targetStat = args[2];
+            var targetStat = args[1];
 
             var statMsg = "";
             foreach (var player in GameManager.Instance.mMultiplayerManager.PlayerControllers)
@@ -572,10 +589,10 @@ public static class ChatCommands
             return;
         }
 
-        var targetID = Helper.GetIDFromColor(args[1]);
-        var targetStats = Helper.GetNetworkPlayer(targetID).GetComponentInParent<CharacterStats>();
+        var targetID = Helper.GetIDFromColor(args[0]);
         
-        cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + args[2] + ": " + Helper.GetTargetStatValue(targetStats, args[2]));
+        var targetStats = Helper.GetNetworkPlayer(targetID).GetComponentInParent<CharacterStats>();
+        cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + args[1] + ": " + Helper.GetTargetStatValue(targetStats, args[1]));
     }
 
     // Kills user

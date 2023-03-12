@@ -89,6 +89,7 @@ public class Plugin : BaseUnityPlugin
 
         modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber 
                           + " </color><color=#00bbff><u>Exp.";
+        
         modTextTMP.fontSize = 25;
         modTextTMP.color = Color.red;
         modTextTMP.fontStyle = FontStyles.Bold;

@@ -359,7 +359,10 @@ public static class ConfigHandler
         => EntriesDict.ContainsKey(entryKey);
 
     public static string[] GetConfigKeys() => EntriesDict.Keys.ToArray();
-
+    
+    // ****************************************************************************************************
+    //                        All OnChanged methods below for certain config entries                                     
+    // ****************************************************************************************************
 
     private static float[] MenuPosParser(string menuPos) 
         => Array.ConvertAll(menuPos.ToLower()

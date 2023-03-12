@@ -89,7 +89,6 @@ public class Command
 
     public void Execute(params string[] args)
     {
-        // Minus 1 from args count so the inputted cmd isn't counted as an arg
         if (args.Length < _minExpectedArgs)
         {
             _currentLogType = LogType.Warning;
