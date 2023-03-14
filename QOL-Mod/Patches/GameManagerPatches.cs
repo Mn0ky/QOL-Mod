@@ -28,7 +28,7 @@ class GameManagerPatches
         var winHpCmd = ChatCommands.CmdDict["winnerhp"];
 
         if (ggCmd.IsEnabled) 
-            Helper.SendModOutput("gg", Command.LogType.Success, ggCmd.IsPublic);
+            Helper.SendPublicOutput("gg");
         if (winHpCmd.IsEnabled)
         {
             var winnerHp = Helper.GetPlayerHp(winner);

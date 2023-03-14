@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿/*using UnityEngine;
 
 namespace QOL;
 
@@ -30,7 +30,7 @@ public class Accel : MonoBehaviour
     /*void FixedUpdate()
     {
         _whipTip.AddForce(new Vector3(-10, 5), ForceMode.Impulse);
-    }*/
+    }#1#
 
     void Update() => Debug.Log("Velocity: " + _whipTip.velocity);
-}
+}*/

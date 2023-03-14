@@ -166,8 +166,7 @@ public class ChatManagerPatches
     private static void FindAndRunCommand(string message)
     {
         Debug.Log("User is trying to run a command...");
-        var args = message.TrimStart(Command.CmdPrefix).Trim() // Sanitising input
-            .Split(' ');
+        var args = message.TrimStart(Command.CmdPrefix).Trim().Split(' '); // Sanitising input
         
         var targetCommandTyped = args[0];
 
@@ -178,7 +177,7 @@ public class ChatManagerPatches
             return;
         }
         
-        ChatCommands.CmdDict[targetCommandTyped].Execute(args.Skip(1).ToArray());
+        ChatCommands.CmdDict[targetCommandTyped].Execute(args.Skip(1).ToArray()); // Skip first element (original cmd)
     }
 
     // Checks if the up-arrow or down-arrow key is pressed, if so then
@@ -315,22 +314,15 @@ public class ChatManagerPatches
                 else if (chatField.richText)
                 {
                     var effectStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
-                    
-                    if (effectStartPos == -1)
-                    {
-                        // Occurs when a cmd is sent, rich txt needs to be reset
-                        chatField.richText = false;
-                        return; 
-                    }
-                    
+                    if (effectStartPos == -1) return;
+
                     chatField.text = txt.Remove(effectStartPos);
-                    //chatField.richText = false;
                 }
             }
         }
         else if (chatField.richText)
         {
-            var effectStartPos = txt.IndexOf("<#000000BB>", StringComparison.InvariantCultureIgnoreCase);
+            var effectStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
             if (effectStartPos == -1)
             {
                 // Occurs when a cmd is sent, richtext needs to be reset

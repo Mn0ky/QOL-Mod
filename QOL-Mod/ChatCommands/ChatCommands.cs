@@ -394,7 +394,7 @@ public static class ChatCommands
         GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
         cmd.SetOutputMsg("Join link copied to clipboard!");
     }
-    
+
     // Outputs the HP setting for the lobby to chat
     private static void LobHpCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg("Lobby HP: " + OptionsHolder.HP);

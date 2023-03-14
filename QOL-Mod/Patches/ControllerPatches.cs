@@ -23,7 +23,9 @@ class ControllerPatches
 
     public static void OnTakeDamageMethodPostfix(Controller __instance) // Postfix method for OnTakeDamage()
     {
-        if (!ChatCommands.CmdDict["ouch"].IsEnabled || !__instance.HasControl) return;
+        if (!ChatCommands.CmdDict["ouch"].IsEnabled ||
+            !__instance.HasControl) 
+            return;
         
         // The max is exclusive, hence no len(OuchPhrases) - 1
         var ouchPhrases = ConfigHandler.OuchPhrases;
@@ -34,8 +36,11 @@ class ControllerPatches
 
     public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
     {
-        if (ChatCommands.CmdDict["deathmsg"].IsEnabled && __instance.HasControl)
-            Helper.SendPublicOutput(ConfigHandler.GetEntry<string>("deathmsg"));
+        if (!ChatCommands.CmdDict["deathmsg"].IsEnabled || !__instance.HasControl) 
+            return;
+        
+        var randIndex = Random.Range(0, ConfigHandler.DeathPhrases.Length);
+        Helper.SendPublicOutput(ConfigHandler.DeathPhrases[randIndex]);
     }
 
     public static void LateUpdateMethodPrefix(Controller __instance, CharacterInformation ___info)

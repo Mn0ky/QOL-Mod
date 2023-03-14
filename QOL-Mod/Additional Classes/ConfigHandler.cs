@@ -27,6 +27,7 @@ public static class ConfigHandler
     public static string CustomName { get; private set; }
     public static Color[] DefaultColors { get; } = new Color[4];
     public static string[] OuchPhrases { get; private set; }
+    public static string[] DeathPhrases { get; private set; }
     
 
     public static void InitializeConfig(ConfigFile config)
@@ -292,10 +293,15 @@ public static class ConfigHandler
             "",
             "Modify the output of /adv? By default the message is blank but can be changed to anything.");
 
-        EntriesDict["DeathMsg"] = config.Bind(MiscSec, 
-            "DeathMsg",
-            "",
-            "Set a custom message to send out upon your death?");
+        var deathPhrasesEntry = config.Bind(MiscSec, 
+            "DeathMsgs",
+            "Me dead >:",
+            "Add a custom messages to send out upon your death? Add multiple values by separating them with commas.");
+        
+        var deathPhrasesEntryKey = deathPhrasesEntry.Definition.Key;
+        EntriesDict[deathPhrasesEntryKey] = deathPhrasesEntry;
+        
+        deathPhrasesEntry.SettingChanged += (_, _) => DeathPhrases = ParseCommaSepPhrases(deathPhrasesEntryKey);
 
         EntriesDict["MsgDuration"] = config.Bind(MiscSec,
             "MsgDuration",
@@ -334,7 +340,7 @@ public static class ConfigHandler
         var ouchPhrasesEntryKey = ouchPhrasesEntry.Definition.Key;
         EntriesDict[ouchPhrasesEntryKey] = ouchPhrasesEntry;
         
-        ouchPhrasesEntry.SettingChanged += (_, _) => OuchPhrases = ParseOuchPhrases(ouchPhrasesEntryKey);
+        ouchPhrasesEntry.SettingChanged += (_, _) => OuchPhrases = ParseCommaSepPhrases(ouchPhrasesEntryKey);
 
         EntriesDict["ShrugEmoji"] = config.Bind(MiscSec,
             "ShrugEmoji",
@@ -349,7 +355,7 @@ public static class ConfigHandler
 
         AllOutputPublic = GetEntry<bool>("AlwaysPublicOutput"); // Does not trigger onChanged method when modified
         
-        OuchPhrases = ParseOuchPhrases(ouchPhrasesEntryKey);
+        OuchPhrases = ParseCommaSepPhrases(ouchPhrasesEntryKey);
         IsCustomPlayerColor = customColorEntry.Value != (Color)customColorEntry.DefaultValue;
         IsCustomName = !string.IsNullOrEmpty(customUsernameEntry.Value);
         CustomName = customUsernameEntry.Value;
@@ -382,7 +388,7 @@ public static class ConfigHandler
                 .Replace("y", "")
                 .Split(' '), float.Parse);
 
-    private static string[] ParseOuchPhrases(string entryKey)
+    private static string[] ParseCommaSepPhrases(string entryKey)
     {
         var phrases = GetEntry<string>(entryKey).Split(new []{", "}, StringSplitOptions.RemoveEmptyEntries);
         for (var index = 0; index < phrases.Length; index++)
