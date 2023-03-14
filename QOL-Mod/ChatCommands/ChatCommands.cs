@@ -37,7 +37,7 @@ public static class ChatCommands
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
         new Command("mute", MuteCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("music", MusicCmd, 1, true, new List<string>(3) {"loop", "play", "skip"}),
-        new Command("ouch", OuchCmd, 0, true).MarkAsToggle(),
+        new Command("ouchmsg", OuchCmd, 0, true).MarkAsToggle(),
         new Command("ping", PingCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("private", PrivateCmd, 0, true),
         new Command("profile", ProfileCmd, 1, true, PlayerUtils.PlayerColorsParams),

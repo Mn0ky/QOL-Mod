@@ -23,7 +23,7 @@ class ControllerPatches
 
     public static void OnTakeDamageMethodPostfix(Controller __instance) // Postfix method for OnTakeDamage()
     {
-        if (!ChatCommands.CmdDict["ouch"].IsEnabled ||
+        if (!ChatCommands.CmdDict["ouchmsg"].IsEnabled ||
             !__instance.HasControl) 
             return;
         
