@@ -3,7 +3,6 @@ using System.Linq;
 using BepInEx.Configuration;
 using Steamworks;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace QOL;
 

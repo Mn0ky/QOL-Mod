@@ -24,7 +24,11 @@ class GameManagerPatches
 
     public static void NetworkAllPlayersDiedButOnePostfix(ref byte winner, GameManager __instance)
     {
+        var ggCmd = ChatCommands.CmdDict["gg"];
         var winHpCmd = ChatCommands.CmdDict["winnerhp"];
+
+        if (ggCmd.IsEnabled) 
+            Helper.SendModOutput("gg", Command.LogType.Success, ggCmd.IsPublic);
         if (winHpCmd.IsEnabled)
         {
             var winnerHp = Helper.GetPlayerHp(winner);

@@ -17,7 +17,7 @@ public class Helper
     public static CSteamID GetSteamID(ushort targetID) => ClientData[targetID].ClientID;
 
     // Returns the corresponding spawnID from the specified color
-    public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor switch
+    public static ushort GetIDFromColor(string targetSpawnColor) => targetSpawnColor.ToLower() switch
     { 
         "yellow" or "y" => 0, 
         "blue" or "b" => 1,
@@ -36,11 +36,6 @@ public class Helper
     // ReSharper disable Unity.PerformanceAnalysis
     public static string GetPlayerHp(ushort targetID) =>
         GetNetworkPlayer(targetID)
-            .GetComponentInChildren<HealthHandler>()
-            .health + "%";
-        
-    public static string GetPlayerHp(string targetColor) =>
-        GetNetworkPlayer(GetIDFromColor(targetColor))
             .GetComponentInChildren<HealthHandler>()
             .health + "%";
 
@@ -128,7 +123,7 @@ public class Helper
     public static string GetTargetStatValue(CharacterStats stats, string targetStat)
     {
         foreach (var stat in typeof(CharacterStats).GetFields())
-            if (stat.Name.ToLower() == targetStat)
+            if (string.Equals(stat.Name, targetStat, StringComparison.InvariantCultureIgnoreCase))
                 return stat.GetValue(stats).ToString();
 
         return "No value";

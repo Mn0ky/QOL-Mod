@@ -34,8 +34,8 @@ class ControllerPatches
 
     public static void OnDeathMethodMethodPostfix(Controller __instance) // Postfix method for OnDeath()
     {
-        if (ChatCommands.CmdDict["gg"].IsEnabled && __instance.HasControl)
-            Helper.SendPublicOutput("gg");
+        if (ChatCommands.CmdDict["deathmsg"].IsEnabled && __instance.HasControl)
+            Helper.SendPublicOutput(ConfigHandler.GetEntry<string>("deathmsg"));
     }
 
     public static void LateUpdateMethodPrefix(Controller __instance, CharacterInformation ___info)

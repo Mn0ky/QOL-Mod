@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BepInEx.Configuration;
+using System.Text;
 using HarmonyLib;
-using MonoMod.Utils;
 using Steamworks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -21,6 +19,8 @@ public static class ChatCommands
         new Command("adv", AdvCmd, 0, false).SetAlwaysPublic(),
         new Command("alias", AliasCmd, 1, true, CmdNames),
         new Command("config", ConfigCmd, 1, true, ConfigHandler.GetConfigKeys().ToList()),
+        new Command("deathmsg", DeathMsgCmd, 0, false).MarkAsToggle(),
+        new Command("dm", DmCmd, 1, false, PlayerUtils.PlayerColorsParams),
         new Command("fov", FovCmd, 1, true),
         new Command("fps", FpsCmd, 1, true),
         new Command("friend", FriendCmd, 1, true, PlayerUtils.PlayerColorsParams),
@@ -56,8 +56,9 @@ public static class ChatCommands
         new Command("winstreak", WinstreakCmd, 0, true).MarkAsToggle()
     };
 
-    public static readonly Dictionary<string, Command> CmdDict = Cmds
-        .ToDictionary(cmd => cmd.Name.Substring(1), cmd => cmd);
+    public static readonly Dictionary<string, Command> CmdDict = Cmds.ToDictionary(cmd => cmd.Name.Substring(1),
+        cmd => cmd,
+        StringComparer.InvariantCultureIgnoreCase);
         
     public static readonly List<string> CmdNames = Cmds.Select(cmd => cmd.Name).ToList();
 
@@ -193,7 +194,7 @@ public static class ChatCommands
     private static void AliasCmd(string[] args, Command cmd)
     {
         var resetAlias = args.Length == 1; // Should be true even if cmd has a space char after it 
-        var targetCmdName = args[0].Replace("\"", "").Replace(Command.CmdPrefix, "");
+        var targetCmdName = args[0].Replace("\"", "").Replace(Command.CmdPrefix, "").ToLower();
         Command targetCmd = null;
 
         if (CmdDict.ContainsKey(targetCmdName))
@@ -222,7 +223,7 @@ public static class ChatCommands
             return;
         }
             
-        var newAlias = Command.CmdPrefix + args[1].Replace("\"", "").Replace(Command.CmdPrefix, "");
+        var newAlias = Command.CmdPrefix + args[1].Replace("\"", "").Replace(Command.CmdPrefix, "").ToLower();
 
         if (CmdNames.Contains(newAlias))
         {
@@ -249,7 +250,7 @@ public static class ChatCommands
 
     private static void ConfigCmd(string[] args, Command cmd)
     {
-        var entryKey = args[0].Replace('"', "");
+        var entryKey = args[0].Replace('"', "").ToLower(); // Sanitize
 
         var newEntryValue = args.Length switch
         {
@@ -276,17 +277,57 @@ public static class ChatCommands
         cmd.SetOutputMsg("Config option has been updated.");
     }
 
+    private static void DeathMsgCmd(string[] args, Command cmd)
+    {
+        cmd.Toggle();
+        cmd.SetOutputMsg("Toggled AutoDeathMsg.");
+    }
+
+    private static void DmCmd(string[] args, Command cmd)
+    {
+        var targetID = Helper.GetIDFromColor(args[0]);
+        var targetSteamID = Helper.GetSteamID(targetID);
+        var msg = string.Join(" ", args, 1, args.Length - 1);
+        var msgBytes = Encoding.UTF8.GetBytes(msg);
+        
+        var channel = Helper.localNetworkPlayer.NetworkSpawnID switch
+        {
+            0 => 3, // Yellow
+            1 => 5, // Red
+            2 => 7, // Green
+            3 => 9, // Blue
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        P2PPackageHandler.Instance.SendP2PPacketToUser(targetSteamID,
+            msgBytes,
+            P2PPackageHandler.MsgType.PlayerTalked,
+            EP2PSend.k_EP2PSendReliable,
+            channel);
+    }
+
     private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead to provide better error handling
     {
-        var newFov = int.Parse(args[0]);
+        var success = int.TryParse(args[0], out var newFov);
+        if (!success)
+        {
+            cmd.SetOutputMsg("Error parsing FOV value.");
+            cmd.SetLogType(Command.LogType.Warning);
+        }
+
+        
         Camera.main!.fieldOfView = newFov;
-            
         cmd.SetOutputMsg("Set FOV to: " + newFov);
     }
 
     private static void FpsCmd(string[] args, Command cmd)
     {
-        var targetFPS = int.Parse(args[0]);
+        var success = int.TryParse(args[0], out var targetFPS);
+        if (!success)
+        {
+            cmd.SetOutputMsg("Error parsing FPS value.");
+            cmd.SetLogType(Command.LogType.Warning);
+        }    
             
         if (targetFPS < 60)
         {
@@ -353,7 +394,7 @@ public static class ChatCommands
         GUIUtility.systemCopyBuffer = Helper.GetJoinGameLink();
         cmd.SetOutputMsg("Join link copied to clipboard!");
     }
-
+    
     // Outputs the HP setting for the lobby to chat
     private static void LobHpCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg("Lobby HP: " + OptionsHolder.HP);
@@ -364,7 +405,10 @@ public static class ChatCommands
 
     private static void LogPrivateCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[0].Replace("\"", "").Replace("/", "").TrimStart(Command.CmdPrefix);
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "")
+            .TrimStart(Command.CmdPrefix)
+            .ToLower(); // Even though CmdDict is case-insensitive we need to compare it to "all"
+        
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled private logging for all applicable commands.");
@@ -396,7 +440,10 @@ public static class ChatCommands
 
     private static void LogPublicCmd(string[] args, Command cmd)
     {
-        var targetCmdName = args[0].Replace("\"", "").Replace("/", "").TrimStart(Command.CmdPrefix);;
+        var targetCmdName = args[0].Replace("\"", "").Replace("/", "")
+            .TrimStart(Command.CmdPrefix)
+            .ToLower();
+        
         if (targetCmdName == "all")
         {
             cmd.SetOutputMsg("Toggled public logging for all applicable commands.");
@@ -462,7 +509,7 @@ public static class ChatCommands
     // Music commands
     private static void MusicCmd(string[] args, Command cmd)
     {
-        switch (args[0])
+        switch (args[0].ToLower())
         {
             case "skip": // Skips to the next song or if all have been played, a random one
                 Helper.SongLoop = false;
@@ -512,7 +559,7 @@ public static class ChatCommands
         
         if (targetID == Helper.localNetworkPlayer.NetworkSpawnID)
         {
-            cmd.SetOutputMsg("Can't ping yourself");
+            cmd.SetOutputMsg("Can't ping yourself.");
             cmd.SetLogType(Command.LogType.Warning);
             return;
         }
@@ -590,7 +637,7 @@ public static class ChatCommands
             
         cmd.SetOutputMsg("Toggled Richtext.");
     }
-        
+
     // Appends shrug emoticon to the end of the msg just sent
     private static void ShrugCmd(string[] args, Command cmd)
     {
@@ -605,7 +652,7 @@ public static class ChatCommands
     {
         if (args.Length == 1)
         {
-            var targetStat = args[0];
+            var targetStat = args[0].ToLower();
             var myStats = Helper.localNetworkPlayer.GetComponentInParent<CharacterStats>();
 
             cmd.SetOutputMsg("My " + targetStat + ": " + Helper.GetTargetStatValue(myStats, targetStat));
@@ -614,7 +661,7 @@ public static class ChatCommands
 
         if (args[0] == "all")
         {
-            var targetStat = args[1];
+            var targetStat = args[1].ToLower();
 
             var statMsg = "";
             foreach (var player in GameManager.Instance.mMultiplayerManager.PlayerControllers)
@@ -632,9 +679,11 @@ public static class ChatCommands
         }
 
         var targetID = Helper.GetIDFromColor(args[0]);
-        
         var targetStats = Helper.GetNetworkPlayer(targetID).GetComponentInParent<CharacterStats>();
-        cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + args[1] + ": " + Helper.GetTargetStatValue(targetStats, args[1]));
+        var targetPlayerStat = args[1].ToLower();
+            
+        cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + ", " + targetPlayerStat + ": " +
+                         Helper.GetTargetStatValue(targetStats, targetPlayerStat));
     }
 
     // Kills user
@@ -644,7 +693,7 @@ public static class ChatCommands
         cmd.SetOutputMsg("I've perished.");
     }
         
-    // Enables/disables the auto-translate system for chat
+    // Enables/disables the autargetStatto-translate system for chat
     private static void TranslateCmd(string[] args, Command cmd)
     {
         cmd.Toggle();

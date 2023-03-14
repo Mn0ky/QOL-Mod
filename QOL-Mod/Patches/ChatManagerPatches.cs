@@ -166,7 +166,7 @@ public class ChatManagerPatches
     private static void FindAndRunCommand(string message)
     {
         Debug.Log("User is trying to run a command...");
-        var args = message.ToLower().TrimStart(Command.CmdPrefix).Trim() // Sanitising input
+        var args = message.TrimStart(Command.CmdPrefix).Trim() // Sanitising input
             .Split(' ');
         
         var targetCommandTyped = args[0];
@@ -370,7 +370,7 @@ public class ChatManagerPatches
     private static string UwUify(string targetText)
     {
         var i = 0;
-        var newMessage = new StringBuilder(targetText.ToLower()).Append(0);
+        var newMessage = new StringBuilder(targetText);
         while (i < newMessage.Length)
         {
             if (!char.IsLetter(newMessage[i]))
@@ -378,28 +378,31 @@ public class ChatManagerPatches
                 i++;
                 continue;
             }
-            var c = newMessage[i];
-            var nextC = newMessage[i + 1];
+            
+            var c = char.ToLower(newMessage[i]);
+            var nextC = i < newMessage.Length - 1 ? char.ToLower(newMessage[i + 1]) : '\0';
+            
             switch (c)
             {
                 case 'r' or 'l':
-                    newMessage[i] = 'w';
+                    newMessage[i] = char.IsUpper(newMessage[i]) ? 'W' : 'w';
                     break;
                 case 't' when nextC == 'h':
-                    newMessage[i] = 'd';
+                    newMessage[i] = char.IsUpper(newMessage[i]) ? 'D' : 'd';
                     newMessage.Remove(i + 1, 1);
                     break;
                 case 'n' when nextC != ' ' && nextC != 'g' && nextC != 't' && nextC != 'd':
-                    newMessage.Insert(i + 1, 'y');
+                    newMessage.Insert(i + 1, char.IsUpper(newMessage[i]) ? 'Y' : 'y');
                     break;
                 default:
-                    if (Helper.IsVowel(c) && nextC == 't') newMessage.Insert(i + 1, 'w');
+                    if (Helper.IsVowel(c) && nextC == 't') 
+                        newMessage.Insert(i + 1, char.IsUpper(newMessage[i]) ? 'W' : 'w');
                     break;
             }
             i++;
         }
-            
-        return newMessage.Remove(newMessage.Length - 1, 1).ToString();
+
+        return newMessage.ToString();
     }
 
     private static int _upArrowCounter; // Holds how many times the up-arrow key is pressed while typing
