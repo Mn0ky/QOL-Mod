@@ -355,6 +355,8 @@ public static class ConfigHandler
 
         AllOutputPublic = GetEntry<bool>("AlwaysPublicOutput"); // Does not trigger onChanged method when modified
         
+        // Values that need to be parsed and initialized now
+        DeathPhrases = ParseCommaSepPhrases(deathPhrasesEntryKey);
         OuchPhrases = ParseCommaSepPhrases(ouchPhrasesEntryKey);
         IsCustomPlayerColor = customColorEntry.Value != (Color)customColorEntry.DefaultValue;
         IsCustomName = !string.IsNullOrEmpty(customUsernameEntry.Value);

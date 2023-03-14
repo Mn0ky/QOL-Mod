@@ -47,7 +47,7 @@ public static class ChatCommands
         new Command("rich", RichCmd, 0, true).MarkAsToggle(),
         new Command("shrug", ShrugCmd, 0, false).SetAlwaysPublic(),
         new Command("stat", StatCmd, 1, true),
-        new Command("suicide", SuicideCmd, 0, true),
+        new Command("suicide", SuicideCmd, 0, false),
         new Command("translate", TranslateCmd, 0, true).MarkAsToggle(),
         new Command("uncensor", UncensorCmd, 0, true).MarkAsToggle(),
         new Command("uwu", UwuCmd, 0, true).MarkAsToggle(),
@@ -690,9 +690,12 @@ public static class ChatCommands
     private static void SuicideCmd(string[] args, Command cmd)
     {
         Helper.localNetworkPlayer.UnitWasDamaged(5, true, DamageType.LocalDamage, true);
-        cmd.SetOutputMsg("I've perished.");
-    }
         
+        var phrases = ConfigHandler.DeathPhrases;
+        var randMsg = phrases[Random.Range(0, phrases.Length)];
+        cmd.SetOutputMsg(randMsg);
+    }
+
     // Enables/disables the autargetStatto-translate system for chat
     private static void TranslateCmd(string[] args, Command cmd)
     {
