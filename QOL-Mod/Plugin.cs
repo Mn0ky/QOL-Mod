@@ -87,9 +87,8 @@ public class Plugin : BaseUnityPlugin
         modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
         var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
 
-        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber 
-                          + " </color><color=#00bbff><u>Exp.";
-        
+        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber;
+
         modTextTMP.fontSize = 25;
         modTextTMP.color = Color.red;
         modTextTMP.fontStyle = FontStyles.Bold;

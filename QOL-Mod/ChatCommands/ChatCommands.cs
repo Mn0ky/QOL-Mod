@@ -186,7 +186,7 @@ public static class ChatCommands
     // ****************************************************************************************************
     //                                    All chat command methods below                                      
     // ****************************************************************************************************
-        
+    
     // Outputs player-specified msg from config to chat, blank by default
     private static void AdvCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg(ConfigHandler.GetEntry<string>("AdvertiseMsg"));

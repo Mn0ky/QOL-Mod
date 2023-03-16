@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using TMPro;
+using UltimateFracturing;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -258,8 +259,7 @@ public class ChatManagerPatches
                     chatField.richText = false;
                     return;
                 }
-                
-                
+
                 var cmdMatch = ChatCommands.CmdNames[cmdDetectedIndex];
                 var targetCmd = ChatCommands.CmdDict[cmdMatch.Substring(1)];
                 var targetCmdParams = targetCmd.AutoParams;
@@ -268,9 +268,10 @@ public class ChatManagerPatches
                 if (cmdAndParam.Length <= 1 || cmdAndParam[0].Length != cmdMatch.Length) return;
                 
                 // Focusing on auto-completing the parameter now
-                var paramTxt = cmdAndParam![1];
+                var paramTxt = cmdAndParam![1].Replace(" ", "");
                 var paramTxtLen = paramTxt.Length;
-                
+                    
+                //Debug.Log("paramTxt: \"" + paramTxt + "\"");
                 var paramsMatched = targetCmdParams.FindAll(
                         word => word.StartsWith(paramTxt, StringComparison.InvariantCultureIgnoreCase));
 
@@ -294,7 +295,8 @@ public class ChatManagerPatches
 
                             if (ReferenceEquals(targetCmdParams, PlayerUtils.PlayerColorsParams))
                             {   // Change player color to 1 letter variant to encourage shorthand alternative
-                                var colorIndex = Helper.GetIDFromColor(paramMatch);
+                                // Multiply by 2 to get correct shorthand index for color
+                                var colorIndex = Helper.GetIDFromColor(paramMatch) * 2;
                                 paramMatch = PlayerUtils.PlayerColorsParams[colorIndex];
                             }
                             
