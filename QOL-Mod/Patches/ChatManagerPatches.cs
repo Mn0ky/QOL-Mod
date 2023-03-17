@@ -6,9 +6,7 @@ using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using TMPro;
-using UltimateFracturing;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace QOL;
 
@@ -189,12 +187,20 @@ public class ChatManagerPatches
         {
             chatField.text = _backupTextList[_upArrowCounter];
             _upArrowCounter++;
+            
+            chatField.DeactivateInputField(); // Necessary to properly update carat pos
+            chatField.stringPosition = chatField.text.Length;
+            chatField.ActivateInputField();
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow) && _upArrowCounter > 0)
         {
             _upArrowCounter--;
             chatField.text = _backupTextList[_upArrowCounter];
+            
+            chatField.DeactivateInputField(); // Necessary to properly update carat pos
+            chatField.stringPosition = chatField.text.Length;
+            chatField.ActivateInputField();
         }
 
         const string rTxtFmt = "<#000000BB><u>";
@@ -274,8 +280,9 @@ public class ChatManagerPatches
                 //Debug.Log("paramTxt: \"" + paramTxt + "\"");
                 var paramsMatched = targetCmdParams.FindAll(
                         word => word.StartsWith(paramTxt, StringComparison.InvariantCultureIgnoreCase));
-
-                if (paramsMatched.Count > 0)
+                
+                // Len check is band-aid so spaces don't break it, this will affect dev on nest parameters if it happens
+                if (paramsMatched.Count > 0 && cmdAndParam.Length < 3)
                 {
                     var paramMatch = paramsMatched[0];
                     var paramMatchLen = paramMatch.Length;
