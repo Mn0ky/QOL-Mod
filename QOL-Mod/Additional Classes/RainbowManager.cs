@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace QOL;
 
-class RainbowManager : MonoBehaviour
+public class RainbowManager : MonoBehaviour
 {
-    private float _speed = ConfigHandler.GetEntry<float>("RainbowSpeed");
+    public static float Speed { get ; set; } = ConfigHandler.GetEntry<float>("rainbowspeed");
     private SpriteRenderer[] _rend1;
     private LineRenderer[] _rend2;
 
@@ -23,7 +24,7 @@ class RainbowManager : MonoBehaviour
     private void Update()
     {
         // From: https://forum.unity.com/threads/solved-rainbow-hue-shift-over-time-c-script.351751/#post-2277135
-        var rbColor = HSBColor.ToColor(new HSBColor(Mathf.PingPong(Time.time * _speed, 1), 1, 1));
+        var rbColor = HSBColor.ToColor(new HSBColor(Mathf.PingPong(Time.time * Speed, 1), 1, 1));
 
         // USE "sharedMaterial" property and not "material" property so new instances aren't created every time!!
         foreach (var spriteRenderer in _rend1) spriteRenderer.color = rbColor;

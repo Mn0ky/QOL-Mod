@@ -55,7 +55,8 @@ public class GUIManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKey(qolMenuKey1) && Input.GetKeyDown(qolMenuKey2) || Input.GetKeyDown(qolMenuKey1) && singleMenuKey)
+        if ((Input.GetKey(qolMenuKey1) && Input.GetKeyDown(qolMenuKey2) ||
+             Input.GetKeyDown(qolMenuKey1) && singleMenuKey) && !ChatManager.isTyping)
         {
             Debug.Log("Trying to open GUI menu!");
 
@@ -76,7 +77,8 @@ public class GUIManager : MonoBehaviour
             _lobbyHost = Helper.GetPlayerName(MatchmakingHandler.Instance.LobbyOwner);
         }
 
-        if (Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) || Input.GetKeyDown(statWindowKey1) && singleStatKey)
+        if ((Input.GetKey(statWindowKey1) && Input.GetKeyDown(statWindowKey2) ||
+             Input.GetKeyDown(statWindowKey1) && singleStatKey) && !ChatManager.isTyping)
         {
             _mStatsShown = true;
             _mShowStatMenu = !_mShowStatMenu;

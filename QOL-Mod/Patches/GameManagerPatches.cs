@@ -165,7 +165,7 @@ class GameManagerPatches
             var colorCount = WinstreakRanges[index];
             if (colorCount == 0) continue; // Color has been used the needed times, move on to the next one
 
-            WinstreakRanges[index] -= 1;
+            WinstreakRanges[index]--;
             return WinstreakColors[index]; // return the target color
         }
 

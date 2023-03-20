@@ -62,10 +62,15 @@ public static class ConfigHandler
         false,
         "Apply your custom color for even your walking, jumping, and punching particles?");
 
-        EntriesDict["RainbowSpeed"] = config.Bind(PlayerColorSec,
+        var rainbowSpeedConfigEntry = config.Bind(PlayerColorSec,
             "RainbowSpeed",
             0.05f,
             "Change the speed of the color shifting in rainbow mode (/rainbow)?");
+ 
+        var rainbowSpeedConfigEntryKey = rainbowSpeedConfigEntry.Definition.Key;
+        EntriesDict[rainbowSpeedConfigEntryKey] = rainbowSpeedConfigEntry;
+
+        rainbowSpeedConfigEntry.SettingChanged += (_, _) => RainbowManager.Speed = rainbowSpeedConfigEntry.Value;
 
         EntriesDict["RainbowStartup"] = config.Bind(PlayerColorSec,
             "RainbowStartup",
@@ -207,10 +212,16 @@ public static class ConfigHandler
             false,
             "Always keep track of your winstreak instead of only when enabled?");
 
-        EntriesDict["WinstreakFontsize"] = config.Bind(WinstreakSec,
+        var winstreakFontsizeEntry = config.Bind(WinstreakSec,
             "WinstreakFontsize",
             200,
             "Change the fontsize of your winstreak message?");
+        
+        var winstreakFontsizeEntryKey = winstreakFontsizeEntry.Definition.Key;
+        EntriesDict[winstreakFontsizeEntryKey] = winstreakFontsizeEntry;
+
+        winstreakFontsizeEntry.SettingChanged +=
+            (_, _) => GameManager.Instance.winText.fontSize = winstreakFontsizeEntry.Value;
 
         var winstreakColorsEntry = config.Bind(WinstreakSec,
             "WinstreakColors",
@@ -419,6 +430,8 @@ public static class ConfigHandler
     
     private static void UpdateWinstreakColors(string entryKey)
     {
+        GameManagerPatches.WinstreakColors.Clear();
+        
         foreach (var colorStr in GetEntry<string>(entryKey).Split(' '))
         {
             ColorUtility.TryParseHtmlString('#' + colorStr, out var color);
