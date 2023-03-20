@@ -221,11 +221,13 @@ public class ChatManagerPatches
             {
                 var cmdMatch = cmdsMatched[0];
                 var cmdMatchLen = cmdMatch.Length;
-
+                
+                Debug.Log("parsedtxt: " + parsedTxt);
                 if (chatField.richText && parsedTxt.Length == cmdMatchLen)
                 {
                     // Check if cmd has been manually fully typed, if so remove its rich text
                     var richTxtStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
+                    Debug.Log("txt: " + txt);
                     if (richTxtStartPos != -1 && txt.Substring(0, richTxtStartPos) == cmdMatch)
                     {
                         chatField.text = cmdMatch;
@@ -244,7 +246,7 @@ public class ChatManagerPatches
                 }
                 
                 chatField.richText = true;
-                chatField.text += rTxtFmt + cmdMatch.Substring(txtLen);
+                chatField.text += txtLen < cmdMatchLen ? rTxtFmt + cmdMatch.Substring(txtLen) : "~";
             }
             else if (chatField.richText)
             { // Already a cmd typed
@@ -257,12 +259,12 @@ public class ChatManagerPatches
                     if (effectStartPos == -1)
                     {
                         // This will only occur if a cmd is fully typed and then more chars are added after
-                        chatField.richText = false;
+                        //chatField.richText = false;
                         return;
                     }
                     
                     chatField.text = txt.Remove(effectStartPos);
-                    chatField.richText = false;
+                    //chatField.richText = false;
                     return;
                 }
 
@@ -315,12 +317,11 @@ public class ChatManagerPatches
                                 
                         return;
                     }
-                
-                    var tempStr = rTxtFmt + paramMatch.Substring(paramTxtLen);
-                    chatField.text += tempStr;
+                    
+                    chatField.text += rTxtFmt + paramMatch.Substring(paramTxtLen);
                     chatField.richText = true;
                 }
-                else if (chatField.richText)
+                else if (chatField.richText) // TODO: Implement support for rich text as argument input
                 {
                     var effectStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
                     if (effectStartPos == -1) return;

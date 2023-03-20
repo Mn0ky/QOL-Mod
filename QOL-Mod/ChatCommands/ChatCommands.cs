@@ -369,7 +369,7 @@ public static class ChatCommands
         // Assuming user wants another player's hp
         var targetID = Helper.GetIDFromColor(args[0]);
 
-        if (GameManager.Instance.mMultiplayerManager.ConnectedClients[targetID] == null)
+        if (!PlayerUtils.IsPlayerInLobby(targetID))
         {
             cmd.SetOutputMsg(Helper.GetColorFromID(targetID) + " is not in the lobby.");
             cmd.SetLogType(Command.LogType.Warning);
