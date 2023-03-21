@@ -191,6 +191,8 @@ public class ChatManagerPatches
             chatField.DeactivateInputField(); // Necessary to properly update carat pos
             chatField.stringPosition = chatField.text.Length;
             chatField.ActivateInputField();
+            
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow) && _upArrowCounter > 0)
@@ -201,6 +203,8 @@ public class ChatManagerPatches
             chatField.DeactivateInputField(); // Necessary to properly update carat pos
             chatField.stringPosition = chatField.text.Length;
             chatField.ActivateInputField();
+            
+            return;
         }
 
         const string rTxtFmt = "<#000000BB><u>";
@@ -222,12 +226,10 @@ public class ChatManagerPatches
                 var cmdMatch = cmdsMatched[0];
                 var cmdMatchLen = cmdMatch.Length;
                 
-                Debug.Log("parsedtxt: " + parsedTxt);
                 if (chatField.richText && parsedTxt.Length == cmdMatchLen)
                 {
                     // Check if cmd has been manually fully typed, if so remove its rich text
                     var richTxtStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
-                    Debug.Log("txt: " + txt);
                     if (richTxtStartPos != -1 && txt.Substring(0, richTxtStartPos) == cmdMatch)
                     {
                         chatField.text = cmdMatch;
@@ -246,7 +248,7 @@ public class ChatManagerPatches
                 }
                 
                 chatField.richText = true;
-                chatField.text += txtLen < cmdMatchLen ? rTxtFmt + cmdMatch.Substring(txtLen) : "~";
+                chatField.text += txtLen <= cmdMatchLen ? rTxtFmt + cmdMatch.Substring(txtLen) : Command.CmdPrefix;
             }
             else if (chatField.richText)
             { // Already a cmd typed
@@ -257,14 +259,10 @@ public class ChatManagerPatches
                 {
                     var effectStartPos = txt.IndexOf(rTxtFmt, StringComparison.InvariantCultureIgnoreCase);
                     if (effectStartPos == -1)
-                    {
                         // This will only occur if a cmd is fully typed and then more chars are added after
-                        //chatField.richText = false;
                         return;
-                    }
-                    
+
                     chatField.text = txt.Remove(effectStartPos);
-                    //chatField.richText = false;
                     return;
                 }
 
