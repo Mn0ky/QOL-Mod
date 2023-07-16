@@ -2,8 +2,10 @@
 using System.IO;
 using BepInEx;
 using HarmonyLib;
+using SimpleJson;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace QOL;
 
@@ -42,11 +44,25 @@ public class Plugin : BaseUnityPlugin
             MusicHandlerPatch.Patch(harmony);
             Logger.LogInfo("Applying MovementPatch...");
             MovementPatch.Patch(harmony);
+            Logger.LogInfo("Applying MapSelectionHandlerPatch...");
+            MapSelectionHandlerPatches.Patch(harmony);
         }
         catch (Exception ex)
         {
             Logger.LogError("Exception on applying patches: " + ex.InnerException);
         }
+        
+        if (!Directory.Exists(InternalsPath))
+            Directory.CreateDirectory(InternalsPath);
+        
+        if (!File.Exists(MapPresetsPath))
+        {
+            var emptyPresetList = new JSONObject();
+            emptyPresetList.Add("savedPresets", new JSONArray());
+            File.WriteAllText(MapPresetsPath, emptyPresetList.ToString());
+        }
+        
+        MapPresetHandler.InitializeMapPresets();
 
         try
         {
@@ -77,26 +93,34 @@ public class Plugin : BaseUnityPlugin
         }
         else
             GameManagerPatches.WinstreakHighScore = 0;
-
+        
+        
         ChatCommands.InitializeCmds();
     }
 
     public static void InitModText()
     {
         var modText = new GameObject("ModText");
-        modText.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+        var canvas = modText.AddComponent<Canvas>();
+        var canvasScaler = modText.AddComponent<CanvasScaler>();
         var modTextTMP = modText.AddComponent<TextMeshProUGUI>();
+        
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        canvasScaler.referenceResolution = new Vector2(1920, 1080);
 
-        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber;
-
+        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber + " </color><color=#00bbff>Testing";
+        
+        modTextTMP.fontSizeMax = 25;
         modTextTMP.fontSize = 25;
+        modTextTMP.enableAutoSizing = true;
         modTextTMP.color = Color.red;
         modTextTMP.fontStyle = FontStyles.Bold;
         modTextTMP.alignment = TextAlignmentOptions.TopRight;
         modTextTMP.richText = true;
     }
 
-    public const string VersionNumber = "1.17.3"; // Version number
+    public const string VersionNumber = "1.17.4"; // Version number
     public const string Guid = "monky.plugins.QOL";
     public static string NewUpdateVerCode = "";
         
@@ -104,8 +128,9 @@ public class Plugin : BaseUnityPlugin
     public static readonly string InternalsPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\";
         
     public static readonly string StatsPath = Paths.PluginPath + "\\QOL-Mod\\StatsData.json";
-    public static readonly string CmdAliasesPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\CmdAliases.json";
-    public static readonly string CmdVisibilityStatesPath = Paths.PluginPath + "\\QOL-Mod\\Internal\\CmdVisibilityStates.json";
+    public static readonly string CmdAliasesPath = InternalsPath + "CmdAliases.json";
+    public static readonly string CmdVisibilityStatesPath = InternalsPath + "CmdVisibilityStates.json";
+    public static readonly string MapPresetsPath = InternalsPath + "SavedMapPresets.json";
 
     public static bool StatsFileExists = File.Exists(StatsPath);
 }

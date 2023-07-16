@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using HarmonyLib;
 using Steamworks;
 using TMPro;
@@ -118,6 +119,11 @@ public class Helper
             __instance.StartCoroutine(CheckForModUpdate());
             _notifyUpdateCount++;
         }
+        
+        MapPresetHandler.RefreshMutables();
+        // Check if all default presets exist, if not generate them first.
+        if (!MapPresetHandler.DefaultPresetsExist())
+            MapPresetHandler.GenerateDefaultPresets();
     }
 
     public static string GetTargetStatValue(CharacterStats stats, string targetStat)
@@ -195,8 +201,18 @@ public class Helper
         }
 
         string latestVer = JSONNode.Parse(webRequest.downloadHandler.text)["tag_name"];
-
-        if (latestVer.Remove(0, 1) == Plugin.VersionNumber) yield break;
+        latestVer = latestVer.Remove(0, 1); // Remove the 'v', ex: v1.17.0 --> 1.17.0
+        const string curVer = Plugin.VersionNumber;
+        
+        var latestMajorBuildNum = int.Parse(latestVer.Substring(2, 2)); // The '17' in 1.17.0
+        var latestMinorBuildNum = int.Parse(latestVer.Substring(5,  latestVer.Length == 6 ? 1 : 2));
+        //Debug.Log("Current build: " + latestMajorBuildNum + " " + latestMinorBuildNum);
+        
+        var curMajorBuildNum = int.Parse(curVer.Substring(2, 2));
+        var curMinorBuildNum = int.Parse(curVer.Substring(5,  curVer.Length == 6 ? 1 : 2));
+        
+        if (latestVer == Plugin.VersionNumber || curMajorBuildNum > latestMajorBuildNum || curMinorBuildNum > latestMinorBuildNum) 
+            yield break;
             
         Plugin.NewUpdateVerCode = latestVer;
         SendModOutput("A new mod update has been detected: <#006400>" + Plugin.NewUpdateVerCode, 

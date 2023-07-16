@@ -16,6 +16,8 @@ public static class ChatCommands
 {
     private static readonly List<Command> Cmds = new()
     {
+        //new Command("socket", SocketCmd, 0, true),
+        //new Command("bulletcolor", BulletColorCmd, 1, true, new List<string>(3) {"all", }),
         new Command("adv", AdvCmd, 0, false).SetAlwaysPublic(),
         new Command("alias", AliasCmd, 1, true, CmdNames),
         new Command("config", ConfigCmd, 1, true, ConfigHandler.GetConfigKeys().ToList()),
@@ -35,6 +37,7 @@ public static class ChatCommands
         new Command("logpublic", LogPublicCmd, 1, true, CmdNames),
         new Command("lowercase", LowercaseCmd, 0, true).MarkAsToggle(),
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
+        new Command("maps", MapsCmd, 1, true),
         new Command("mute", MuteCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("music", MusicCmd, 1, true, new List<string>(3) {"loop", "play", "skip"}),
         new Command("ouchmsg", OuchCmd, 0, true).MarkAsToggle(),
@@ -64,20 +67,18 @@ public static class ChatCommands
 
     public static void InitializeCmds()
     {
-        if (!Directory.Exists(Plugin.InternalsPath))
-            Directory.CreateDirectory(Plugin.InternalsPath);
-            
         if (File.Exists(Plugin.CmdVisibilityStatesPath))
             LoadCmdVisibilityStates();
             
         if (File.Exists(Plugin.CmdAliasesPath))
             LoadCmdAliases();
-        
-        // Reflection hackery so that auto-params for the alias and log cmds work
+
+        // Reflection hackery so that auto-params for the alias,log, maps cmds work
         const string autoParamsBackingField = $"<{nameof(Command.AutoParams)}>k__BackingField";
         Traverse.Create(CmdDict["alias"]).Field(autoParamsBackingField).SetValue(CmdNames); 
         Traverse.Create(CmdDict["logprivate"]).Field(autoParamsBackingField).SetValue(CmdNames);
         Traverse.Create(CmdDict["logpublic"]).Field(autoParamsBackingField).SetValue(CmdNames);
+        Traverse.Create(CmdDict["maps"]).Field(autoParamsBackingField).SetValue(MapPresetHandler.MapPresetNames);
         
         // On-startup options need to map their values to respective cmds
         CmdDict["gg"].IsEnabled = ConfigHandler.GetEntry<bool>("ggstartup");
@@ -186,7 +187,16 @@ public static class ChatCommands
     // ****************************************************************************************************
     //                                    All chat command methods below                                      
     // ****************************************************************************************************
-    
+
+    // private static void SocketCmd(string[] args, Command cmd)
+    // {
+    //     Debug.Log("Trying to connect to socket server!!!");
+    //     var multiplayerStuff = Object.FindObjectOfType<MatchmakingHandler>().gameObject;
+    //     
+    //     if (!multiplayerStuff.GetComponent<MatchMakingHandlerSockets>())
+    //         multiplayerStuff.AddComponent<MatchMakingHandlerSockets>().JoinServer();
+    // }
+
     // Outputs player-specified msg from config to chat, blank by default
     private static void AdvCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg(ConfigHandler.GetEntry<string>("AdvertiseMsg"));
@@ -487,6 +497,64 @@ public static class ChatCommands
         if (Helper.RoutineUsed != null) Helper.LocalChat.StopCoroutine(Helper.RoutineUsed);
         cmd.SetOutputMsg("Toggled NukyChat.");
     }
+    
+    // Saves/Removes/Loads map presets
+    private static void MapsCmd(string[] args, Command cmd)
+    {
+        var arg = args[0];
+        switch (arg)
+        {
+            case "remove" or "save" when args.Length < 2:
+                cmd.SetLogType(Command.LogType.Warning);
+                cmd.SetOutputMsg("No preset name given, please specify one.");
+                return;
+            case "save":
+            {
+                var presetName = args[1];
+                if (MapPresetHandler.MapPresetNames.Contains(presetName))
+                {
+                    cmd.SetLogType(Command.LogType.Warning);
+                    cmd.SetOutputMsg("Preset with specified name already exists.");
+                    return;
+                }
+
+                var activeMaps = MapPresetHandler.GetAllStockMapIndexes(true);
+                var presetToSave = new SaveableMapPreset(activeMaps, presetName);
+                MapPresetHandler.AddNewPreset(presetToSave);
+
+                cmd.SetOutputMsg("Saved preset: \"" + presetName + "\".");
+                return;
+            }
+            case "remove":
+            {
+                var presetName = args[1];
+                var presetWantedIndex = MapPresetHandler.MapPresets.FindIndex(preset => preset.PresetName == presetName);
+
+                if (presetWantedIndex == -1)
+                {
+                    cmd.SetLogType(Command.LogType.Warning);
+                    cmd.SetOutputMsg("Specified preset not found.");
+                    return;
+                }
+            
+                MapPresetHandler.DeletePreset(presetWantedIndex, presetName);
+                cmd.SetOutputMsg("Removed preset: \"" + presetName + "\".");
+                return;
+            }
+        }
+
+        // Must want to load preset instead
+        var presetWanted = MapPresetHandler.MapPresets.FirstOrDefault(preset => preset.PresetName == arg);
+        if (presetWanted is null)
+        {
+            cmd.SetLogType(Command.LogType.Warning);
+            cmd.SetOutputMsg("Specified preset not found.");
+            return;
+        }
+
+        MapPresetHandler.LoadPreset(presetWanted);
+        cmd.SetOutputMsg("Enabled preset: \"" + arg + "\".");
+    }
         
     // Mutes the specified player (Only for the current lobby and only client-side)
     private static void MuteCmd(string[] args, Command cmd) 
@@ -515,10 +583,15 @@ public static class ChatCommands
                 Helper.SongLoop = false;
                 var nextSongMethod = AccessTools.Method(typeof(MusicHandler), "PlayNext");
                 nextSongMethod.Invoke(MusicHandler.Instance, null);
+                
+                Helper.SongLoop = false;
+                cmd.IsEnabled = true;
+                
                 cmd.SetOutputMsg("Current song skipped.");
                 return;
             case "loop": // Loops the current song
                 Helper.SongLoop = !Helper.SongLoop;
+                cmd.IsEnabled = Helper.SongLoop;
                 cmd.SetOutputMsg("Song looping toggled.");
                 return;
             case "play": // Plays song that corresponds to the specified index (0 to # of songs - 1)
@@ -538,6 +611,9 @@ public static class ChatCommands
                 audioSource.clip = musicHandler.myMusic[songIndex].clip;
                 audioSource.volume = musicHandler.myMusic[songIndex].volume;
                 audioSource.Play();
+                
+                Helper.SongLoop = false;
+                cmd.IsEnabled = true;
 
                 cmd.SetOutputMsg($"Now playing song #{songIndex} out of {musicHandler.myMusic.Length - 1}.");
                 return;

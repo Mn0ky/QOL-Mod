@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using TMPro;
@@ -13,11 +14,11 @@ public static class ConfigHandler
     private static readonly Dictionary<string, ConfigEntryBase> EntriesDict = new(StringComparer.InvariantCultureIgnoreCase);
     
     // Config sections
-    private const string MenuSec = "Menu Options";
-    private const string MiscSec = "Misc. Options";
-    private const string OnstartupSec = "On-Startup Options";
-    private const string PlayerColorSec = "Player Color Options";
-    private const string WinstreakSec = "Winstreak Options";
+    private const string MenuSect = "Menu Options";
+    private const string MiscSect = "Misc. Options";
+    private const string OnstartupSect = "On-Startup Options";
+    private const string PlayerColorSect = "Player Color Options";
+    private const string WinstreakSect = "Winstreak Options";
 
     public static bool AllOutputPublic { get; set; }
     
@@ -32,7 +33,7 @@ public static class ConfigHandler
 
     public static void InitializeConfig(ConfigFile config)
     {
-        var customColorEntry = config.Bind(PlayerColorSec,
+        var customColorEntry = config.Bind(PlayerColorSect,
             "CustomColor",
             new Color(1, 1, 1),
             "Specify a custom player color? (Use a HEX value)");
@@ -57,12 +58,12 @@ public static class ConfigHandler
             MultiplayerManagerPatches.ChangeAllCharacterColors(DefaultColors[localUser.NetworkSpawnID], localUser.gameObject);
         };
 
-        EntriesDict["CustomColorOnParticle"] = config.Bind(PlayerColorSec,
+        EntriesDict["CustomColorOnParticle"] = config.Bind(PlayerColorSect,
         "CustomColorOnParticle",
         false,
         "Apply your custom color for even your walking, jumping, and punching particles?");
 
-        var rainbowSpeedConfigEntry = config.Bind(PlayerColorSec,
+        var rainbowSpeedConfigEntry = config.Bind(PlayerColorSect,
             "RainbowSpeed",
             0.05f,
             "Change the speed of the color shifting in rainbow mode (/rainbow)?");
@@ -72,12 +73,12 @@ public static class ConfigHandler
 
         rainbowSpeedConfigEntry.SettingChanged += (_, _) => RainbowManager.Speed = rainbowSpeedConfigEntry.Value;
 
-        EntriesDict["RainbowStartup"] = config.Bind(PlayerColorSec,
+        EntriesDict["RainbowStartup"] = config.Bind(PlayerColorSect,
             "RainbowStartup",
             false,
             "Start with rainbow mode enabled?");
 
-        var defaultPlayerColorsEntry = config.Bind(PlayerColorSec,
+        var defaultPlayerColorsEntry = config.Bind(PlayerColorSect,
             "DefaultPlayerColors",
             "D88C47 5573AD D6554D 578B49",
             "Change the default player colors? (Order is: Yellow, Blue, Red, and then Green)");
@@ -100,7 +101,7 @@ public static class ConfigHandler
         };
         UpdateDefaultPlayerColors(defaultPlayerColorsEntryKey);
 
-        var customCrownColorEntry = config.Bind(PlayerColorSec,
+        var customCrownColorEntry = config.Bind(PlayerColorSect,
             "CustomCrownColor",
             (Color) new Color32(255, 196, 68, 255), // #FFC444FF
             "Change the default crown (for when a player wins a match) color? (Use a HEX value)");
@@ -124,7 +125,7 @@ public static class ConfigHandler
                 crownCount.GetComponentInChildren<Image>().color = customCrownColor;
         };
 
-        var qolMenuKeybindEntry = config.Bind(MenuSec, 
+        var qolMenuKeybindEntry = config.Bind(MenuSect, 
             "QOLMenuKeybind",
             new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F1),
             "Change the keybind for opening the QOL Menu? Only specify a single key or two keys. " +
@@ -145,7 +146,7 @@ public static class ConfigHandler
             guiManager.singleMenuKey = guiManager.qolMenuKey2 == KeyCode.None;
         };
 
-        var statWindowKeybindEntry = config.Bind(MenuSec,
+        var statWindowKeybindEntry = config.Bind(MenuSect,
             "StatWindowKeybind",
             new KeyboardShortcut(KeyCode.LeftShift, KeyCode.F2),
             "Change the keybind for opening the Stat Window? Only specify a single key or two keys. " +
@@ -166,7 +167,7 @@ public static class ConfigHandler
             guiManager.singleStatKey = guiManager.statWindowKey2 == KeyCode.None;
         };
 
-        var qolMenuCoordsEntry = config.Bind(MenuSec,
+        var qolMenuCoordsEntry = config.Bind(MenuSect,
             "QOLMenuCoords",
             "0X 100Y",
             "Change the default opening position of the QOL menu?");
@@ -184,7 +185,7 @@ public static class ConfigHandler
             guiManager.menuRect.y = newCoords[1];
         }; 
 
-        var statMenuCoordsEntry = config.Bind(MenuSec,
+        var statMenuCoordsEntry = config.Bind(MenuSect,
             "StatMenuCoords",
             "800X 100Y",
             "Change the default opening position of the Stat menu?");
@@ -207,12 +208,12 @@ public static class ConfigHandler
         GUIManager.QolMenuPos = MenuPosParser(qolMenuCoordsEntry.Value);
         GUIManager.StatMenuPos = MenuPosParser(statMenuCoordsEntry.Value);
 
-        EntriesDict["WinstreakStartup"] = config.Bind(WinstreakSec,
+        EntriesDict["WinstreakStartup"] = config.Bind(WinstreakSect,
             "WinstreakStartup",
             false,
             "Always keep track of your winstreak instead of only when enabled?");
 
-        var winstreakFontsizeEntry = config.Bind(WinstreakSec,
+        var winstreakFontsizeEntry = config.Bind(WinstreakSect,
             "WinstreakFontsize",
             200,
             "Change the fontsize of your winstreak message?");
@@ -223,7 +224,7 @@ public static class ConfigHandler
         winstreakFontsizeEntry.SettingChanged +=
             (_, _) => GameManager.Instance.winText.fontSize = winstreakFontsizeEntry.Value;
 
-        var winstreakColorsEntry = config.Bind(WinstreakSec,
+        var winstreakColorsEntry = config.Bind(WinstreakSect,
             "WinstreakColors",
             "FF0000 FFEB04 00FF00",
             "Change the default winstreak colors? HEX values only, space separated. " 
@@ -236,7 +237,7 @@ public static class ConfigHandler
         winstreakColorsEntry.SettingChanged += (_, _) => UpdateWinstreakColors(winstreakColorsEntryKey);
         UpdateWinstreakColors(winstreakColorsEntryKey);
 
-        var winstreakRangesEntry = config.Bind(WinstreakSec,
+        var winstreakRangesEntry = config.Bind(WinstreakSect,
             "WinstreakRanges",
             "0-1 1-2 2-3",
             "Change the default ranges? Add more ranges, space separated, to support more colors. " 
@@ -249,37 +250,37 @@ public static class ConfigHandler
         winstreakRangesEntry.SettingChanged += (_, _) => UpdateWinstreakRanges(winstreakRangesEntryKey);
         UpdateWinstreakRanges(winstreakRangesEntryKey);
 
-        EntriesDict["GGStartup"] = config.Bind(OnstartupSec, // The section under which the option is shown
+        EntriesDict["GGStartup"] = config.Bind(OnstartupSect, // The section under which the option is shown
             "GGStartup",
             false, // The key of the configuration option in the configuration file
             "Enable AutoGG on startup?"); // Description of the option to show in the config file
             
-        EntriesDict["AlwaysPublicOutput"] = config.Bind(OnstartupSec,
+        EntriesDict["AlwaysPublicOutput"] = config.Bind(OnstartupSect,
             "AlwaysPublicOutput",
             false,
             "Enable AlwaysPublicOutput on start-up, where all mod logs in chat are no longer client-side?");
 
-        EntriesDict["UncensorStartup"] = config.Bind(OnstartupSec,
+        EntriesDict["UncensorStartup"] = config.Bind(OnstartupSect,
             "UncensorStartup",
             false,
             "Disable chat censorship on startup?");
 
-        EntriesDict["RichtextStartup"] = config.Bind(OnstartupSec,
+        EntriesDict["RichtextStartup"] = config.Bind(OnstartupSect,
             "RichtextStartup",
             true,
             "Enable rich text for chat on startup?");
             
-        EntriesDict["TranslateStartup"] = config.Bind(OnstartupSec,
+        EntriesDict["TranslateStartup"] = config.Bind(OnstartupSect,
             "TranslateStartup",
             false,
             "Enable auto-translation for chat messages to English on startup?");
             
-        EntriesDict["WinnerHPStartup"] = config.Bind(OnstartupSec,
+        EntriesDict["WinnerHPStartup"] = config.Bind(OnstartupSect,
             "WinnerHPStartup",
             false,
             "Enable always show the HP for the winner of the round on-startup?");
             
-        var cmdPrefixEntry = config.Bind(MiscSec,
+        var cmdPrefixEntry = config.Bind(MiscSect,
             "CommandPrefix",
             "/", 
             "Change the default command prefix character? (Recommended: /, !, $, ., &, ?, ~)");
@@ -299,12 +300,12 @@ public static class ConfigHandler
                 cmdNames[i] = Command.CmdPrefix + cmdNames[i].Substring(1);
         };
 
-        EntriesDict["AdvertiseMsg"] = config.Bind(MiscSec,
+        EntriesDict["AdvertiseMsg"] = config.Bind(MiscSect,
             "AdvertiseMsg",
             "",
             "Modify the output of /adv? By default the message is blank but can be changed to anything.");
 
-        var deathPhrasesEntry = config.Bind(MiscSec, 
+        var deathPhrasesEntry = config.Bind(MiscSect, 
             "DeathMsgs",
             "Me dead >:",
             "Add a custom messages to send out upon your death? Add multiple values by separating them with commas.");
@@ -314,17 +315,17 @@ public static class ConfigHandler
         
         deathPhrasesEntry.SettingChanged += (_, _) => DeathPhrases = ParseCommaSepPhrases(deathPhrasesEntryKey);
 
-        EntriesDict["MsgDuration"] = config.Bind(MiscSec,
+        EntriesDict["MsgDuration"] = config.Bind(MiscSect,
             "MsgDuration",
             0.0f,
             "Extend the amount of seconds per chat message by a specified amount? (Decimals allowed)");
 
-        EntriesDict["ResizeName"] = config.Bind(MiscSec,
+        EntriesDict["ResizeName"] = config.Bind(MiscSect,
             "ResizeName",
             true,
             "Auto-resize a player's name if it's over 12 characters? (This provides large name support)");
 
-        var customUsernameEntry = config.Bind(MiscSec,
+        var customUsernameEntry = config.Bind(MiscSect,
             "CustomUsername",
             "",
             "Specify a custom username? (client-side only)");
@@ -338,12 +339,12 @@ public static class ConfigHandler
             IsCustomName = !string.IsNullOrEmpty(CustomName);
         };
 
-        EntriesDict["FixCrownTxt"] = config.Bind(MiscSec,
+        EntriesDict["FixCrownTxt"] = config.Bind(MiscSect,
             "FixCrownTxt",
             true,
             "Auto-resize win counter font so wins into the hundreds/thousands display properly?");
 
-        var ouchPhrasesEntry = config.Bind(MiscSec,
+        var ouchPhrasesEntry = config.Bind(MiscSect,
             "OuchPhrases",
             "ow, owie, ouch, ouchie, much pain",
             "Words to be used by OuchMode? Comma seperated. (/ouch)");
@@ -353,13 +354,13 @@ public static class ConfigHandler
         
         ouchPhrasesEntry.SettingChanged += (_, _) => OuchPhrases = ParseCommaSepPhrases(ouchPhrasesEntryKey);
 
-        EntriesDict["ShrugEmoji"] = config.Bind(MiscSec,
+        EntriesDict["ShrugEmoji"] = config.Bind(MiscSect,
             "ShrugEmoji",
             "☹",
             "Specify the emoji used in the shrug command? Only the following 15 TMP defaults are available: " 
             + "😋, 😍, 😎, 😀, 😁, 😂, 😃, 😄, 😅, 😆, 😉, 😘, 🤣, ☺, ☹");
 
-        EntriesDict["AutoAuthTranslationsAPIKey"] = config.Bind(MiscSec,
+        EntriesDict["AutoAuthTranslationsAPIKey"] = config.Bind(MiscSect,
             "AutoAuthTranslationsAPIKey",
             "",
             "Put your API key for Google Translate V2 here (Optional)");
