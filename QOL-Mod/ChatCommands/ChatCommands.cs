@@ -528,7 +528,7 @@ public static class ChatCommands
             case "remove":
             {
                 var presetName = args[1];
-                var presetWantedIndex = MapPresetHandler.MapPresets.FindIndex(preset => preset.PresetName == presetName);
+                var presetWantedIndex = MapPresetHandler.FindIndexOfPreset(presetName);
 
                 if (presetWantedIndex == -1)
                 {
@@ -544,14 +544,15 @@ public static class ChatCommands
         }
 
         // Must want to load preset instead
-        var presetWanted = MapPresetHandler.MapPresets.FirstOrDefault(preset => preset.PresetName == arg);
+        var presetWanted = MapPresetHandler.FindPreset(arg);
         if (presetWanted is null)
         {
             cmd.SetLogType(Command.LogType.Warning);
             cmd.SetOutputMsg("Specified preset not found.");
             return;
         }
-
+        
+        Debug.Log("Trying to load a preset: " + presetWanted.PresetName);
         MapPresetHandler.LoadPreset(presetWanted);
         cmd.SetOutputMsg("Enabled preset: \"" + arg + "\".");
     }

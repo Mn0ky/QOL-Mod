@@ -9,12 +9,13 @@ namespace QOL;
 
 public static class MapPresetHandler
 {
-    public static List<SaveableMapPreset> MapPresets { get; private set; }
     public static List<string> MapPresetNames { get; private set; }
     
+    private static List<SaveableMapPreset> _mapPresets;
+    private static List<MapSelectionHandler.MapCategoryUI> _mapCategories;
     private static bool _defaultPresetsAlreadyExist;
     private static int _highestMapIndex = -1;
-    private static List<MapSelectionHandler.MapCategoryUI> _mapCategories;
+    
     private static readonly string[] StockCategoryNames = Enum.GetNames(typeof(MapWorldsEnum))
         .Select(name => name.ToLower())
         .ToArray();
@@ -38,21 +39,21 @@ public static class MapPresetHandler
 
     public static void InitializeMapPresets()
     {
-        MapPresets = new List<SaveableMapPreset>();
+        _mapPresets = new List<SaveableMapPreset>();
         var mapPresetsJson = JSONNode.Parse(File.ReadAllText(Plugin.MapPresetsPath))["savedPresets"];
 
         foreach (var presetJson in mapPresetsJson)
         {
             var newPreset = new SaveableMapPreset(presetJson.Value);
-            MapPresets.Add(newPreset);
+            _mapPresets.Add(newPreset);
         }
         
-        MapPresetNames = MapPresets.Select(preset => preset.PresetName).ToList(); // Add all names from the preset list
+        MapPresetNames = _mapPresets.Select(preset => preset.PresetName).ToList(); // Add all names from the preset list
         MapPresetNames.Add("save");
         MapPresetNames.Add("remove");
         MapPresetNames.Sort();
         
-        Debug.Log("Loaded " + MapPresets.Count + " map presets!");
+        Debug.Log("Loaded " + _mapPresets.Count + " map presets!");
     }
     
     public static List<string> GetAllStockMapIndexes(bool activeMapsOnly)
@@ -63,9 +64,9 @@ public static class MapPresetHandler
         {
             var mapType = (MapWorldsEnum) i;
 
-            allMaps.AddRange(GetSpecificCategoryMaps(mapType, activeMapsOnly)
-                .Where(map => map.MapToggle is not null) // Don't want hidden/unused maps, they don't have a toggle
-                .Select(map => map.MapIndex).ToList());
+            allMaps
+                .AddRange(GetSpecificCategoryMaps(mapType, activeMapsOnly)
+                    .Select(map => map.MapIndex).ToList());
         }
 
         return allMaps;
@@ -100,7 +101,7 @@ public static class MapPresetHandler
 
     public static bool DefaultPresetsExist()
     {
-        var rawPresetNames = MapPresets.Select(preset => preset.PresetName).ToList();
+        var rawPresetNames = _mapPresets.Select(preset => preset.PresetName).ToList();
 
         if (_defaultPresetsAlreadyExist)
             return true;
@@ -117,7 +118,8 @@ public static class MapPresetHandler
     public static void GenerateDefaultPresets()
     {
         var allMaps = new List<string>();
-        Debug.Log("Generating default map presets...");
+        
+        Debug.Log("Generating default map presets...!");
 
         SaveableMapPreset newPreset;
         for (var i = 0; i < (int) MapWorldsEnum.CustomLocal; i++) // Only want to include stock Landfall maps
@@ -125,7 +127,6 @@ public static class MapPresetHandler
             var mapType = (MapWorldsEnum) i;
 
             var categoryMaps = GetSpecificCategoryMaps(mapType, false)
-                .Where(map => map.MapToggle is not null) // Don't want hidden/unused maps, they don't have a toggle
                 .Select(map => map.MapIndex).ToList();
 
             var categoryName = StockCategoryNames[i];
@@ -145,7 +146,7 @@ public static class MapPresetHandler
 
     public static void AddNewPreset(SaveableMapPreset preset)
     {
-        MapPresets.Add(preset);
+        _mapPresets.Add(preset);
         MapPresetNames.Add(preset.PresetName);
         MapPresetNames.Sort();
         
@@ -164,13 +165,19 @@ public static class MapPresetHandler
     {
         var savedMapPresetsJson = JSONNode.Parse(File.ReadAllText(Plugin.MapPresetsPath));
         
-        MapPresets.RemoveAt(presetIndex);
+        _mapPresets.RemoveAt(presetIndex);
         MapPresetNames.Remove(presetName);
         savedMapPresetsJson["savedPresets"].Remove(presetIndex);
         
         File.WriteAllText(Plugin.MapPresetsPath, savedMapPresetsJson.ToString());
     }
+
+    public static int FindIndexOfPreset(string presetName) 
+        => _mapPresets.FindIndex(preset => preset.PresetName == presetName);
     
+    public static SaveableMapPreset FindPreset(string presetName) 
+        => _mapPresets.FirstOrDefault(preset => preset.PresetName == presetName);
+
     public static void LoadPreset(SaveableMapPreset preset) 
     {
         var mapSelector = MapSelectionHandler.Instance;
@@ -179,13 +186,16 @@ public static class MapPresetHandler
         {
             var curMapIndex = i.ToString();
             var map = mapSelector.FindSingleMapByIndex(curMapIndex);
-            var mapToggle = map?.MapToggle;
-            
-            if (mapToggle is not null)
-                mapToggle.isOn = preset.Maps.Contains(curMapIndex); // Enable map if in preset else disable it
+
+            if (map is not null) // Don't want unused/deprecated maps!
+                map.IsLocallyActive = preset.Maps.Contains(curMapIndex);
         }
 
         for (var i = 0; i < (int) MapWorldsEnum.CustomLocal; i++) 
-            _mapCategories[i].CategoryToggle.isOn = true; // All maps have the proper state, so enable all categories
+            _mapCategories[i].CategoryToggle.isOn = true; // All maps have the proper state, so enable all stock categories
+
+        // Don't want custom maps
+        _mapCategories[(int) MapWorldsEnum.CustomLocal].CategoryToggle.isOn = false;
+        _mapCategories[(int) MapWorldsEnum.CustomOnline].CategoryToggle.isOn = false;
     }
 }
