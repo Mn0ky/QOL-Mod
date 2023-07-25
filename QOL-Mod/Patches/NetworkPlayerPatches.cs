@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace QOL;
 
-class NetworkPlayerPatch
+internal class NetworkPlayerPatch
 {
     public static void Patch(Harmony harmonyInstance) // NetworkPlayer methods to patch with the harmony instance
     {
@@ -17,7 +17,10 @@ class NetworkPlayerPatch
 
     public static bool SyncClientChatMethodPrefix(ref byte[] data, NetworkPlayer __instance)
     {
-        if (Helper.MutedPlayers.Contains(__instance.NetworkSpawnID)) return false;
+        if (Helper.MutedPlayers.Contains(__instance.NetworkSpawnID))
+        {
+            return false;
+        }
 
         if (!ChatCommands.CmdDict["translate"].IsEnabled) return true;
 

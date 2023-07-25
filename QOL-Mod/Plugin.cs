@@ -61,8 +61,16 @@ public class Plugin : BaseUnityPlugin
             emptyPresetList.Add("savedPresets", new JSONArray());
             File.WriteAllText(MapPresetsPath, emptyPresetList.ToString());
         }
+
+        if (!File.Exists(GunPresetsPath))
+        {
+            var emptyPresetList = new JSONObject();
+            emptyPresetList.Add("savedPresets", new JSONArray());
+            File.WriteAllText(GunPresetsPath, emptyPresetList.ToString());
+        }
         
         MapPresetHandler.InitializeMapPresets();
+        GunPresetHandler.InitializeGunPresets();
 
         try
         {
@@ -131,6 +139,7 @@ public class Plugin : BaseUnityPlugin
     public static readonly string CmdAliasesPath = InternalsPath + "CmdAliases.json";
     public static readonly string CmdVisibilityStatesPath = InternalsPath + "CmdVisibilityStates.json";
     public static readonly string MapPresetsPath = InternalsPath + "SavedMapPresets.json";
+    public static readonly string GunPresetsPath = InternalsPath + "SavedGunPresets.json";
 
     public static bool StatsFileExists = File.Exists(StatsPath);
 }

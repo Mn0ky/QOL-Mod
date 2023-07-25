@@ -37,7 +37,7 @@ public static class ChatCommands
         new Command("logpublic", LogPublicCmd, 1, true, CmdNames),
         new Command("lowercase", LowercaseCmd, 0, true).MarkAsToggle(),
         new Command("nuky", NukyCmd, 0, true).MarkAsToggle(),
-        new Command("maps", MapsCmd, 1, true),
+        new Command("maps", MapsCmd, 1, true, MapPresetHandler.MapPresetNames),
         new Command("mute", MuteCmd, 1, true, PlayerUtils.PlayerColorsParams),
         new Command("music", MusicCmd, 1, true, new List<string>(3) {"loop", "play", "skip"}),
         new Command("ouchmsg", OuchCmd, 0, true).MarkAsToggle(),
@@ -55,6 +55,7 @@ public static class ChatCommands
         new Command("uncensor", UncensorCmd, 0, true).MarkAsToggle(),
         new Command("uwu", UwuCmd, 0, true).MarkAsToggle(),
         new Command("ver", VerCmd, 0, true),
+        new Command("weapons", WeaponsCmd, 1, true, GunPresetHandler.GunPresetNames),
         new Command("winnerhp", WinnerHpCmd, 0, false).MarkAsToggle(),
         new Command("winstreak", WinstreakCmd, 0, true).MarkAsToggle()
     };
@@ -362,6 +363,65 @@ public static class ChatCommands
         cmd.Toggle();
         cmd.SetOutputMsg("Toggled AutoGG.");
     }
+    
+    
+    private static void WeaponsCmd(string[] args, Command cmd)
+    {
+        var arg = args[0];
+        switch (arg)
+        {
+            case "remove" or "save" when args.Length < 2:
+                cmd.SetLogType(Command.LogType.Warning);
+                cmd.SetOutputMsg("No preset name given, please specify one.");
+                return;
+            case "save":
+            {
+                var presetName = args[1].ToLower();
+                if (GunPresetHandler.GunPresetNames.Contains(presetName))
+                {
+                    cmd.SetLogType(Command.LogType.Warning);
+                    cmd.SetOutputMsg("Preset with specified name already exists.");
+                    return;
+                }
+
+                var activeWeapons = GunPresetHandler.GetAllActiveWeapons();
+                var presetToSave = new SaveableGunPreset(activeWeapons, presetName);
+                GunPresetHandler.AddNewPreset(presetToSave);
+
+                cmd.SetOutputMsg("Saved preset: \"" + presetName + "\".");
+                return;
+            }
+            case "remove":
+            {
+                var presetName = args[1];
+                var presetWantedIndex = GunPresetHandler.FindIndexOfPreset(presetName);
+
+                if (presetWantedIndex == -1)
+                {
+                    cmd.SetLogType(Command.LogType.Warning);
+                    cmd.SetOutputMsg("Specified preset not found.");
+                    return;
+                }
+            
+                GunPresetHandler.DeletePreset(presetWantedIndex, presetName);
+                cmd.SetOutputMsg("Removed preset: \"" + presetName + "\".");
+                return;
+            }
+        }
+
+        // Must want to load preset instead
+        var presetWanted = GunPresetHandler.FindPreset(arg);
+        if (presetWanted is null)
+        {
+            cmd.SetLogType(Command.LogType.Warning);
+            cmd.SetOutputMsg("Specified preset not found.");
+            return;
+        }
+        
+        Debug.Log("Trying to load a weapon preset: " + presetWanted.PresetName);
+        GunPresetHandler.LoadPreset(presetWanted);
+        cmd.SetOutputMsg("Enabled preset: \"" + arg + "\".");
+    }
 
     // Opens up the steam overlay to the GitHub readme, specifically the Chat Commands section
     private static void HelpCmd(string[] args, Command cmd) 
@@ -510,7 +570,7 @@ public static class ChatCommands
                 return;
             case "save":
             {
-                var presetName = args[1];
+                var presetName = args[1].ToLower();
                 if (MapPresetHandler.MapPresetNames.Contains(presetName))
                 {
                     cmd.SetLogType(Command.LogType.Warning);
@@ -566,6 +626,7 @@ public static class ChatCommands
         {
             Helper.MutedPlayers.Add(targetID);
             cmd.IsEnabled = true;
+
             cmd.SetOutputMsg("Muted: " + Helper.GetColorFromID(targetID));
             return;
         }

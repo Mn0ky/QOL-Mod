@@ -121,9 +121,12 @@ public class Helper
         }
         
         MapPresetHandler.RefreshMutables();
+        GunPresetHandler.RefreshMutables();
         // Check if all default presets exist, if not generate them first.
         if (!MapPresetHandler.DefaultPresetsExist())
             MapPresetHandler.GenerateDefaultPresets();
+        if (!GunPresetHandler.DefaultPresetsExist())
+            GunPresetHandler.GenerateDefaultPresets();
     }
 
     public static string GetTargetStatValue(CharacterStats stats, string targetStat)

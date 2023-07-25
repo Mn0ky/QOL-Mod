@@ -367,7 +367,7 @@ public class ChatManagerPatches
     }
 
     // UwUifies a message if possible, not perfect
-    private static string UwUify(string targetText)
+    public static string UwUify(string targetText)
     {
         var i = 0;
         var newMessage = new StringBuilder(targetText);
