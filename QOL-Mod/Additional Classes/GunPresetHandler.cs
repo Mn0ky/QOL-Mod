@@ -99,9 +99,12 @@ public static class GunPresetHandler
         
         _defaultPresetsAlreadyExist = true;
     }
-
-    public static List<int> GetAllActiveWeapons() 
-        => _weapons.Where(weapon => weapon.IsLocallyActive).Select(weapon => (int)weapon.WeaponIndex).ToList();
+    
+    public static List<int> GetAllActiveWeapons() =>
+        _weapons.Where(weapon => weapon.IsLocallyActive && // Verify both weapon and its parent category is active
+                                 Helper.WeaponSelectHandler.FindCategoryByName(weapon.Category).IsActive)
+            .Select(weapon => (int)weapon.WeaponIndex)
+            .ToList();
 
     public static void AddNewPreset(SaveableGunPreset preset)
     {

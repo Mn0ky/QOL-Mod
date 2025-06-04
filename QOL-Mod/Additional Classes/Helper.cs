@@ -65,6 +65,7 @@ public class Helper
         var localID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
         localNetworkPlayer = ClientData[localID].PlayerObject.GetComponent<NetworkPlayer>();
         LocalChat = ClientData[localID].PlayerObject.GetComponentInChildren<ChatManager>();
+        WeaponSelectHandler = UnityEngine.Object.FindObjectOfType<WeaponSelectionHandler>();
 
         Debug.Log("Assigned the localNetworkPlayer!: " + localNetworkPlayer.NetworkSpawnID);
 
@@ -241,6 +242,7 @@ public class Helper
 
     public static ConnectedClientData[] ClientData;
     public static ChatManager LocalChat;
+    public static WeaponSelectionHandler WeaponSelectHandler;
 
     public static TextMeshPro TMPText;
     public static int WinStreak = 0;

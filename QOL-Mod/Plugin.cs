@@ -2,7 +2,6 @@
 using System.IO;
 using BepInEx;
 using HarmonyLib;
-using SimpleJson;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -117,7 +116,7 @@ public class Plugin : BaseUnityPlugin
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasScaler.referenceResolution = new Vector2(1920, 1080);
 
-        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber + " </color><color=#00bbff>Testing";
+        modTextTMP.text = "<color=red>Monky's QOL Mod</color> " + "<color=white>v" + VersionNumber;
         
         modTextTMP.fontSizeMax = 25;
         modTextTMP.fontSize = 25;
@@ -128,7 +127,7 @@ public class Plugin : BaseUnityPlugin
         modTextTMP.richText = true;
     }
 
-    public const string VersionNumber = "1.17.4"; // Version number
+    public const string VersionNumber = "1.18.0"; // Version number
     public const string Guid = "monky.plugins.QOL";
     public static string NewUpdateVerCode = "";
         

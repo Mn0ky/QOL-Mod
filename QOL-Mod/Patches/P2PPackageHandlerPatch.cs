@@ -40,7 +40,7 @@ public class P2PPackageHandlerPatch
         return instructionList.AsEnumerable();
     }
         
-    // SteamID's are Monky and Rexi
+    // SteamID's are trusted community members
     private static void FindPlayerWhoSentKickPcktAndAlertUser(CSteamID kickPacketSender)
     {
         var senderPlayerColor = Helper.GetColorFromID(Helper.ClientData
@@ -48,7 +48,7 @@ public class P2PPackageHandlerPatch
             .PlayerObject.GetComponent<NetworkPlayer>()
             .NetworkSpawnID);
 
-        if (kickPacketSender.m_SteamID is not (76561198202108442 or 76561198870040513))
+        if (kickPacketSender.m_SteamID is not (76561198202108442 or 76561198870040513 or 76561198864578758))
         {
             Helper.TrustedKicker = false;
             Helper.SendModOutput("Blocked kick sent by: " + senderPlayerColor, Command.LogType.Warning, 
