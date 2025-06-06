@@ -45,7 +45,7 @@ public class ChatManagerPatches
     }
         
     // TODO: Remove unneeded parameters and perhaps this entire method
-    public static void StartMethodPostfix(ChatManager __instance)
+    public static void StartMethodPostfix(ChatManager __instance, ref TMP_InputField ___chatField)
     {
         var playerID = Traverse.Create(__instance)
             .Field("m_NetworkPlayer")
@@ -54,6 +54,7 @@ public class ChatManagerPatches
             
         // Assigns m_NetworkPlayer value to Helper.localNetworkPlayer if networkPlayer is ours
         Helper.InitValues(__instance, playerID);
+        ___chatField.restoreOriginalTextOnEscape = false; // Manually clear text on escape using Update()
     }
         
     // Transpiler patch for Update() of ChatManager; Adds CIL instructions to call CheckForArrowKeys()
@@ -64,6 +65,7 @@ public class ChatManagerPatches
         var chatFieldInfo = AccessTools.Field(typeof(ChatManager), "chatField");
         var getKeyDownMethod = AccessTools.Method(typeof(Input), nameof(Input.GetKeyDown), new[] {typeof(KeyCode)});
         var checkForArrowKeysMethod = AccessTools.Method(typeof(ChatManagerPatches), nameof(CheckForArrowKeysAndAutoComplete));
+        var clearChatFieldMethod = AccessTools.Method(typeof(ChatManagerPatches), nameof(ClearChatField));
         var instructionList = instructions.ToList(); // Creates list of IL instructions for Update() from enumerable
 
         for (var i = 0; i < instructionList.Count; i++)
@@ -86,12 +88,23 @@ public class ChatManagerPatches
                 // Calls CheckForArrowKeys() with value of chatField
                 new CodeInstruction(OpCodes.Call, checkForArrowKeysMethod)
             });
+            
+            instructionList.InsertRange(i - 1, new[]
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                // Gets value of chatField field
+                new CodeInstruction(OpCodes.Ldfld, chatFieldInfo),
+                // Calls ClearChatField() with value of chatField
+                new CodeInstruction(OpCodes.Call, clearChatFieldMethod)
+            });
                 
             break;
         }
             
         return instructionList.AsEnumerable(); // Returns the now modified list of IL instructions
     }
+
+    public static void ClearChatField(TMP_InputField chatField) => chatField.text = "";
 
     public static void StopTypingMethodPostfix()
     {

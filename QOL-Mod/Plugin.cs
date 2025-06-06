@@ -127,7 +127,7 @@ public class Plugin : BaseUnityPlugin
         modTextTMP.richText = true;
     }
 
-    public const string VersionNumber = "1.18.0"; // Version number
+    public const string VersionNumber = "1.18.1"; // Version number
     public const string Guid = "monky.plugins.QOL";
     public static string NewUpdateVerCode = "";
         

@@ -16,7 +16,6 @@ public static class ChatCommands
 {
     private static readonly List<Command> Cmds = new()
     {
-        //new Command("socket", SocketCmd, 0, true),
         //new Command("bulletcolor", BulletColorCmd, 1, true, new List<string>(3) {"all", }),
         new Command("adv", AdvCmd, 0, false).SetAlwaysPublic(),
         new Command("alias", AliasCmd, 1, true, CmdNames),
@@ -189,15 +188,6 @@ public static class ChatCommands
     //                                    All chat command methods below                                      
     // ****************************************************************************************************
 
-    // private static void SocketCmd(string[] args, Command cmd)
-    // {
-    //     Debug.Log("Trying to connect to socket server!!!");
-    //     var multiplayerStuff = Object.FindObjectOfType<MatchmakingHandler>().gameObject;
-    //     
-    //     if (!multiplayerStuff.GetComponent<MatchMakingHandlerSockets>())
-    //         multiplayerStuff.AddComponent<MatchMakingHandlerSockets>().JoinServer();
-    // }
-
     // Outputs player-specified msg from config to chat, blank by default
     private static void AdvCmd(string[] args, Command cmd) 
         => cmd.SetOutputMsg(ConfigHandler.GetEntry<string>("AdvertiseMsg"));
@@ -316,7 +306,7 @@ public static class ChatCommands
             EP2PSend.k_EP2PSendReliable,
             channel);
     }
-
+    
     private static void FovCmd(string[] args, Command cmd) // TODO: Do tryparse instead to provide better error handling
     {
         var success = int.TryParse(args[0], out var newFov);
