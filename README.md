@@ -25,7 +25,7 @@ This mod is a plugin for [BepInEx](https://github.com/BepInEx/BepInEx) which is 
 ## Installation
 
 To install the mod, watch the video below, or follow the written steps:<br/> 
-  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/download/v5.4.19/BepInEx_x86_5.4.19.0.zip).
+  1)  Download [BepInEx](https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip).
   2)  Extract the newly downloaded zip into the ``StickFightTheGame`` folder.
   3)  Drag all contents from the folder into the ``StickFightTheGame`` folder (``winhttp.dll``, ``doorstop_config.ini``, the ``BepInEx`` folder etc.).
   4)  Launch the game and then exit (BepInEx will have generated new files and folders).
